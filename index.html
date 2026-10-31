@@ -1,0 +1,1801 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Khmer Quiz & Earn</title>
+
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+
+<style>
+:root {
+  --bg:#0b1120;
+  --panel:#151f32;
+  --panel2:#202e45;
+  --text:#f5f7ff;
+  --muted:#9ba9c0;
+  --gold:#f6c453;
+  --blue:#61a9ff;
+  --green:#37d69a;
+  --red:#f16b6b;
+  --border:#293953;
+}
+
+* {box-sizing:border-box}
+
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+  padding-bottom:85px;
+}
+
+header {
+  position:sticky;
+  top:0;
+  z-index:5;
+  background:#111b2d;
+  padding:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid var(--border);
+}
+
+header strong {font-size:17px}
+.balance {color:var(--gold);font-weight:bold}
+
+main {
+  max-width:650px;
+  margin:auto;
+  padding:15px;
+}
+
+.page {display:none}
+.page.active {display:block}
+
+h2 {font-size:21px}
+h3 {margin-top:0}
+
+p {line-height:1.5}
+
+.card {
+  background:var(--panel);
+  border:1px solid var(--border);
+  padding:15px;
+  border-radius:14px;
+  margin:12px 0;
+}
+
+.banner {
+  background:linear-gradient(120deg,#263b61,#49366b);
+  padding:17px;
+  text-align:center;
+  border-radius:13px;
+  margin:12px 0;
+  border:1px dashed #8ea9dc;
+}
+
+.banner small {
+  display:block;
+  color:#d4e1ff;
+  margin-bottom:8px;
+  font-weight:bold;
+}
+
+.banner strong {font-size:17px}
+.banner p {font-size:13px;color:#d1dafa}
+
+button {
+  padding:12px 15px;
+  border:0;
+  border-radius:9px;
+  background:var(--blue);
+  color:#071426;
+  font-weight:bold;
+  margin:4px 2px;
+  cursor:pointer;
+}
+
+button.gold {background:var(--gold)}
+button.green {background:var(--green)}
+button.red {background:var(--red)}
+button.dark {
+  background:var(--panel2);
+  color:white;
+  border:1px solid var(--border);
+}
+
+button:disabled {
+  opacity:.4;
+  cursor:not-allowed;
+}
+
+button.full {
+  width:100%;
+  margin:7px 0;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:9px;
+}
+
+.stat {
+  background:var(--panel2);
+  padding:13px;
+  border-radius:10px;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.stat strong {
+  display:block;
+  color:var(--gold);
+  font-size:20px;
+  margin-top:6px;
+}
+
+.price {
+  font-size:26px;
+  color:var(--gold);
+  font-weight:bold;
+  margin:12px 0;
+}
+
+.muted {
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.5;
+}
+
+.tag {
+  font-size:11px;
+  color:var(--green);
+  font-weight:bold;
+}
+
+ul {
+  line-height:1.9;
+  color:#d4deee;
+  padding-left:20px;
+}
+
+.answer {
+  display:block;
+  width:100%;
+  text-align:left;
+  background:var(--panel2);
+  color:white;
+  border:1px solid var(--border);
+  margin:8px 0;
+}
+
+.answer.correct {background:#176b4b}
+.answer.wrong {background:#8c3434}
+.answer.removed {opacity:.3}
+
+input,select {
+  width:100%;
+  padding:12px;
+  margin:8px 0 12px;
+  background:#0d1728;
+  color:white;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+
+nav {
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:10;
+  background:#111b2d;
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:space-around;
+  overflow-x:auto;
+  padding:8px 2px;
+}
+
+nav button {
+  background:transparent;
+  color:var(--muted);
+  font-size:11px;
+  padding:7px 5px;
+  margin:0;
+  white-space:nowrap;
+}
+
+nav button.active {color:var(--gold)}
+
+.feature {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:9px 0;
+  border-bottom:1px solid var(--border);
+}
+
+.feature strong {color:var(--gold)}
+
+.hidden {display:none!important}
+
+.reward-section {
+  background:var(--panel2);
+  border:1px solid var(--border);
+  padding:16px;
+  border-radius:13px;
+  margin:13px 0;
+}
+
+.reward-section h3 {margin-bottom:10px}
+
+.reward-amount {
+  color:var(--gold);
+  font-size:23px;
+  font-weight:bold;
+  margin:12px 0;
+}
+
+hr {
+  border:0;
+  border-top:1px solid var(--border);
+  margin:15px 0;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <strong>🇰🇭 Khmer Quiz & Earn</strong>
+  <span class="balance">🪙 <span id="coinBalance">1000</span></span>
+</header>
+
+<main>
+
+<!-- ================= HOME ================= -->
+
+<section id="home" class="page active">
+
+  <div class="banner">
+    <small>SPONSORED PLACEMENT 1 · HOME</small>
+    <strong>Your Advertisement Here</strong>
+    <p>Promote your website, application or social media.</p>
+    <button class="dark" onclick="openSponsor('home')">
+      Visit Sponsor
+    </button>
+  </div>
+
+  <h2>Welcome to Khmer Quiz & Earn!</h2>
+
+  <div class="grid">
+    <div class="stat">
+      Coins
+      <strong id="homeCoins">1000</strong>
+    </div>
+
+    <div class="stat">
+      Available Tips
+      <strong id="homeTips">3</strong>
+    </div>
+
+    <div class="stat">
+      Games Played
+      <strong id="gamesPlayed">0</strong>
+    </div>
+
+    <div class="stat">
+      Membership
+      <strong id="memberStatus">Free</strong>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🎮 Choose Your Difficulty</h3>
+    <p class="muted">
+      Complete a quiz to earn coins. Each game contains up to 10 questions.
+    </p>
+
+    <button class="full" onclick="startQuiz('easy')">
+      Easy · 10 Coins
+    </button>
+
+    <button class="full" onclick="startQuiz('medium')">
+      Medium · 12 Coins
+    </button>
+
+    <button class="full" onclick="startQuiz('hard')">
+      Hard · 15 Coins
+    </button>
+  </div>
+
+  <div class="card">
+    <h3>🎁 Daily Bonus</h3>
+    <p id="dailyStatus">Claim your daily bonus.</p>
+    <button class="gold" id="dailyButton" onclick="claimDaily()">
+      Claim Daily Bonus
+    </button>
+  </div>
+
+</section>
+
+
+<!-- ================= GAME ================= -->
+
+<section id="game" class="page">
+
+  <div class="banner">
+    <small>SPONSORED PLACEMENT 3 · IN-GAME</small>
+    <strong>Your In-Game Advertisement</strong>
+    <p>Sponsored content displayed during gameplay.</p>
+    <button class="dark" onclick="openSponsor('game')">
+      Visit Sponsor
+    </button>
+  </div>
+
+  <div class="card" id="quizCard">
+
+    <h2>🎮 Quiz Game</h2>
+
+    <div class="feature">
+      <span>Difficulty</span>
+      <strong id="difficulty">Easy</strong>
+    </div>
+
+    <div class="feature">
+      <span>Question</span>
+      <strong id="questionNumber">0/0</strong>
+    </div>
+
+    <div class="feature">
+      <span>Basic Reward</span>
+      <strong id="potentialReward">10 Coins</strong>
+    </div>
+
+    <h3 id="questionText">Choose a difficulty to begin.</h3>
+
+    <div id="answerList"></div>
+
+    <p id="quizFeedback"></p>
+
+    <button class="dark" id="tipButton" onclick="useTip()" disabled>
+      💡 Use 1 Tip · 50/50
+    </button>
+
+    <button id="nextButton" onclick="nextQuestion()" disabled>
+      Next Question
+    </button>
+
+  </div>
+
+
+  <!-- QUIZ COMPLETION: TWO SECTIONS -->
+
+  <div class="card hidden" id="quizComplete" style="text-align:center">
+
+    <h2>🎉 Quiz Completed!</h2>
+
+    <p id="finalScore">Your score: 5/5</p>
+
+    <hr>
+
+    <!-- SECTION 1: BASIC REWARD -->
+
+    <div class="reward-section">
+
+      <h3>🪙 Section 1: Basic Reward</h3>
+
+      <div class="reward-amount" id="normalReward">
+        You earned 10 coins!
+      </div>
+
+      <p class="muted">
+        Claim your normal quiz reward and continue.
+      </p>
+
+      <button class="green full" onclick="finishAndReturn()">
+        Next — Basic Reward
+      </button>
+
+    </div>
+
+    <!-- SECTION 2: DOUBLE REWARD -->
+
+    <div class="reward-section">
+
+      <h3>🎬 Section 2: Double Reward</h3>
+
+      <div class="reward-amount">
+        Earn Extra Coins!
+      </div>
+
+      <p class="muted">
+        Complete one rewarded advertisement to receive an additional
+        reward equal to your basic quiz reward.
+      </p>
+
+      <button
+        class="gold full"
+        id="watchAdButton"
+        onclick="watchAdForDoubleReward()"
+      >
+        ▶ Watch Ads — Double Reward
+      </button>
+
+      <p id="adMessage" class="muted"></p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ================= FAUCET ================= -->
+
+<section id="faucet" class="page">
+
+  <div class="banner">
+    <small>SPONSORED PLACEMENT 2 · FAUCET</small>
+    <strong>Your Faucet Advertisement</strong>
+    <p>Promote your products and services here.</p>
+    <button class="dark" onclick="openSponsor('faucet')">
+      Visit Sponsor
+    </button>
+  </div>
+
+  <h2>🚰 Faucet</h2>
+
+  <div class="card">
+
+    <h3>Claim Free Coins</h3>
+
+    <p>Claim every 5 minutes.</p>
+
+    <div class="grid">
+
+      <div class="stat">
+        Base Reward
+        <strong>5 Coins</strong>
+      </div>
+
+      <div class="stat">
+        Multiplier
+        <strong id="faucetMultiplier">×1.00</strong>
+      </div>
+
+    </div>
+
+    <p id="faucetCountdown" class="muted">
+      Ready to claim!
+    </p>
+
+    <button class="green" id="faucetButton" onclick="claimFaucet()">
+      Claim Faucet
+    </button>
+
+    <p class="muted">
+      Multiplier increases by 0.01 for every 100 claims.
+      Membership multipliers also apply.
+    </p>
+
+  </div>
+
+</section>
+
+
+<!-- ================= TIPS ================= -->
+
+<section id="tips" class="page">
+
+  <h2>💡 Tips Center</h2>
+
+  <div class="card">
+
+    <h3>Your Available Tips</h3>
+
+    <div class="price" id="tipsBalance">3</div>
+
+    <p class="muted">
+      Use one Tip to remove two incorrect answers during a quiz.
+    </p>
+
+    <p id="dailyTipInfo"></p>
+
+  </div>
+
+  <h3>Buy More Tips</h3>
+
+  <div class="card">
+    <h3>100 Tips</h3>
+    <div class="price">$1.00</div>
+    <button onclick="buyTips(100,1)">Pay with ABA</button>
+    <button class="dark" onclick="buyStars(100)">Telegram Stars</button>
+  </div>
+
+  <div class="card">
+    <h3>150 Tips</h3>
+    <div class="price">$1.50</div>
+    <button onclick="buyTips(150,1.5)">Pay with ABA</button>
+    <button class="dark" onclick="buyStars(150)">Telegram Stars</button>
+  </div>
+
+  <div class="card">
+    <h3>200 Tips</h3>
+    <div class="price">$2.00</div>
+    <button onclick="buyTips(200,2)">Pay with ABA</button>
+    <button class="dark" onclick="buyStars(200)">Telegram Stars</button>
+  </div>
+
+  <p class="muted">
+    Payment buttons are demo placeholders. Real payment verification
+    requires a secure backend.
+  </p>
+
+</section>
+
+
+<!-- ================= MEMBERSHIP ================= -->
+
+<section id="membership" class="page">
+
+  <h2>👑 Monthly Membership</h2>
+
+  <div class="card">
+
+    <span class="tag">SILVER MEMBERSHIP</span>
+    <h3>🥈 Silver</h3>
+    <div class="price">$4.99/month</div>
+
+    <ul>
+      <li>Game Reward ×1.5</li>
+      <li>Referral Commission 30%</li>
+      <li>Referral Bonus 250 coins</li>
+      <li>Faucet Reward ×1.5</li>
+      <li>Daily Tips 5</li>
+    </ul>
+
+    <button class="gold full" onclick="subscribe('Silver')">
+      Subscribe Silver
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <span class="tag">GOLD MEMBERSHIP</span>
+    <h3>🥇 Gold</h3>
+    <div class="price">$6.99/month</div>
+
+    <ul>
+      <li>Game Reward ×2</li>
+      <li>Referral Commission 35%</li>
+      <li>Referral Bonus 350 coins</li>
+      <li>Faucet Reward ×2</li>
+      <li>Daily Tips 7</li>
+    </ul>
+
+    <button class="gold full" onclick="subscribe('Gold')">
+      Subscribe Gold
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <span class="tag">DIAMOND MEMBERSHIP</span>
+    <h3>💎 Diamond</h3>
+    <div class="price">$9.99/month</div>
+
+    <ul>
+      <li>Game Reward ×3</li>
+      <li>Referral Commission 40%</li>
+      <li>Referral Bonus 500 coins</li>
+      <li>Faucet Reward ×2.5</li>
+      <li>Daily Tips 10</li>
+    </ul>
+
+    <button class="gold full" onclick="subscribe('Diamond')">
+      Subscribe Diamond
+    </button>
+
+  </div>
+
+  <p class="muted">
+    Subscriptions are simulated in this frontend demo.
+    Automatic monthly renewal is not connected.
+  </p>
+
+</section>
+
+
+<!-- ================= WALLET ================= -->
+
+<section id="wallet" class="page">
+
+  <h2>💰 Wallet</h2>
+
+  <div class="card">
+
+    <h3>Available Balance</h3>
+
+    <div class="price">
+      <span id="walletCoins">1000</span> Coins
+    </div>
+
+    <p>10,000 coins = $1.00</p>
+    <p>Minimum withdrawal: 2,000 coins ($0.20)</p>
+
+    <label>Withdrawal Amount</label>
+    <input
+      type="number"
+      id="withdrawAmount"
+      placeholder="Enter coins"
+      min="2000"
+    >
+
+    <label>Payment Method</label>
+
+    <select id="withdrawMethod">
+      <option>ABA Bank</option>
+      <option>USDT - TON Network</option>
+    </select>
+
+    <button class="full" onclick="requestWithdrawal()">
+      Request Withdrawal
+    </button>
+
+    <p class="muted">
+      Demo only. No real payment is sent.
+    </p>
+
+  </div>
+
+</section>
+
+
+<!-- ================= INVITE ================= -->
+
+<section id="invite" class="page">
+
+  <h2>👥 Invite Friends</h2>
+
+  <div class="card">
+
+    <h3>Referral Benefits</h3>
+
+    <p id="referralInfo"></p>
+
+    <p class="muted">
+      Referral tracking and commission payments require a backend.
+    </p>
+
+    <button onclick="copyReferral()">
+      Copy Referral Link
+    </button>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<!-- ================= NAVIGATION ================= -->
+
+<nav>
+
+  <button class="active" onclick="showPage('home',this)">
+    🏠<br>Home
+  </button>
+
+  <button onclick="showPage('game',this)">
+    🎮<br>Game
+  </button>
+
+  <button onclick="showPage('faucet',this)">
+    🚰<br>Faucet
+  </button>
+
+  <button onclick="showPage('tips',this)">
+    💡<br>Tips
+  </button>
+
+  <button onclick="showPage('membership',this)">
+    👑<br>Plans
+  </button>
+
+  <button onclick="showPage('wallet',this)">
+    💰<br>Wallet
+  </button>
+
+  <button onclick="showPage('invite',this)">
+    👥<br>Invite
+  </button>
+
+</nav>
+
+
+<script>
+
+// ==========================================
+// CONFIGURATION
+// ==========================================
+
+// true = simulated ad for frontend testing.
+// false = use a configured AdsGram block ID.
+
+const DEMO_AD_MODE = true;
+
+const ADSGRAM_BLOCK_ID = "YOUR_ADSGRAM_BLOCK_ID";
+
+
+// ==========================================
+// QUESTION BANKS
+// ==========================================
+
+// The code supports up to 2,000 questions per difficulty.
+// These are sample questions, not the full 2,000-question datasets.
+
+const questionBanks = {
+
+  easy: [
+
+    {
+      q:"តើរាជធានីនៃប្រទេសកម្ពុជាគឺអ្វី?",
+      a:["ភ្នំពេញ","សៀមរាប","បាត់ដំបង","កំពត"],
+      c:0
+    },
+
+    {
+      q:"តើប្រាសាទអង្គរវត្តស្ថិតនៅខេត្តណា?",
+      a:["កំពង់ចាម","សៀមរាប","កណ្ដាល","កែប"],
+      c:1
+    },
+
+    {
+      q:"តើភាសាផ្លូវការរបស់កម្ពុជាគឺអ្វី?",
+      a:["ថៃ","អង់គ្លេស","ខ្មែរ","ចិន"],
+      c:2
+    },
+
+    {
+      q:"តើទង់ជាតិកម្ពុជាមានប៉ុន្មានពណ៌?",
+      a:["២","៣","៤","៥"],
+      c:1
+    },
+
+    {
+      q:"តើរូបិយប័ណ្ណជាតិរបស់កម្ពុជាគឺអ្វី?",
+      a:["បាត","រៀល","ដុង","គីប"],
+      c:1
+    }
+
+  ],
+
+  medium: [
+
+    {
+      q:"តើទន្លេមេគង្គហូរកាត់ទីក្រុងណា?",
+      a:["ភ្នំពេញ","ប៉ោយប៉ែត","កែប","បានលុង"],
+      c:0
+    },
+
+    {
+      q:"តើថ្ងៃបុណ្យឯករាជ្យជាតិកម្ពុជាគឺថ្ងៃណា?",
+      a:["៩ វិច្ឆិកា","១ មករា","១៣ មេសា","១ ឧសភា"],
+      c:0
+    },
+
+    {
+      q:"តើប្រាសាទអង្គរវត្តត្រូវបានកសាងក្នុងសម័យណា?",
+      a:["ចេនឡា","អង្គរ","ហ្វូណន","លង្វែក"],
+      c:1
+    },
+
+    {
+      q:"តើបឹងទឹកសាបដ៏ធំរបស់កម្ពុជាមានឈ្មោះអ្វី?",
+      a:["បឹងកន្សែង","បឹងទន្លេសាប","បឹងយក្សឡោម","បឹងកំពីងពួយ"],
+      c:1
+    },
+
+    {
+      q:"តើខេត្តកែបស្ថិតនៅតំបន់ណារបស់កម្ពុជា?",
+      a:["ភាគខាងត្បូង","ភាគខាងជើង","ភាគខាងកើត","ភាគពាយ័ព្យ"],
+      c:0
+    }
+
+  ],
+
+  hard: [
+
+    {
+      q:"តើព្រះបាទជ័យវរ្ម័នទី៧គ្រងរាជ្យក្នុងសតវត្សទីប៉ុន្មាន?",
+      a:["ទី១០","ទី១១","ទី១២","ទី១៤"],
+      c:2
+    },
+
+    {
+      q:"តើប្រាសាទអង្គរវត្តឧទ្ទិសដល់ព្រះណាដំបូង?",
+      a:["ព្រះព្រហ្ម","ព្រះវិស្ណុ","ព្រះសិវៈ","ព្រះពុទ្ធ"],
+      c:1
+    },
+
+    {
+      q:"តើប្រាសាទបាយ័នមានភាពល្បីល្បាញដោយសារអ្វី?",
+      a:["ប៉មមុខញញឹម","បឹងធំ","ស្ពានឈើ","ជញ្ជាំងកញ្ចក់"],
+      c:0
+    },
+
+    {
+      q:"តើព្រះបាទសូរ្យវរ្ម័នទី២ជាប់ទាក់ទងនឹងប្រាសាទណា?",
+      a:["អង្គរវត្ត","បាយ័ន","តាព្រហ្ម","បន្ទាយស្រី"],
+      c:0
+    },
+
+    {
+      q:"តើអង្គរធំត្រូវបានសាងសង់ដោយព្រះមហាក្សត្រអង្គណា?",
+      a:["ជ័យវរ្ម័នទី៧","សូរ្យវរ្ម័នទី២","ជ័យវរ្ម័នទី២","ឥន្ទ្រវរ្ម័នទី១"],
+      c:0
+    }
+
+  ]
+
+};
+
+
+// Load a question bank from another JavaScript file or admin system.
+// Example: loadQuestionBank("easy", yourQuestionArray)
+
+function loadQuestionBank(level,arr) {
+
+  if (!["easy","medium","hard"].includes(level)) {
+    throw new Error("Invalid difficulty.");
+  }
+
+  if (!Array.isArray(arr) || arr.length > 2000) {
+    throw new Error("Maximum 2,000 questions per difficulty.");
+  }
+
+  const valid = arr.every(q =>
+    q &&
+    typeof q.q === "string" &&
+    Array.isArray(q.a) &&
+    q.a.length === 4 &&
+    Number.isInteger(q.c) &&
+    q.c >= 0 &&
+    q.c <= 3
+  );
+
+  if (!valid) {
+    throw new Error("Invalid question format.");
+  }
+
+  questionBanks[level] = arr;
+
+  alert(level + ": " + arr.length + " questions loaded.");
+}
+
+
+// ==========================================
+// MEMBERSHIP SETTINGS
+// ==========================================
+
+const plans = {
+
+  Free: {
+    game:1,
+    faucet:1,
+    commission:0,
+    referral:200,
+    tips:3
+  },
+
+  Silver: {
+    game:1.5,
+    faucet:1.5,
+    commission:30,
+    referral:250,
+    tips:5
+  },
+
+  Gold: {
+    game:2,
+    faucet:2,
+    commission:35,
+    referral:350,
+    tips:7
+  },
+
+  Diamond: {
+    game:3,
+    faucet:2.5,
+    commission:40,
+    referral:500,
+    tips:10
+  }
+
+};
+
+
+const gameBaseReward = {
+  easy:10,
+  medium:12,
+  hard:15
+};
+
+
+// ==========================================
+// SAVE AND LOAD DEMO DATA
+// ==========================================
+
+function loadState() {
+
+  try {
+    return JSON.parse(localStorage.getItem("khmerQuizEarn")) || {};
+  } catch(error) {
+    return {};
+  }
+
+}
+
+const stored = loadState();
+
+let data = {
+
+  coins:Number.isFinite(stored.coins) ? stored.coins : 1000,
+
+  purchasedTips:Number.isFinite(stored.purchasedTips)
+    ? stored.purchasedTips : 0,
+
+  dailyTipsRemaining:Number.isFinite(stored.dailyTipsRemaining)
+    ? stored.dailyTipsRemaining : 3,
+
+  dailyTipsDate:stored.dailyTipsDate || "",
+
+  membership:plans[stored.membership]
+    ? stored.membership : "Free",
+
+  membershipExpiry:stored.membershipExpiry || 0,
+
+  games:Number.isFinite(stored.games) ? stored.games : 0,
+
+  lastDaily:stored.lastDaily || "",
+
+  streak:Number.isFinite(stored.streak) ? stored.streak : 0,
+
+  lastFaucet:stored.lastFaucet || 0,
+
+  faucetClaims:Number.isFinite(stored.faucetClaims)
+    ? stored.faucetClaims : 0
+
+};
+
+
+let quiz = {
+  level:"easy",
+  list:[],
+  index:0,
+  score:0,
+  answered:false,
+  finished:false,
+  reward:0
+};
+
+let quizSessionFinished = false;
+
+
+// ==========================================
+// GENERAL FUNCTIONS
+// ==========================================
+
+function availableTips() {
+  return data.purchasedTips + data.dailyTipsRemaining;
+}
+
+function save() {
+
+  localStorage.setItem(
+    "khmerQuizEarn",
+    JSON.stringify(data)
+  );
+
+  render();
+
+}
+
+function addCoins(amount) {
+
+  data.coins += Math.floor(amount);
+
+  save();
+
+}
+
+function render() {
+
+  const tips = availableTips();
+
+  document.getElementById("coinBalance").textContent = data.coins;
+  document.getElementById("homeCoins").textContent = data.coins;
+  document.getElementById("walletCoins").textContent = data.coins;
+
+  document.getElementById("homeTips").textContent = tips;
+  document.getElementById("tipsBalance").textContent = tips;
+
+  document.getElementById("gamesPlayed").textContent = data.games;
+
+  document.getElementById("memberStatus").textContent =
+    data.membership;
+
+  document.getElementById("dailyTipInfo").textContent =
+    "Daily Tips remaining: " + data.dailyTipsRemaining +
+    " | Purchased Tips: " + data.purchasedTips;
+
+  document.getElementById("faucetMultiplier").textContent =
+    "×" + faucetMultiplier().toFixed(2);
+
+  document.getElementById("referralInfo").textContent =
+    data.membership + " membership: " +
+    plans[data.membership].referral +
+    " coins per successful referral, plus " +
+    plans[data.membership].commission +
+    "% eligible commission.";
+
+}
+
+function showPage(id,btn) {
+
+  document.querySelectorAll(".page").forEach(p => {
+    p.classList.remove("active");
+  });
+
+  document.getElementById(id).classList.add("active");
+
+  document.querySelectorAll("nav button").forEach(b => {
+    b.classList.remove("active");
+  });
+
+  if (btn) {
+    btn.classList.add("active");
+  }
+
+}
+
+
+// ==========================================
+// DAILY TIPS
+// ==========================================
+
+function refreshDailyTips() {
+
+  const today = new Date().toDateString();
+
+  if (data.dailyTipsDate !== today) {
+
+    data.dailyTipsDate = today;
+
+    data.dailyTipsRemaining =
+      plans[data.membership].tips;
+
+    save();
+
+  }
+
+}
+
+
+// ==========================================
+// QUIZ SYSTEM
+// ==========================================
+
+function startQuiz(level) {
+
+  refreshDailyTips();
+
+  const bank = questionBanks[level];
+
+  if (!bank || bank.length === 0) {
+    alert("No questions are available for this difficulty.");
+    return;
+  }
+
+  if (bank.length > 2000) {
+    alert("Question bank limit is 2,000.");
+    return;
+  }
+
+  quiz.level = level;
+
+  quiz.list = [...bank]
+    .sort(() => Math.random() - 0.5)
+    .slice(0,10);
+
+  quiz.index = 0;
+  quiz.score = 0;
+  quiz.answered = false;
+  quiz.finished = false;
+  quiz.reward = 0;
+
+  quizSessionFinished = false;
+
+  document.getElementById("quizCard").classList.remove("hidden");
+
+  document.getElementById("quizComplete").classList.add("hidden");
+
+  showPage("game");
+
+  showQuestion();
+
+}
+
+
+function showQuestion() {
+
+  const q = quiz.list[quiz.index];
+
+  quiz.answered = false;
+
+  document.getElementById("difficulty").textContent =
+    quiz.level.toUpperCase();
+
+  document.getElementById("questionNumber").textContent =
+    (quiz.index + 1) + "/" + quiz.list.length;
+
+  document.getElementById("potentialReward").textContent =
+    Math.floor(
+      gameBaseReward[quiz.level] *
+      plans[data.membership].game
+    ) + " Coins";
+
+  document.getElementById("questionText").textContent = q.q;
+
+  document.getElementById("quizFeedback").textContent = "";
+
+  document.getElementById("nextButton").disabled = true;
+
+  document.getElementById("tipButton").disabled =
+    availableTips() <= 0;
+
+  const list = document.getElementById("answerList");
+
+  list.innerHTML = "";
+
+  q.a.forEach((answer,i) => {
+
+    const button = document.createElement("button");
+
+    button.className = "answer";
+
+    button.textContent =
+      String.fromCharCode(65+i) + ". " + answer;
+
+    button.onclick = () => answerQuestion(i);
+
+    list.appendChild(button);
+
+  });
+
+}
+
+
+function answerQuestion(index) {
+
+  if (quiz.answered || quiz.finished) return;
+
+  quiz.answered = true;
+
+  const q = quiz.list[quiz.index];
+
+  const buttons = [
+    ...document.querySelectorAll(".answer")
+  ];
+
+  buttons.forEach((button,i) => {
+
+    button.disabled = true;
+
+    if (i === q.c) {
+      button.classList.add("correct");
+    } else if (i === index) {
+      button.classList.add("wrong");
+    }
+
+  });
+
+  if (index === q.c) {
+
+    quiz.score++;
+
+    document.getElementById("quizFeedback").textContent =
+      "ត្រឹមត្រូវ! Correct!";
+
+  } else {
+
+    document.getElementById("quizFeedback").textContent =
+      "មិនត្រឹមត្រូវទេ។";
+
+  }
+
+  document.getElementById("nextButton").disabled = false;
+
+  document.getElementById("tipButton").disabled = true;
+
+}
+
+
+function useTip() {
+
+  if (
+    quiz.answered ||
+    quiz.finished ||
+    availableTips() <= 0
+  ) return;
+
+  const q = quiz.list[quiz.index];
+
+  const wrongAnswers = [0,1,2,3].filter(i => i !== q.c);
+
+  const remove = wrongAnswers.slice(0,2);
+
+  remove.forEach(i => {
+
+    const button = document.querySelectorAll(".answer")[i];
+
+    button.disabled = true;
+
+    button.textContent = "Removed";
+
+    button.classList.add("removed");
+
+  });
+
+  if (data.dailyTipsRemaining > 0) {
+
+    data.dailyTipsRemaining--;
+
+  } else {
+
+    data.purchasedTips--;
+
+  }
+
+  save();
+
+  document.getElementById("tipButton").disabled = true;
+
+}
+
+
+function nextQuestion() {
+
+  if (!quiz.answered || quiz.finished) return;
+
+  if (quiz.index < quiz.list.length - 1) {
+
+    quiz.index++;
+
+    showQuestion();
+
+  } else {
+
+    completeQuiz();
+
+  }
+
+}
+
+
+// ==========================================
+// QUIZ COMPLETION
+// ==========================================
+
+function completeQuiz() {
+
+  if (quiz.finished) return;
+
+  quiz.finished = true;
+
+  const reward = Math.floor(
+    gameBaseReward[quiz.level] *
+    plans[data.membership].game
+  );
+
+  quiz.reward = reward;
+
+  // Basic reward is credited once here.
+  addCoins(reward);
+
+  data.games++;
+
+  save();
+
+  document.getElementById("quizCard").classList.add("hidden");
+
+  document.getElementById("quizComplete").classList.remove("hidden");
+
+  document.getElementById("finalScore").textContent =
+    "Your score: " + quiz.score + "/" + quiz.list.length;
+
+  document.getElementById("normalReward").textContent =
+    "You earned " + reward + " coins!";
+
+  document.getElementById("watchAdButton").textContent =
+    "▶ Watch Ads — Get +" + reward + " Coins";
+
+  document.getElementById("watchAdButton").disabled = false;
+
+  document.getElementById("watchAdButton").classList.remove("hidden");
+
+  document.getElementById("adMessage").textContent =
+    "Complete one rewarded ad to receive an additional " +
+    reward + " coins.";
+
+}
+
+
+// ==========================================
+// REWARDED ADS
+// ==========================================
+
+async function watchAdForDoubleReward() {
+
+  if (
+    !quiz.finished ||
+    quizSessionFinished ||
+    quiz.reward <= 0
+  ) return;
+
+  const button = document.getElementById("watchAdButton");
+
+  const message = document.getElementById("adMessage");
+
+  button.disabled = true;
+
+  message.textContent = "Preparing advertisement...";
+
+
+  // DEMO MODE
+  if (DEMO_AD_MODE) {
+
+    const confirmed = confirm(
+      "DEMO MODE: Simulate a successfully completed rewarded advertisement?"
+    );
+
+    if (confirmed) {
+
+      grantDoubleReward();
+
+    } else {
+
+      button.disabled = false;
+
+      message.textContent =
+        "Ad not completed. You can try again.";
+
+    }
+
+    return;
+
+  }
+
+
+  // REAL ADSGRAM MODE
+  if (
+    !window.Adsgram ||
+    ADSGRAM_BLOCK_ID === "YOUR_ADSGRAM_BLOCK_ID"
+  ) {
+
+    button.disabled = false;
+
+    message.textContent =
+      "Rewarded advertisements are not configured.";
+
+    return;
+
+  }
+
+  try {
+
+    const controller = window.Adsgram.init({
+      blockId: ADSGRAM_BLOCK_ID
+    });
+
+    const result = await controller.show();
+
+    if (result && result.done) {
+
+      grantDoubleReward();
+
+    } else {
+
+      button.disabled = false;
+
+      message.textContent =
+        "Advertisement was not completed.";
+
+    }
+
+  } catch(error) {
+
+    button.disabled = false;
+
+    message.textContent =
+      "Advertisement unavailable. Please try again.";
+
+  }
+
+}
+
+
+function grantDoubleReward() {
+
+  if (
+    quizSessionFinished ||
+    !quiz.finished ||
+    quiz.reward <= 0
+  ) return;
+
+  quizSessionFinished = true;
+
+  // Add only the extra reward.
+  // The basic reward was already credited.
+  addCoins(quiz.reward);
+
+  document.getElementById("watchAdButton").disabled = true;
+
+  document.getElementById("watchAdButton").textContent =
+    "✓ Double Reward Claimed!";
+
+  document.getElementById("adMessage").textContent =
+    "🎉 Congratulations! You received an additional " +
+    quiz.reward + " coins.";
+
+}
+
+
+function finishAndReturn() {
+
+  // User chooses the basic reward option.
+  // Do not award the extra ad reward.
+  quizSessionFinished = true;
+
+  document.getElementById("quizComplete").classList.add("hidden");
+
+  document.getElementById("quizCard").classList.remove("hidden");
+
+  showPage("home");
+
+}
+
+
+// ==========================================
+// DAILY BONUS
+// ==========================================
+
+function claimDaily() {
+
+  const today = new Date().toDateString();
+
+  if (data.lastDaily === today) {
+
+    alert("You already claimed today's daily bonus.");
+
+    return;
+
+  }
+
+  data.streak = data.streak + 1;
+
+  data.lastDaily = today;
+
+  const reward = 19 + data.streak;
+
+  addCoins(reward);
+
+  document.getElementById("dailyStatus").textContent =
+    "Claimed " + reward + " coins! Day " +
+    data.streak + " streak.";
+
+  document.getElementById("dailyButton").disabled = true;
+
+}
+
+
+// ==========================================
+// FAUCET
+// ==========================================
+
+function faucetMultiplier() {
+
+  return 1 +
+    Math.floor(data.faucetClaims / 100) * 0.01;
+
+}
+
+
+function claimFaucet() {
+
+  const now = Date.now();
+
+  const wait = 300000 - (now - data.lastFaucet);
+
+  if (data.lastFaucet && wait > 0) {
+
+    alert(
+      "Please wait " +
+      Math.ceil(wait / 1000) +
+      " seconds."
+    );
+
+    return;
+
+  }
+
+  data.lastFaucet = now;
+
+  data.faucetClaims++;
+
+  const reward = Math.floor(
+    5 *
+    faucetMultiplier() *
+    plans[data.membership].faucet
+  );
+
+  addCoins(reward);
+
+  document.getElementById("faucetCountdown").textContent =
+    "You received " + reward +
+    " coins! Next claim in 5 minutes.";
+
+}
+
+
+function updateFaucetTimer() {
+
+  const remaining =
+    300000 - (Date.now() - data.lastFaucet);
+
+  const button = document.getElementById("faucetButton");
+
+  if (data.lastFaucet && remaining > 0) {
+
+    const seconds = Math.ceil(remaining / 1000);
+
+    const minutes = Math.floor(seconds / 60);
+
+    const rest = seconds % 60;
+
+    button.disabled = true;
+
+    document.getElementById("faucetCountdown").textContent =
+      "Next claim in " + minutes + "m " + rest + "s";
+
+  } else {
+
+    button.disabled = false;
+
+    document.getElementById("faucetCountdown").textContent =
+      "Ready to claim!";
+
+  }
+
+}
+
+
+// ==========================================
+// MEMBERSHIP
+// ==========================================
+
+function subscribe(name) {
+
+  const prices = {
+    Silver:4.99,
+    Gold:6.99,
+    Diamond:9.99
+  };
+
+  if (!plans[name]) return;
+
+  const confirmed = confirm(
+    "DEMO SUBSCRIPTION\n\n" +
+    name + " membership: $" +
+    prices[name].toFixed(2) +
+    " per month?\n\n" +
+    "No real payment will be made."
+  );
+
+  if (!confirmed) return;
+
+  data.membership = name;
+
+  data.membershipExpiry =
+    Date.now() + 30 * 24 * 60 * 60 * 1000;
+
+  data.dailyTipsDate = new Date().toDateString();
+
+  data.dailyTipsRemaining = plans[name].tips;
+
+  save();
+
+  alert(
+    name +
+    " membership activated in demo mode for 30 days."
+  );
+
+}
+
+
+// ==========================================
+// TIPS PURCHASE
+// ==========================================
+
+function buyTips(amount,price) {
+
+  alert(
+    "ABA PAYMENT DEMO\n\n" +
+    amount + " Tips = $" +
+    price.toFixed(2) +
+    "\n\nReal payment verification is not connected."
+  );
+
+}
+
+
+function buyStars(amount) {
+
+  alert(
+    "TELEGRAM STARS DEMO\n\n" +
+    amount + " Tips\n\n" +
+    "A Telegram bot backend must create and verify " +
+    "the Stars invoice. The Stars price has not been configured."
+  );
+
+}
+
+
+// ==========================================
+// WALLET
+// ==========================================
+
+function requestWithdrawal() {
+
+  const amount = Number(
+    document.getElementById("withdrawAmount").value
+  );
+
+  const method =
+    document.getElementById("withdrawMethod").value;
+
+  if (!Number.isFinite(amount) || amount < 2000) {
+
+    alert("Minimum withdrawal is 2,000 coins.");
+
+    return;
+
+  }
+
+  if (amount > data.coins) {
+
+    alert("Insufficient balance.");
+
+    return;
+
+  }
+
+  const confirmed = confirm(
+    "Submit demo withdrawal of " +
+    amount + " coins using " +
+    method + "?"
+  );
+
+  if (!confirmed) return;
+
+  data.coins -= amount;
+
+  save();
+
+  document.getElementById("withdrawAmount").value = "";
+
+  alert(
+    "Demo withdrawal request recorded locally. " +
+    "No real payment was sent."
+  );
+
+}
+
+
+// ==========================================
+// REFERRALS
+// ==========================================
+
+function copyReferral() {
+
+  const text =
+    "https://t.me/YOUR_BOT_USERNAME?start=demo";
+
+  if (
+    navigator.clipboard &&
+    navigator.clipboard.writeText
+  ) {
+
+    navigator.clipboard.writeText(text)
+      .then(() => alert("Demo referral link copied."))
+      .catch(() => alert(text));
+
+  } else {
+
+    alert(text);
+
+  }
+
+}
+
+
+// ==========================================
+// SPONSORED BANNERS
+// ==========================================
+
+function openSponsor(placement) {
+
+  alert(
+    "Sponsored Placement: " +
+    placement +
+    "\n\nConnect your sponsor URL and click tracking through the backend."
+  );
+
+}
+
+
+// ==========================================
+// INITIALIZATION
+// ==========================================
+
+function initialize() {
+
+  // Expire memberships before setting daily Tips.
+  if (
+    data.membership !== "Free" &&
+    data.membershipExpiry > 0 &&
+    Date.now() > data.membershipExpiry
+  ) {
+
+    data.membership = "Free";
+
+    data.membershipExpiry = 0;
+
+  }
+
+  refreshDailyTips();
+
+  const today = new Date().toDateString();
+
+  if (data.lastDaily === today) {
+
+    document.getElementById("dailyButton").disabled = true;
+
+    document.getElementById("dailyStatus").textContent =
+      "Today's daily bonus has already been claimed.";
+
+  }
+
+  render();
+
+  updateFaucetTimer();
+
+  setInterval(updateFaucetTimer,1000);
+
+}
+
+initialize();
+
+</script>
+
+</body>
+</html>
