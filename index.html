@@ -534,9 +534,9 @@ hr {
   </div>
 
   <p class="muted">
-    Payment buttons are demo placeholders. Real payment verification
-    requires a secure backend.
-  </p>
+  Telegram Stars purchases are processed and verified by our secure
+  Telegram payment server. ABA payments are not yet connected.
+</p>
 
 </section>
 
@@ -608,10 +608,10 @@ hr {
   </div>
 
   <p class="muted">
-    Subscriptions are simulated in this frontend demo.
-    Automatic monthly renewal is not connected.
-  </p>
-
+  Membership payments use Telegram Stars. Monthly recurring billing
+  is subject to Telegram's subscription terms. Manage or cancel
+  subscriptions through Telegram.
+</p>
 </section>
 
 
@@ -728,13 +728,14 @@ hr {
 // CONFIGURATION
 // ==========================================
 
-// true = simulated ad for frontend testing.
-// false = use a configured AdsGram block ID.
+const API_URL = "https://YOUR-RENDER-BACKEND.onrender.com";
 
 const DEMO_AD_MODE = true;
-
 const ADSGRAM_BLOCK_ID = "YOUR_ADSGRAM_BLOCK_ID";
 
+let authToken = null;
+let starsCatalog = {};
+let paymentBusy = false;
 
 // ==========================================
 // QUESTION BANKS
@@ -1008,6 +1009,142 @@ function save() {
 
   render();
 
+}
+
+// ==========================================
+// REAL TELEGRAM BACKEND AUTHENTICATION
+// ==========================================
+
+async function backendRequest(path, options = {}) {
+  if (!authToken) {
+    throw new Error("Please open the game inside Telegram first.");
+  }
+
+  const response = await fetch(API_URL + path, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + authToken,
+      ...(options.headers || {})
+    }
+  });
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(result.error || "Backend request failed.");
+  }
+
+  return result;
+}
+
+
+async function loginWithTelegram() {
+  const tg = window.Telegram?.WebApp;
+
+  if (!tg || !tg.initData) {
+    throw new Error(
+      "Please open Khmer Quiz & Earn from your Telegram bot."
+    );
+  }
+
+  tg.ready();
+  tg.expand();
+
+  const response = await fetch(API_URL + "/api/auth/telegram", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      initData: tg.initData
+    })
+  });
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok || !result.token) {
+    throw new Error(
+      result.error || "Telegram login failed."
+    );
+  }
+
+  authToken = result.token;
+
+  return result;
+}
+
+
+// ==========================================
+// REFRESH ACCOUNT AFTER PAYMENT
+// ==========================================
+
+async function refreshAccountFromServer() {
+  const result = await backendRequest("/api/me");
+
+  const user = result.user;
+
+  data.coins = Number(user.coins);
+  data.purchasedTips = Number(user.purchasedTips);
+  data.dailyTipsRemaining = Number(user.dailyTips);
+  data.membership = plans[user.membership]
+    ? user.membership
+    : "Free";
+
+  data.membershipExpiry = user.membershipExpiry
+    ? new Date(user.membershipExpiry).getTime()
+    : 0;
+
+  data.games = Number(user.games);
+
+  // Prevent the existing local daily-tip function from
+  // immediately overwriting the server's current quota.
+  data.dailyTipsDate = new Date().toDateString();
+
+  save();
+
+  return result;
+}
+
+
+// ==========================================
+// LOAD REAL STARS PRICES
+// ==========================================
+
+async function loadStarsCatalog() {
+  const result = await backendRequest(
+    "/api/payments/stars/catalog"
+  );
+
+  starsCatalog = {};
+
+  for (const product of result.products || []) {
+    starsCatalog[product.code] = product;
+  }
+
+  const tipButtons = {
+    100: "tips_100",
+    150: "tips_150",
+    200: "tips_200"
+  };
+
+  for (const [amount, code] of Object.entries(tipButtons)) {
+    const product = starsCatalog[code];
+
+    const button = document.querySelector(
+      `button[onclick="buyStars(${amount})"]`
+    );
+
+    if (button && product && product.available) {
+      button.textContent =
+        "Pay " + product.amount + " ⭐ with Telegram Stars";
+    }
+
+    if (button && (!product || !product.available)) {
+      button.textContent = "Stars price not configured";
+      button.disabled = true;
+    }
+  }
 }
 
 function addCoins(amount) {
@@ -1593,44 +1730,23 @@ function updateFaucetTimer() {
 // MEMBERSHIP
 // ==========================================
 
-function subscribe(name) {
+// ==========================================
+// REAL MEMBERSHIP PURCHASE
+// ==========================================
 
-  const prices = {
-    Silver:4.99,
-    Gold:6.99,
-    Diamond:9.99
+async function subscribe(name) {
+  const productCodes = {
+    Silver: "silver",
+    Gold: "gold",
+    Diamond: "diamond"
   };
 
-  if (!plans[name]) return;
+  const productCode = productCodes[name];
 
-  const confirmed = confirm(
-    "DEMO SUBSCRIPTION\n\n" +
-    name + " membership: $" +
-    prices[name].toFixed(2) +
-    " per month?\n\n" +
-    "No real payment will be made."
-  );
+  if (!productCode) return;
 
-  if (!confirmed) return;
-
-  data.membership = name;
-
-  data.membershipExpiry =
-    Date.now() + 30 * 24 * 60 * 60 * 1000;
-
-  data.dailyTipsDate = new Date().toDateString();
-
-  data.dailyTipsRemaining = plans[name].tips;
-
-  save();
-
-  alert(
-    name +
-    " membership activated in demo mode for 30 days."
-  );
-
+  await createStarsInvoice(productCode);
 }
-
 
 // ==========================================
 // TIPS PURCHASE
@@ -1648,18 +1764,113 @@ function buyTips(amount,price) {
 }
 
 
-function buyStars(amount) {
+// ==========================================
+// REAL TIPS PURCHASE
+// ==========================================
 
-  alert(
-    "TELEGRAM STARS DEMO\n\n" +
-    amount + " Tips\n\n" +
-    "A Telegram bot backend must create and verify " +
-    "the Stars invoice. The Stars price has not been configured."
-  );
+async function buyStars(amount) {
+  const productCodes = {
+    100: "tips_100",
+    150: "tips_150",
+    200: "tips_200"
+  };
 
+  const productCode = productCodes[amount];
+
+  if (!productCode) return;
+
+  await createStarsInvoice(productCode);
 }
 
+// ==========================================
+// TELEGRAM STARS INVOICE
+// ==========================================
 
+async function createStarsInvoice(productCode) {
+  if (paymentBusy) return;
+
+  const tg = window.Telegram?.WebApp;
+
+  if (!tg || !tg.initData || !tg.openInvoice) {
+    alert(
+      "Telegram Stars payments must be opened inside Telegram."
+    );
+    return;
+  }
+
+  if (!authToken) {
+    alert("Your Telegram session is not ready. Please reopen the game.");
+    return;
+  }
+
+  paymentBusy = true;
+
+  try {
+    const result = await backendRequest(
+      "/api/payments/stars/create",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          productCode
+        })
+      }
+    );
+
+    if (!result.success || !result.invoiceUrl) {
+      throw new Error("The backend did not return an invoice URL.");
+    }
+
+    tg.openInvoice(result.invoiceUrl, async function(status) {
+      if (status === "paid") {
+        alert(
+          "Payment successful! Your purchase is being processed."
+        );
+
+        // The Telegram webhook credits the account.
+        // Refresh after it has had time to process the payment.
+        setTimeout(async () => {
+          try {
+            await refreshAccountFromServer();
+
+            alert(
+              "Your account has been updated successfully."
+            );
+          } catch (error) {
+            console.error(error);
+            alert(
+              "Payment received. Please reopen the game shortly to refresh your balance."
+            );
+          }
+        }, 2000);
+
+      } else if (status === "cancelled") {
+        alert("Payment cancelled. No purchase was made.");
+
+      } else if (status === "failed") {
+        alert("Payment failed. Please try again.");
+
+      } else {
+        alert(
+          "Payment status: " + status +
+          ". Please check your account before trying again."
+        );
+      }
+
+      paymentBusy = false;
+    });
+
+  } catch (error) {
+    paymentBusy = false;
+
+    console.error("Stars payment error:", error);
+
+    alert(
+      "Unable to create Telegram Stars invoice:\n\n" +
+      error.message
+    );
+  }
+}
+  
 // ==========================================
 // WALLET
 // ==========================================
@@ -1794,6 +2005,30 @@ function initialize() {
 }
 
 initialize();
+  // ==========================================
+// START TELEGRAM BACKEND CONNECTION
+// ==========================================
+
+async function initializeTelegramPayments() {
+  try {
+    await loginWithTelegram();
+    await refreshAccountFromServer();
+    await loadStarsCatalog();
+
+    console.log("Telegram backend connected.");
+    console.log("Telegram Stars catalog loaded.");
+
+  } catch (error) {
+    console.error("Backend connection error:", error);
+
+    alert(
+      "Unable to connect to your account.\n\n" +
+      error.message
+    );
+  }
+}
+
+initializeTelegramPayments();
 
 </script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
