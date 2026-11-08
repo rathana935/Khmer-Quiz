@@ -697,7 +697,7 @@ hr {
   <div class="card"><h3>App Coins</h3><div class="price"><span id="walletCoins">0</span> Coins</div><p class="muted">Used for quiz rewards and instant Tips/Plan purchases.</p></div>
   <div class="card"><h3>USD-Coins</h3><div class="price" id="usdWalletBalance">0</div><p>10,000 USD-Coins = $1 USD</p></div>
   <div class="card"><h3>USDT-Coins</h3><div class="price" id="usdtWalletBalance">0</div><p>10,000 USDT-Coins = 1 USDT</p></div>
-  <div class="card"><h3>Deposit</h3><label>Currency</label><select id="depositCurrency"><option value="USD">USD-Coins</option><option value="USDT">USDT-Coins</option></select><label>Amount in wallet Coins (minimum 10,000)</label><input id="depositAmount" type="number" min="10000" step="1" placeholder="10000"><label>Payment method</label><select id="depositMethod"><option>ABA Bank</option><option>USDT - TON Network</option></select><label>Transaction reference/hash</label><input id="depositReference" placeholder="Enter payment reference"><label>Proof note (optional)</label><input id="depositProof" placeholder="Optional proof URL or note"><button class="full" onclick="submitWalletDeposit()">Submit Deposit for Approval</button><p class="muted">Deposits are credited only after manual admin approval.</p></div>
+  <div class="card"><h3>Deposit</h3><label>Currency</label><select id="depositCurrency"><option value="USD">USD-Coins</option><option value="USDT">USDT-Coins</option></select><label>Amount in wallet Coins (minimum 10,000)</label><input id="depositAmount" type="number" min="10000" step="1" placeholder="10000"><label>Payment method</label><select id="depositMethod" onchange="loadDepositInstructions()"><option>ABA Bank</option><option>USDT - TON Network</option></select><div id="depositInstructions" class="muted" style="margin:12px 0;padding:12px;border:1px solid #293a55;border-radius:10px">Select a payment method to view deposit instructions.</div><label>Transaction reference/hash</label><input id="depositReference" placeholder="Enter payment reference"><label>Proof note (optional)</label><input id="depositProof" placeholder="Optional proof URL or note"><button class="full" onclick="submitWalletDeposit()">Submit Deposit for Approval</button><p class="muted">Deposits are credited only after manual admin approval.</p></div>
   <div class="card"><h3>Withdraw</h3><label>Currency</label><select id="withdrawCurrency"><option value="USD">USD-Coins</option><option value="USDT">USDT-Coins</option></select><label>Amount in wallet Coins (minimum 10,000)</label><input id="walletWithdrawAmount" type="number" min="10000" placeholder="10000"><label>Payment method</label><select id="walletWithdrawMethod"><option>ABA Bank</option><option>USDT - TON Network</option></select><label>Payment details</label><input id="walletWithdrawDetails" placeholder="ABA account or USDT TON wallet"><button class="full" onclick="submitWalletWithdrawal()">Request Withdrawal</button><p class="muted">Withdrawals require manual admin approval. Balance is reserved while pending.</p></div>
   <div class="card"><h3>Exchange · 0% Fee</h3><p>1 USD-Coin = 1 USDT-Coin. No exchange fee.</p><label>Convert from</label><select id="exchangeFrom"><option value="USD">USD-Coins</option><option value="USDT">USDT-Coins</option></select><label>Convert to</label><select id="exchangeTo"><option value="USDT">USDT-Coins</option><option value="USD">USD-Coins</option></select><label>Amount</label><input id="exchangeAmount" type="number" min="1" placeholder="10000"><button class="full" onclick="exchangeWalletCoins()">Exchange Now</button></div>
   <div class="card"><h3>Wallet Request History</h3><button class="dark" onclick="loadWalletData()">Refresh Wallet</button><div id="walletRequestHistory" class="muted">Open wallet to load history.</div></div>
@@ -777,7 +777,6 @@ hr {
 // ==========================================
 
 const API_URL = "https://khmer-quiz-backend.onrender.com"; 
-
 const DEMO_AD_MODE = true;
 const ADSGRAM_BLOCK_ID = "YOUR_ADSGRAM_BLOCK_ID";
 
@@ -2134,10 +2133,43 @@ initialize();
 // START TELEGRAM BACKEND CONNECTION
 // ==========================================
 
+async function copyDepositDetail(value) {
+  const text = String(value || "");
+  if (!text) return;
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const field = document.createElement("textarea");
+      field.value = text; document.body.appendChild(field); field.select();
+      document.execCommand("copy"); field.remove();
+    }
+    alert("Copied to clipboard.");
+  } catch (e) { alert("Copy failed. Please select and copy this detail manually: " + text); }
+}
+
+async function loadDepositInstructions() {
+  const box = document.getElementById("depositInstructions");
+  if (!box) return;
+  const method = document.getElementById("depositMethod")?.value || "ABA Bank";
+  box.textContent = "Loading payment details…";
+  try {
+    const info = await backendRequest("/api/wallet/deposit-instructions?method=" + encodeURIComponent(method));
+    if (method === "ABA Bank") {
+      box.innerHTML = `<strong>ABA Bank transfer</strong><p>Account name: <strong>${escapeTaskText(info.accountName)}</strong></p><p>Account number: <strong>${escapeTaskText(info.accountNumber)}</strong></p><button type="button" class="dark" onclick='copyDepositDetail(${JSON.stringify(info.accountNumber)})'>Copy ABA account number</button>${info.qrImageUrl ? `<p><img src="${safeTaskUrl(info.qrImageUrl)}" alt="ABA payment QR" style="max-width:220px;width:100%;height:auto;border-radius:8px"></p>` : ""}<p class="muted">Transfer to this account, then enter your bank transaction reference below.</p>`;
+    } else {
+      box.innerHTML = `<strong>USDT deposit · TON Network only</strong><p>Wallet address:</p><p style="overflow-wrap:anywhere"><strong>${escapeTaskText(info.walletAddress)}</strong></p><button type="button" class="dark" onclick='copyDepositDetail(${JSON.stringify(info.walletAddress)})'>Copy USDT wallet address</button><p class="muted">Send USDT using the TON network only. Do not send through another network. Enter the transaction hash below.</p>`;
+    }
+  } catch (e) {
+    box.textContent = e.message || "Unable to load deposit instructions. Please contact support.";
+  }
+}
+
 async function loadWalletData() {
   if (!authToken) return;
   try {
     const [w, r] = await Promise.all([backendRequest("/api/wallet"), backendRequest("/api/wallet/requests")]);
+    loadDepositInstructions();
     document.getElementById("usdWalletBalance").textContent = Number(w.wallet.usdCoins).toLocaleString();
     document.getElementById("usdtWalletBalance").textContent = Number(w.wallet.usdtCoins).toLocaleString();
     const host=document.getElementById("walletRequestHistory");
