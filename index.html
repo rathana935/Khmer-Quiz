@@ -1,10 +1,11 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Khmer Quiz & Earn</title>
+<title>English Quiz & Earn</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
@@ -178,7 +179,7 @@ ul {
 .answer.wrong {background:#8c3434}
 .answer.removed {opacity:.3}
 
-input,select {
+input,select,textarea {
   width:100%;
   padding:12px;
   margin:8px 0 12px;
@@ -187,6 +188,7 @@ input,select {
   border:1px solid var(--border);
   border-radius:8px;
 }
+textarea {min-height:85px;resize:vertical;font:inherit}
 
 nav {
   position:fixed;
@@ -247,13 +249,25 @@ hr {
   border-top:1px solid var(--border);
   margin:15px 0;
 }
+
+.task-mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.task-mode-btn{min-height:54px;border:1px solid var(--border);border-radius:12px;background:var(--panel);color:var(--text);font-weight:700;padding:10px}
+.task-mode-btn.selected{background:#244b78;border-color:#7aa9e8;color:#fff}
+.task-list-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.task-item{border:1px solid var(--border);border-radius:12px;padding:13px;margin:10px 0;background:rgba(255,255,255,.025)}
+.task-item h4{margin:0 0 8px;font-size:16px}
+.task-meta{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}
+.task-chip{font-size:12px;border:1px solid var(--border);border-radius:20px;padding:4px 8px;color:var(--muted)}
+.task-reward{font-weight:800;color:var(--gold)}
+.task-open-link{display:inline-block;margin-top:8px;padding:9px 13px;border-radius:9px;background:#244b78;color:#fff;text-decoration:none;font-weight:700}
+
 </style>
 </head>
 
 <body>
 
 <header>
-  <strong>🇰🇭 Khmer Quiz & Earn</strong>
+  <strong>🇬🇧 English Quiz & Earn</strong>
   <span class="balance">🪙 <span id="coinBalance">1000</span></span>
 </header>
 
@@ -272,7 +286,7 @@ hr {
     </button>
   </div>
 
-  <h2>Welcome to Khmer Quiz & Earn!</h2>
+  <h2>Welcome to English Quiz & Earn!</h2>
 
   <div class="grid">
     <div class="stat">
@@ -303,15 +317,15 @@ hr {
     </p>
 
     <button class="full" onclick="startQuiz('easy')">
-      Easy · 10 Coins
+      Easy · 5 Coins
     </button>
 
     <button class="full" onclick="startQuiz('medium')">
-      Medium · 12 Coins
+      Medium · 8 Coins
     </button>
 
     <button class="full" onclick="startQuiz('hard')">
-      Hard · 15 Coins
+      Hard · 10 Coins
     </button>
   </div>
 
@@ -491,53 +505,35 @@ hr {
 
 
 <!-- ================= TIPS ================= -->
-
 <section id="tips" class="page">
-
   <h2>💡 Tips Center</h2>
-
   <div class="card">
-
     <h3>Your Available Tips</h3>
-
     <div class="price" id="tipsBalance">3</div>
-
-    <p class="muted">
-      Use one Tip to remove two incorrect answers during a quiz.
-    </p>
-
+    <p class="muted">Use one Tip to remove two incorrect answers during a quiz.</p>
     <p id="dailyTipInfo"></p>
-
   </div>
-
   <h3>Buy More Tips</h3>
-
+  <p class="muted">Available payment methods: ABA, Telegram Stars, and USDT (TON).</p>
   <div class="card">
-    <h3>100 Tips</h3>
-    <div class="price">$1.00</div>
-    <button onclick="buyTips(100,1)">Pay with ABA</button>
+    <h3>100 Tips</h3><div class="price">$1.00</div>
+    <button onclick="buyTipsManual(100,'aba_payway')">Pay with ABA</button>
     <button class="dark" onclick="buyStars(100)">Telegram Stars</button>
+    <button class="dark" onclick="buyTipsManual(100,'usdt_ton')">USDT (TON)</button>
   </div>
-
   <div class="card">
-    <h3>150 Tips</h3>
-    <div class="price">$1.50</div>
-    <button onclick="buyTips(150,1.5)">Pay with ABA</button>
+    <h3>150 Tips</h3><div class="price">$1.50</div>
+    <button onclick="buyTipsManual(150,'aba_payway')">Pay with ABA</button>
     <button class="dark" onclick="buyStars(150)">Telegram Stars</button>
+    <button class="dark" onclick="buyTipsManual(150,'usdt_ton')">USDT (TON)</button>
   </div>
-
   <div class="card">
-    <h3>200 Tips</h3>
-    <div class="price">$2.00</div>
-    <button onclick="buyTips(200,2)">Pay with ABA</button>
+    <h3>200 Tips</h3><div class="price">$2.00</div>
+    <button onclick="buyTipsManual(200,'aba_payway')">Pay with ABA</button>
     <button class="dark" onclick="buyStars(200)">Telegram Stars</button>
+    <button class="dark" onclick="buyTipsManual(200,'usdt_ton')">USDT (TON)</button>
   </div>
-
-  <p class="muted">
-  Telegram Stars purchases are processed and verified by our secure
-  Telegram payment server. ABA payments are not yet connected.
-</p>
-
+  <p class="muted">ABA and USDT payments require transaction-reference submission and admin approval. Configure the corresponding prices and payment wallet details on Render.</p>
 </section>
 
 
@@ -564,6 +560,8 @@ hr {
     <button class="gold full" onclick="subscribe('Silver')">
       Subscribe Silver
     </button>
+    <button class="full" onclick="subscribeManual('Silver','aba_payway')">Pay with ABA</button>
+    <button class="dark full" onclick="subscribeManual('Silver','usdt_ton')">Pay with USDT (TON)</button>
 
   </div>
 
@@ -584,6 +582,8 @@ hr {
     <button class="gold full" onclick="subscribe('Gold')">
       Subscribe Gold
     </button>
+    <button class="full" onclick="subscribeManual('Gold','aba_payway')">Pay with ABA</button>
+    <button class="dark full" onclick="subscribeManual('Gold','usdt_ton')">Pay with USDT (TON)</button>
 
   </div>
 
@@ -604,6 +604,8 @@ hr {
     <button class="gold full" onclick="subscribe('Diamond')">
       Subscribe Diamond
     </button>
+    <button class="full" onclick="subscribeManual('Diamond','aba_payway')">Pay with ABA</button>
+    <button class="dark full" onclick="subscribeManual('Diamond','usdt_ton')">Pay with USDT (TON)</button>
 
   </div>
 
@@ -614,6 +616,98 @@ hr {
 </p>
 </section>
 
+
+<!-- ================= TASKS ================= -->
+<section id="tasks" class="page">
+  <h2>📋 Tasks</h2>
+  <p class="muted">Choose how you want to use the task marketplace.</p>
+  <div class="task-mode-switch" role="group" aria-label="Task mode">
+    <button id="advertiserModeBtn" class="task-mode-btn selected" type="button" onclick="setTaskMode('advertiser')">📢 Advertiser Mode</button>
+    <button id="earnerModeBtn" class="task-mode-btn" type="button" onclick="setTaskMode('earner')">💰 Earner Mode</button>
+  </div>
+
+  <div id="advertiserModePanel">
+    <h3>📢 Advertiser Mode</h3>
+    <p class="muted">Create PTC, video, or job campaigns. Your campaign budget is reserved when you publish. 10,000 coins = $1.</p>
+  <div class="card">
+    <h3>👁️ PTC Ads</h3>
+    <form id="ptcForm" onsubmit="submitCampaign(event,'ptc')">
+      <label>Select a Pack</label>
+      <select name="pack" required>
+        <option value="bronze">Bronze · 5s · $0.000300000/view (3 coins)</option>
+        <option value="silver">Silver · 10s · $0.000500000/view (5 coins)</option>
+        <option value="gold">Gold · 20s · $0.000800000/view (8 coins)</option>
+        <option value="platinum">Platinum · 30s · $0.001200000/view (12 coins)</option>
+        <option value="diamond">Diamond · 60s · $0.001500000/view (15 coins)</option>
+      </select>
+      <label>Ad Title</label><input name="title" maxlength="120" required placeholder="Enter ad title">
+      <label>Website URL</label><input name="url" type="url" required placeholder="https://example.com">
+      <label>Description (Optional)</label><textarea name="description" maxlength="2000" placeholder="Describe your advertisement"></textarea>
+      <label>Number of Views</label><input name="views" type="number" min="1" max="1000000" required>
+      <label>Daily View Limit (0 = Unlimited)</label><input name="dailyLimit" type="number" min="0" value="0" required>
+      <button class="full" type="submit">Create PTC Campaign</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>🎬 Video Ads</h3>
+    <form id="videoForm" onsubmit="submitCampaign(event,'video')">
+      <label>Select a Pack</label>
+      <select name="pack" required>
+        <option value="short">Short · 15s · $0.00070000/view (7 coins)</option>
+        <option value="medium">Medium · 30s · $0.0010000/view (10 coins)</option>
+        <option value="long">Long · 60s · $0.001700000/view (17 coins)</option>
+        <option value="premium">Premium · 120s · $0.002400000/view (24 coins)</option>
+      </select>
+      <label>Video Ad Title</label><input name="title" maxlength="120" required placeholder="Enter video title">
+      <label>Video URL</label><input name="url" type="url" required placeholder="https://youtube.com/...">
+      <label>Description (Optional)</label><textarea name="description" maxlength="2000" placeholder="Describe your video"></textarea>
+      <label>Number of Views</label><input name="views" type="number" min="1" max="1000000" required>
+      <label>Daily View Limit (0 = Unlimited)</label><input name="dailyLimit" type="number" min="0" value="0" required>
+      <button class="full" type="submit">Create Video Campaign</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>💼 Jobs</h3>
+    <form id="jobForm" onsubmit="submitCampaign(event,'job')">
+      <label>Category</label>
+      <select name="category" required>
+        <option>Social Media</option><option>Website</option><option>App</option><option>Content Review</option><option>Other</option>
+      </select>
+      <label>Difficulty</label>
+      <select name="difficulty" required><option>Easy</option><option>Medium</option><option>Hard</option></select>
+      <label>Expected Time (Minutes)</label><input name="expectedMinutes" type="number" min="1" max="1440" required>
+      <label>Job Title</label><input name="title" maxlength="120" required>
+      <label>Description</label><textarea name="description" maxlength="2000" required></textarea>
+      <label>Job URL (Optional)</label><input name="url" type="url" placeholder="https://example.com">
+      <label>Verification Type</label>
+      <select name="verificationType" required><option>Link/URL</option><option>Text</option><option>Screenshot</option></select>
+      <label>Reward Per Work (Coins)</label><input name="rewardPerWork" type="number" min="1" required>
+      <label>Total Slots (Workers)</label><input name="slots" type="number" min="1" required>
+      <button class="full" type="submit">Create Job</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>My Campaigns</h3>
+    <button class="dark" type="button" onclick="loadMyCampaigns()">Refresh Campaigns</button>
+    <div id="myCampaigns" class="muted">Sign in through Telegram to view your campaigns.</div>
+  </div>
+  </div><!-- /advertiserModePanel -->
+
+  <div id="earnerModePanel" style="display:none">
+    <h3>💰 Earner Mode</h3>
+    <p class="muted">Find campaigns created by other users. Review each task's instructions and open the advertiser's link.</p>
+    <div class="card">
+      <div class="task-list-heading">
+        <strong>Available Tasks</strong>
+        <button class="dark" type="button" onclick="loadAvailableTasks()">↻ Refresh</button>
+      </div>
+      <div id="availableTasks" class="muted">Sign in through Telegram to load available tasks.</div>
+    </div>
+  </div><!-- /earnerModePanel -->
+</section>
 
 <!-- ================= WALLET ================= -->
 
@@ -669,11 +763,11 @@ hr {
   <div class="card">
 
     <h3>Referral Benefits</h3>
-
+    <p><strong>Free account: 10% commission</strong> on eligible referral activity.</p>
     <p id="referralInfo"></p>
 
     <p class="muted">
-      Referral tracking and commission payments require a backend.
+      Referral commission eligibility and payout tracking must be enabled on the server before commissions are paid.
     </p>
 
     <button onclick="copyReferral()">
@@ -711,6 +805,10 @@ hr {
     👑<br>Plans
   </button>
 
+  <button onclick="showPage('tasks',this)">
+    📋<br>Tasks
+  </button>
+
   <button onclick="showPage('wallet',this)">
     💰<br>Wallet
   </button>
@@ -728,7 +826,7 @@ hr {
 // CONFIGURATION
 // ==========================================
 
-const API_URL = "https://khmer-quiz-backend.onrender.com";
+const API_URL = "https://YOUR-RENDER-SERVICE.onrender.com"; // Replace with your Render backend URL
 
 const DEMO_AD_MODE = true;
 const ADSGRAM_BLOCK_ID = "YOUR_ADSGRAM_BLOCK_ID";
@@ -749,32 +847,32 @@ const questionBanks = {
   easy: [
 
     {
-      q:"តើរាជធានីនៃប្រទេសកម្ពុជាគឺអ្វី?",
-      a:["ភ្នំពេញ","សៀមរាប","បាត់ដំបង","កំពត"],
+      q:"What is the capital city of Cambodia?",
+      a:["Phnom Penh","Siem Reap","Battambang","Kampot"],
       c:0
     },
 
     {
-      q:"តើប្រាសាទអង្គរវត្តស្ថិតនៅខេត្តណា?",
-      a:["កំពង់ចាម","សៀមរាប","កណ្ដាល","កែប"],
+      q:"In which province is Angkor Wat located?",
+      a:["Kampong Cham","Siem Reap","Kandal","Kep"],
       c:1
     },
 
     {
-      q:"តើភាសាផ្លូវការរបស់កម្ពុជាគឺអ្វី?",
-      a:["ថៃ","អង់គ្លេស","ខ្មែរ","ចិន"],
+      q:"What is the official language of Cambodia?",
+      a:["Thai","English","Khmer","Chinese"],
       c:2
     },
 
     {
-      q:"តើទង់ជាតិកម្ពុជាមានប៉ុន្មានពណ៌?",
-      a:["២","៣","៤","៥"],
+      q:"How many colors are on the Cambodian flag?",
+      a:["Two","Three","Four","Five"],
       c:1
     },
 
     {
-      q:"តើរូបិយប័ណ្ណជាតិរបស់កម្ពុជាគឺអ្វី?",
-      a:["បាត","រៀល","ដុង","គីប"],
+      q:"What is the national currency of Cambodia?",
+      a:["Baht","Riel","Dong","Kip"],
       c:1
     }
 
@@ -783,32 +881,32 @@ const questionBanks = {
   medium: [
 
     {
-      q:"តើទន្លេមេគង្គហូរកាត់ទីក្រុងណា?",
-      a:["ភ្នំពេញ","ប៉ោយប៉ែត","កែប","បានលុង"],
+      q:"Which Cambodian city does the Mekong River flow through?",
+      a:["Phnom Penh","Poipet","Kep","Banlung"],
       c:0
     },
 
     {
-      q:"តើថ្ងៃបុណ្យឯករាជ្យជាតិកម្ពុជាគឺថ្ងៃណា?",
-      a:["៩ វិច្ឆិកា","១ មករា","១៣ មេសា","១ ឧសភា"],
+      q:"When is Cambodia’s Independence Day?",
+      a:["November 9","January 1","April 13","May 1"],
       c:0
     },
 
     {
-      q:"តើប្រាសាទអង្គរវត្តត្រូវបានកសាងក្នុងសម័យណា?",
-      a:["ចេនឡា","អង្គរ","ហ្វូណន","លង្វែក"],
+      q:"During which historical period was Angkor Wat built?",
+      a:["Chenla","Angkor","Funan","Longvek"],
       c:1
     },
 
     {
-      q:"តើបឹងទឹកសាបដ៏ធំរបស់កម្ពុជាមានឈ្មោះអ្វី?",
-      a:["បឹងកន្សែង","បឹងទន្លេសាប","បឹងយក្សឡោម","បឹងកំពីងពួយ"],
+      q:"What is the name of Cambodia’s largest freshwater lake?",
+      a:["Boeng Kanseng","Tonle Sap","Yeak Laom Lake","Kamping Puoy"],
       c:1
     },
 
     {
-      q:"តើខេត្តកែបស្ថិតនៅតំបន់ណារបស់កម្ពុជា?",
-      a:["ភាគខាងត្បូង","ភាគខាងជើង","ភាគខាងកើត","ភាគពាយ័ព្យ"],
+      q:"In which part of Cambodia is Kep located?",
+      a:["Southern","Northern","Eastern","Northwestern"],
       c:0
     }
 
@@ -817,32 +915,32 @@ const questionBanks = {
   hard: [
 
     {
-      q:"តើព្រះបាទជ័យវរ្ម័នទី៧គ្រងរាជ្យក្នុងសតវត្សទីប៉ុន្មាន?",
-      a:["ទី១០","ទី១១","ទី១២","ទី១៤"],
+      q:"In which century did King Jayavarman VII reign?",
+      a:["10th","11th","12th","14th"],
       c:2
     },
 
     {
-      q:"តើប្រាសាទអង្គរវត្តឧទ្ទិសដល់ព្រះណាដំបូង?",
-      a:["ព្រះព្រហ្ម","ព្រះវិស្ណុ","ព្រះសិវៈ","ព្រះពុទ្ធ"],
+      q:"Which deity was Angkor Wat originally dedicated to?",
+      a:["Brahma","Vishnu","Shiva","Buddha"],
       c:1
     },
 
     {
-      q:"តើប្រាសាទបាយ័នមានភាពល្បីល្បាញដោយសារអ្វី?",
-      a:["ប៉មមុខញញឹម","បឹងធំ","ស្ពានឈើ","ជញ្ជាំងកញ្ចក់"],
+      q:"What is Bayon Temple best known for?",
+      a:["Face towers","A large lake","A wooden bridge","Glass walls"],
       c:0
     },
 
     {
-      q:"តើព្រះបាទសូរ្យវរ្ម័នទី២ជាប់ទាក់ទងនឹងប្រាសាទណា?",
-      a:["អង្គរវត្ត","បាយ័ន","តាព្រហ្ម","បន្ទាយស្រី"],
+      q:"Which temple is associated with King Suryavarman II?",
+      a:["Angkor Wat","Bayon","Ta Prohm","Banteay Srei"],
       c:0
     },
 
     {
-      q:"តើអង្គរធំត្រូវបានសាងសង់ដោយព្រះមហាក្សត្រអង្គណា?",
-      a:["ជ័យវរ្ម័នទី៧","សូរ្យវរ្ម័នទី២","ជ័យវរ្ម័នទី២","ឥន្ទ្រវរ្ម័នទី១"],
+      q:"Which king built Angkor Thom?",
+      a:["Jayavarman VII","Suryavarman II","Jayavarman II","Indravarman I"],
       c:0
     }
 
@@ -893,7 +991,7 @@ const plans = {
   Free: {
     game:1,
     faucet:1,
-    commission:0,
+    commission:10,
     referral:200,
     tips:3
   },
@@ -926,9 +1024,9 @@ const plans = {
 
 
 const gameBaseReward = {
-  easy:10,
-  medium:12,
-  hard:15
+  easy:5,
+  medium:8,
+  hard:10
 };
 
 
@@ -1044,7 +1142,7 @@ async function loginWithTelegram() {
 
   if (!tg || !tg.initData) {
     throw new Error(
-      "Please open Khmer Quiz & Earn from your Telegram bot."
+      "Please open English Quiz & Earn from your Telegram bot."
     );
   }
 
@@ -1181,9 +1279,7 @@ function render() {
   document.getElementById("referralInfo").textContent =
     data.membership + " membership: " +
     plans[data.membership].referral +
-    " coins per successful referral, plus " +
-    plans[data.membership].commission +
-    "% eligible commission.";
+    " coins per successful referral. Free account commission: 10%.";
 
 }
 
@@ -1351,12 +1447,12 @@ function answerQuestion(index) {
     quiz.score++;
 
     document.getElementById("quizFeedback").textContent =
-      "ត្រឹមត្រូវ! Correct!";
+      "Correct!";
 
   } else {
 
     document.getElementById("quizFeedback").textContent =
-      "មិនត្រឹមត្រូវទេ។";
+      "Incorrect.";
 
   }
 
@@ -1752,15 +1848,8 @@ async function subscribe(name) {
 // TIPS PURCHASE
 // ==========================================
 
-function buyTips(amount,price) {
-
-  alert(
-    "ABA PAYMENT DEMO\n\n" +
-    amount + " Tips = $" +
-    price.toFixed(2) +
-    "\n\nReal payment verification is not connected."
-  );
-
+function buyTips(amount) {
+  return buyStars(amount);
 }
 
 
@@ -1872,6 +1961,137 @@ async function createStarsInvoice(productCode) {
 }
   
 // ==========================================
+
+// ==========================================
+// MANUAL ABA / USDT PAYMENTS FOR TIPS + PLANS
+// ==========================================
+
+async function createManualPayment(productCode, method) {
+  if (!authToken) {
+    alert("Open this Mini App inside Telegram and sign in first.");
+    return;
+  }
+  const order = await backendRequest("/api/payments/manual/create", {
+    method: "POST",
+    body: JSON.stringify({ productCode, method })
+  });
+  const details = order.instructions || {};
+  let instructions = `Order: ${order.orderId}\nAmount: ${order.amount} ${order.currency}\n`;
+  if (method === "aba_payway") {
+    instructions += `Pay to: ${details.accountName || "ABA account"}\nAccount: ${details.accountNumber || "Not configured"}\n`;
+    if (details.qrImageUrl) instructions += `QR: ${details.qrImageUrl}\n`;
+  } else {
+    instructions += `Network: TON\nUSDT wallet: ${details.walletAddress || "Not configured"}\n`;
+  }
+  instructions += "\nAfter payment, enter the transaction reference/hash.";
+  alert(instructions);
+  const reference = prompt("Enter your payment transaction reference or hash:");
+  if (!reference) return;
+  const proof = prompt("Optional proof note or image URL (leave blank if none):") || "";
+  const submitted = await backendRequest(`/api/payments/manual/${order.orderId}/submit`, {
+    method: "POST",
+    body: JSON.stringify({ reference, proof })
+  });
+  alert(submitted.message || "Payment submitted for admin review.");
+}
+
+async function buyTipsManual(amount, method) {
+  const codes = {100:"tips_100",150:"tips_150",200:"tips_200"};
+  try { await createManualPayment(codes[amount], method); }
+  catch (error) { alert(error.message); }
+}
+
+async function subscribeManual(name, method) {
+  const codes = {Silver:"silver",Gold:"gold",Diamond:"diamond"};
+  try { await createManualPayment(codes[name], method); }
+  catch (error) { alert(error.message); }
+}
+
+// ==========================================
+// TASK CAMPAIGNS
+// ==========================================
+
+function setTaskMode(mode) {
+  const advertiser = mode === "advertiser";
+  document.getElementById("advertiserModePanel").style.display = advertiser ? "block" : "none";
+  document.getElementById("earnerModePanel").style.display = advertiser ? "none" : "block";
+  document.getElementById("advertiserModeBtn").classList.toggle("selected", advertiser);
+  document.getElementById("earnerModeBtn").classList.toggle("selected", !advertiser);
+  if (!advertiser) loadAvailableTasks();
+  else if (authToken) loadMyCampaigns();
+}
+
+async function submitCampaign(event, type) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const values = Object.fromEntries(new FormData(form).entries());
+  ["views","dailyLimit","expectedMinutes","rewardPerWork","slots"].forEach(key => {
+    if (values[key] !== undefined) values[key] = Number(values[key]);
+  });
+  try {
+    const result = await backendRequest("/api/campaigns", {
+      method: "POST",
+      body: JSON.stringify({ ...values, type })
+    });
+    alert(`${result.message}\nReserved budget: ${result.reservedCoins} coins`);
+    form.reset();
+    await refreshAccountFromServer();
+    await loadMyCampaigns();
+    await loadAvailableTasks();
+  } catch (error) { alert(error.message); }
+}
+
+async function loadMyCampaigns() {
+  const target = document.getElementById("myCampaigns");
+  try {
+    const result = await backendRequest("/api/campaigns/my");
+    target.innerHTML = result.campaigns.length ? result.campaigns.map(c =>
+      `<div class="feature"><span>${escapeTaskText(c.title)} · ${escapeTaskText(c.campaign_type)}</span><strong>${escapeTaskText(c.status)}</strong></div><p class="muted">Reserved: ${Number(c.reserved_coins)} coins</p>`
+    ).join("") : "You have not created any campaigns yet.";
+  } catch (error) { target.textContent = error.message; }
+}
+
+async function loadAvailableTasks() {
+  const target = document.getElementById("availableTasks");
+  if (!target) return;
+  target.innerHTML = "Loading available tasks...";
+  try {
+    const result = await backendRequest("/api/tasks");
+    target.innerHTML = result.tasks.length ? result.tasks.map(t => {
+      const isJob = t.campaign_type === "job";
+      const reward = isJob ? Number(t.reward_per_work || 0) : Number(t.coins_per_view || 0);
+      const remaining = Number(t.remaining_work || 0);
+      const typeLabel = isJob ? "Job" : (t.campaign_type === "ptc" ? "PTC Ad" : "Video Ad");
+      const detail = isJob
+        ? `${escapeTaskText(t.category || "Other")} · ${escapeTaskText(t.difficulty || "Easy")} · ${Number(t.expected_minutes || 0)} min`
+        : `${Number(t.duration_seconds || 0)} seconds per view · ${escapeTaskText(t.pack_code || "Standard")} pack`;
+      const url = t.target_url ? safeTaskUrl(t.target_url) : "";
+      return `<article class="task-item">
+        <h4>${escapeTaskText(t.title)}</h4>
+        <div class="task-meta"><span class="task-chip">${typeLabel}</span><span class="task-chip">${detail}</span><span class="task-chip">${remaining} available</span></div>
+        <p>${escapeTaskText(t.description || "No additional description provided.")}</p>
+        <p class="task-reward">Advertised rate: ${reward.toLocaleString()} coins ${isJob ? "per task" : "per view"}</p>
+        ${t.verification_type ? `<p class="muted">Verification: ${escapeTaskText(t.verification_type)}</p>` : ""}
+        ${url ? `<a class="task-open-link" href="${url}" target="_blank" rel="noopener noreferrer">Open ${isJob ? "job" : "advertisement"}</a>` : `<span class="muted">No external link supplied.</span>`}
+      </article>`;
+    }).join("") : `<p class="muted">There are no available tasks right now. Please check again later.</p>`;
+  } catch (error) {
+    target.textContent = error.message;
+  }
+}
+
+function escapeTaskText(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[ch]);
+}
+function safeTaskUrl(value) {
+  try {
+    const url = new URL(value);
+    return ["http:","https:"].includes(url.protocol) ? url.href : "#";
+  } catch { return "#"; }
+}
+
 // WALLET
 // ==========================================
 
@@ -2014,6 +2234,8 @@ async function initializeTelegramPayments() {
     await loginWithTelegram();
     await refreshAccountFromServer();
     await loadStarsCatalog();
+    await loadMyCampaigns();
+    await loadAvailableTasks();
 
     console.log("Telegram backend connected.");
     console.log("Telegram Stars catalog loaded.");
