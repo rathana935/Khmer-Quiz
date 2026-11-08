@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -512,26 +514,10 @@ hr {
     <p id="dailyTipInfo"></p>
   </div>
   <h3>Buy More Tips</h3>
-  <p class="muted">Available payment methods: ABA, Telegram Stars, and USDT (TON).</p>
-  <div class="card">
-    <h3>100 Tips</h3><div class="price">$1.00</div>
-    <button onclick="buyTipsManual(100,'aba_payway')">Pay with ABA</button>
-    <button class="dark" onclick="buyStars(100)">Telegram Stars</button>
-    <button class="dark" onclick="buyTipsManual(100,'usdt_ton')">USDT (TON)</button>
-  </div>
-  <div class="card">
-    <h3>150 Tips</h3><div class="price">$1.50</div>
-    <button onclick="buyTipsManual(150,'aba_payway')">Pay with ABA</button>
-    <button class="dark" onclick="buyStars(150)">Telegram Stars</button>
-    <button class="dark" onclick="buyTipsManual(150,'usdt_ton')">USDT (TON)</button>
-  </div>
-  <div class="card">
-    <h3>200 Tips</h3><div class="price">$2.00</div>
-    <button onclick="buyTipsManual(200,'aba_payway')">Pay with ABA</button>
-    <button class="dark" onclick="buyStars(200)">Telegram Stars</button>
-    <button class="dark" onclick="buyTipsManual(200,'usdt_ton')">USDT (TON)</button>
-  </div>
-  <p class="muted">ABA and USDT payments require transaction-reference submission and admin approval. Configure the corresponding prices and payment wallet details on Render.</p>
+  <p class="muted">Pay automatically with app Coins or Telegram Stars.</p>
+  <div class="card"><h3>100 Tips</h3><div class="price">$1.00 · 10,000 Coins</div><button onclick="buyTipsWithCoins(100)">Buy with 10,000 Coins</button><button class="dark" onclick="buyStars(100)">Telegram Stars ⭐</button></div>
+  <div class="card"><h3>150 Tips</h3><div class="price">$1.50 · 15,000 Coins</div><button onclick="buyTipsWithCoins(150)">Buy with 15,000 Coins</button><button class="dark" onclick="buyStars(150)">Telegram Stars ⭐</button></div>
+  <div class="card"><h3>200 Tips</h3><div class="price">$2.00 · 20,000 Coins</div><button onclick="buyTipsWithCoins(200)">Buy with 20,000 Coins</button><button class="dark" onclick="buyStars(200)">Telegram Stars ⭐</button></div>
 </section>
 
 
@@ -558,8 +544,7 @@ hr {
     <button class="gold full" onclick="subscribe('Silver')">
       Subscribe Silver
     </button>
-    <button class="full" onclick="subscribeManual('Silver','aba_payway')">Pay with ABA</button>
-    <button class="dark full" onclick="subscribeManual('Silver','usdt_ton')">Pay with USDT (TON)</button>
+    <button class="full" onclick="buyPlanWithCoins('Silver')">Subscribe with 49900 Coins</button>
 
   </div>
 
@@ -580,8 +565,7 @@ hr {
     <button class="gold full" onclick="subscribe('Gold')">
       Subscribe Gold
     </button>
-    <button class="full" onclick="subscribeManual('Gold','aba_payway')">Pay with ABA</button>
-    <button class="dark full" onclick="subscribeManual('Gold','usdt_ton')">Pay with USDT (TON)</button>
+    <button class="full" onclick="buyPlanWithCoins('Gold')">Subscribe with 69900 Coins</button>
 
   </div>
 
@@ -602,8 +586,7 @@ hr {
     <button class="gold full" onclick="subscribe('Diamond')">
       Subscribe Diamond
     </button>
-    <button class="full" onclick="subscribeManual('Diamond','aba_payway')">Pay with ABA</button>
-    <button class="dark full" onclick="subscribeManual('Diamond','usdt_ton')">Pay with USDT (TON)</button>
+    <button class="full" onclick="buyPlanWithCoins('Diamond')">Subscribe with 99900 Coins</button>
 
   </div>
 
@@ -710,45 +693,14 @@ hr {
 <!-- ================= WALLET ================= -->
 
 <section id="wallet" class="page">
-
   <h2>💰 Wallet</h2>
-
-  <div class="card">
-
-    <h3>Available Balance</h3>
-
-    <div class="price">
-      <span id="walletCoins">1000</span> Coins
-    </div>
-
-    <p>10,000 coins = $1.00</p>
-    <p>Minimum withdrawal: 2,000 coins ($0.20)</p>
-
-    <label>Withdrawal Amount</label>
-    <input
-      type="number"
-      id="withdrawAmount"
-      placeholder="Enter coins"
-      min="2000"
-    >
-
-    <label>Payment Method</label>
-
-    <select id="withdrawMethod">
-      <option>ABA Bank</option>
-      <option>USDT - TON Network</option>
-    </select>
-
-    <button class="full" onclick="requestWithdrawal()">
-      Request Withdrawal
-    </button>
-
-    <p class="muted">
-      Demo only. No real payment is sent.
-    </p>
-
-  </div>
-
+  <div class="card"><h3>App Coins</h3><div class="price"><span id="walletCoins">0</span> Coins</div><p class="muted">Used for quiz rewards and instant Tips/Plan purchases.</p></div>
+  <div class="card"><h3>USD-Coins</h3><div class="price" id="usdWalletBalance">0</div><p>10,000 USD-Coins = $1 USD</p></div>
+  <div class="card"><h3>USDT-Coins</h3><div class="price" id="usdtWalletBalance">0</div><p>10,000 USDT-Coins = 1 USDT</p></div>
+  <div class="card"><h3>Deposit</h3><label>Currency</label><select id="depositCurrency"><option value="USD">USD-Coins</option><option value="USDT">USDT-Coins</option></select><label>Amount in wallet Coins (minimum 10,000)</label><input id="depositAmount" type="number" min="10000" step="1" placeholder="10000"><label>Payment method</label><select id="depositMethod"><option>ABA Bank</option><option>USDT - TON Network</option></select><label>Transaction reference/hash</label><input id="depositReference" placeholder="Enter payment reference"><label>Proof note (optional)</label><input id="depositProof" placeholder="Optional proof URL or note"><button class="full" onclick="submitWalletDeposit()">Submit Deposit for Approval</button><p class="muted">Deposits are credited only after manual admin approval.</p></div>
+  <div class="card"><h3>Withdraw</h3><label>Currency</label><select id="withdrawCurrency"><option value="USD">USD-Coins</option><option value="USDT">USDT-Coins</option></select><label>Amount in wallet Coins (minimum 10,000)</label><input id="walletWithdrawAmount" type="number" min="10000" placeholder="10000"><label>Payment method</label><select id="walletWithdrawMethod"><option>ABA Bank</option><option>USDT - TON Network</option></select><label>Payment details</label><input id="walletWithdrawDetails" placeholder="ABA account or USDT TON wallet"><button class="full" onclick="submitWalletWithdrawal()">Request Withdrawal</button><p class="muted">Withdrawals require manual admin approval. Balance is reserved while pending.</p></div>
+  <div class="card"><h3>Exchange · 0% Fee</h3><p>1 USD-Coin = 1 USDT-Coin. No exchange fee.</p><label>Convert from</label><select id="exchangeFrom"><option value="USD">USD-Coins</option><option value="USDT">USDT-Coins</option></select><label>Convert to</label><select id="exchangeTo"><option value="USDT">USDT-Coins</option><option value="USD">USD-Coins</option></select><label>Amount</label><input id="exchangeAmount" type="number" min="1" placeholder="10000"><button class="full" onclick="exchangeWalletCoins()">Exchange Now</button></div>
+  <div class="card"><h3>Wallet Request History</h3><button class="dark" onclick="loadWalletData()">Refresh Wallet</button><div id="walletRequestHistory" class="muted">Open wallet to load history.</div></div>
 </section>
 
 
@@ -824,7 +776,7 @@ hr {
 // CONFIGURATION
 // ==========================================
 
-const API_URL = "https://khmer-quiz-backend.onrender.com";
+const API_URL = "https://YOUR-RENDER-SERVICE.onrender.com"; // Replace with your Render backend URL
 
 const DEMO_AD_MODE = true;
 const ADSGRAM_BLOCK_ID = "YOUR_ADSGRAM_BLOCK_ID";
@@ -1328,8 +1280,6 @@ function refreshDailyTips() {
 
 function startQuiz(level) {
 
-  alert("Quiz button works! Level: " + level);
-
   refreshDailyTips();
 
   const bank = questionBanks[level];
@@ -1348,7 +1298,7 @@ function startQuiz(level) {
 
   quiz.list = [...bank]
     .sort(() => Math.random() - 0.5)
-    .slice(0, 10);
+    .slice(0,10);
 
   quiz.index = 0;
   quiz.score = 0;
@@ -1367,6 +1317,7 @@ function startQuiz(level) {
   showQuestion();
 
 }
+
 
 function showQuestion() {
 
@@ -1390,14 +1341,7 @@ function showQuestion() {
 
   document.getElementById("quizFeedback").textContent = "";
 
-  const nextButton = document.getElementById("nextButton");
-
-nextButton.disabled = true;
-
-nextButton.textContent =
-  quiz.index === quiz.list.length - 1
-    ? "Finish & Claim Reward"
-    : "Next Question";
+  document.getElementById("nextButton").disabled = true;
 
   document.getElementById("tipButton").disabled =
     availableTips() <= 0;
@@ -1406,14 +1350,14 @@ nextButton.textContent =
 
   list.innerHTML = "";
 
-  q.a.forEach((answer, i) => {
+  q.a.forEach((answer,i) => {
 
     const button = document.createElement("button");
 
     button.className = "answer";
 
     button.textContent =
-      String.fromCharCode(65 + i) + ". " + answer;
+      String.fromCharCode(65+i) + ". " + answer;
 
     button.onclick = () => answerQuestion(i);
 
@@ -1422,6 +1366,7 @@ nextButton.textContent =
   });
 
 }
+
 
 function answerQuestion(index) {
 
@@ -1968,51 +1913,6 @@ async function createStarsInvoice(productCode) {
 // ==========================================
 
 // ==========================================
-// MANUAL ABA / USDT PAYMENTS FOR TIPS + PLANS
-// ==========================================
-
-async function createManualPayment(productCode, method) {
-  if (!authToken) {
-    alert("Open this Mini App inside Telegram and sign in first.");
-    return;
-  }
-  const order = await backendRequest("/api/payments/manual/create", {
-    method: "POST",
-    body: JSON.stringify({ productCode, method })
-  });
-  const details = order.instructions || {};
-  let instructions = `Order: ${order.orderId}\nAmount: ${order.amount} ${order.currency}\n`;
-  if (method === "aba_payway") {
-    instructions += `Pay to: ${details.accountName || "ABA account"}\nAccount: ${details.accountNumber || "Not configured"}\n`;
-    if (details.qrImageUrl) instructions += `QR: ${details.qrImageUrl}\n`;
-  } else {
-    instructions += `Network: TON\nUSDT wallet: ${details.walletAddress || "Not configured"}\n`;
-  }
-  instructions += "\nAfter payment, enter the transaction reference/hash.";
-  alert(instructions);
-  const reference = prompt("Enter your payment transaction reference or hash:");
-  if (!reference) return;
-  const proof = prompt("Optional proof note or image URL (leave blank if none):") || "";
-  const submitted = await backendRequest(`/api/payments/manual/${order.orderId}/submit`, {
-    method: "POST",
-    body: JSON.stringify({ reference, proof })
-  });
-  alert(submitted.message || "Payment submitted for admin review.");
-}
-
-async function buyTipsManual(amount, method) {
-  const codes = {100:"tips_100",150:"tips_150",200:"tips_200"};
-  try { await createManualPayment(codes[amount], method); }
-  catch (error) { alert(error.message); }
-}
-
-async function subscribeManual(name, method) {
-  const codes = {Silver:"silver",Gold:"gold",Diamond:"diamond"};
-  try { await createManualPayment(codes[name], method); }
-  catch (error) { alert(error.message); }
-}
-
-// ==========================================
 // TASK CAMPAIGNS
 // ==========================================
 
@@ -2234,10 +2134,41 @@ initialize();
 // START TELEGRAM BACKEND CONNECTION
 // ==========================================
 
+async function loadWalletData() {
+  if (!authToken) return;
+  try {
+    const [w, r] = await Promise.all([backendRequest("/api/wallet"), backendRequest("/api/wallet/requests")]);
+    document.getElementById("usdWalletBalance").textContent = Number(w.wallet.usdCoins).toLocaleString();
+    document.getElementById("usdtWalletBalance").textContent = Number(w.wallet.usdtCoins).toLocaleString();
+    const host=document.getElementById("walletRequestHistory");
+    host.innerHTML=(r.requests||[]).map(x=>`<p>${x.request_type} · ${Number(x.amount_coins).toLocaleString()} ${x.currency}-Coins · ${x.status}</p>`).join("")||"No wallet requests yet.";
+  } catch(e) { console.error("Wallet load failed",e); }
+}
+async function buyProductWithCoins(productCode) {
+  if(!authToken){alert("Open the app inside Telegram first.");return;}
+  try { const r=await backendRequest("/api/purchases/coins",{method:"POST",body:JSON.stringify({productCode})}); alert(r.message||"Purchase successful."); await refreshAccountFromServer(); }
+  catch(e){alert(e.message);}
+}
+function buyTipsWithCoins(n){return buyProductWithCoins("tips_"+n);}
+function buyPlanWithCoins(name){return buyProductWithCoins(name.toLowerCase());}
+async function submitWalletDeposit(){
+  try{const amount=Number(document.getElementById("depositAmount").value);const r=await backendRequest("/api/wallet/deposit",{method:"POST",body:JSON.stringify({currency:document.getElementById("depositCurrency").value,amount,method:document.getElementById("depositMethod").value,reference:document.getElementById("depositReference").value,proof:document.getElementById("depositProof").value})});alert(r.message);await loadWalletData();}
+  catch(e){alert(e.message);}
+}
+async function submitWalletWithdrawal(){
+  try{const amount=Number(document.getElementById("walletWithdrawAmount").value);const r=await backendRequest("/api/wallet/withdraw",{method:"POST",body:JSON.stringify({currency:document.getElementById("withdrawCurrency").value,amount,method:document.getElementById("walletWithdrawMethod").value,paymentDetails:document.getElementById("walletWithdrawDetails").value})});alert(r.message);await loadWalletData();}
+  catch(e){alert(e.message);}
+}
+async function exchangeWalletCoins(){
+  try{const from=document.getElementById("exchangeFrom").value;const to=document.getElementById("exchangeTo").value;const amount=Number(document.getElementById("exchangeAmount").value);const r=await backendRequest("/api/wallet/exchange",{method:"POST",body:JSON.stringify({from,to,amount})});alert(`Exchange complete. Received ${Number(r.received).toLocaleString()} ${to}-Coins. Fee: 0%.`);await loadWalletData();}
+  catch(e){alert(e.message);}
+}
+
 async function initializeTelegramPayments() {
   try {
     await loginWithTelegram();
     await refreshAccountFromServer();
+    await loadWalletData();
     await loadStarsCatalog();
     await loadMyCampaigns();
     await loadAvailableTasks();
@@ -2258,5 +2189,7 @@ async function initializeTelegramPayments() {
 initializeTelegramPayments();
 
 </script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
