@@ -1328,6 +1328,8 @@ function refreshDailyTips() {
 
 function startQuiz(level) {
 
+  alert("Quiz button works! Level: " + level);
+
   refreshDailyTips();
 
   const bank = questionBanks[level];
@@ -1346,7 +1348,7 @@ function startQuiz(level) {
 
   quiz.list = [...bank]
     .sort(() => Math.random() - 0.5)
-    .slice(0,10);
+    .slice(0, 10);
 
   quiz.index = 0;
   quiz.score = 0;
@@ -1365,7 +1367,6 @@ function startQuiz(level) {
   showQuestion();
 
 }
-
 
 function showQuestion() {
 
@@ -1398,14 +1399,14 @@ function showQuestion() {
 
   list.innerHTML = "";
 
-  q.a.forEach((answer,i) => {
+  q.a.forEach((answer, i) => {
 
     const button = document.createElement("button");
 
     button.className = "answer";
 
     button.textContent =
-      String.fromCharCode(65+i) + ". " + answer;
+      String.fromCharCode(65 + i) + ". " + answer;
 
     button.onclick = () => answerQuestion(i);
 
@@ -1414,7 +1415,6 @@ function showQuestion() {
   });
 
 }
-
 
 function answerQuestion(index) {
 
