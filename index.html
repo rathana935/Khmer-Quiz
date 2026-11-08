@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -313,7 +312,7 @@ hr {
   <div class="card">
     <h3>🎮 Choose Your Difficulty</h3>
     <p class="muted">
-      Complete a quiz to earn coins. Each game contains up to 10 questions.
+      Complete a quiz to earn Coins. Each game contains 10 random global English questions.
     </p>
 
     <button class="full" onclick="startQuiz('easy')">
@@ -374,6 +373,8 @@ hr {
 
     <h3 id="questionText"></h3>
 
+    <p class="muted" style="font-size:11px">Question source: Open Trivia Database (CC BY-SA 4.0).</p>
+
     <div id="answerList"></div>
 
     <p id="quizFeedback"></p>
@@ -421,7 +422,7 @@ hr {
 
     <!-- SECTION 2: DOUBLE REWARD -->
 
-    <div class="reward-section">
+    <div class="reward-section hidden">
 
       <h3>🎬 Section 2: Double Reward</h3>
 
@@ -514,10 +515,26 @@ hr {
     <p id="dailyTipInfo"></p>
   </div>
   <h3>Buy More Tips</h3>
-  <p class="muted">Pay automatically with app Coins or Telegram Stars.</p>
-  <div class="card"><h3>100 Tips</h3><div class="price">$1.00 · 10,000 Coins</div><button onclick="buyTipsWithCoins(100)">Buy with 10,000 Coins</button><button class="dark" onclick="buyStars(100)">Telegram Stars ⭐</button></div>
-  <div class="card"><h3>150 Tips</h3><div class="price">$1.50 · 15,000 Coins</div><button onclick="buyTipsWithCoins(150)">Buy with 15,000 Coins</button><button class="dark" onclick="buyStars(150)">Telegram Stars ⭐</button></div>
-  <div class="card"><h3>200 Tips</h3><div class="price">$2.00 · 20,000 Coins</div><button onclick="buyTipsWithCoins(200)">Buy with 20,000 Coins</button><button class="dark" onclick="buyStars(200)">Telegram Stars ⭐</button></div>
+  <p class="muted">Available payment methods: ABA, Telegram Stars, and USDT (TON).</p>
+  <div class="card">
+    <h3>100 Tips</h3><div class="price">$1.00</div>
+    <button onclick="buyTipsManual(100,'aba_payway')">Pay with ABA</button>
+    <button class="dark" onclick="buyStars(100)">Telegram Stars</button>
+    <button class="dark" onclick="buyTipsManual(100,'usdt_ton')">USDT (TON)</button>
+  </div>
+  <div class="card">
+    <h3>150 Tips</h3><div class="price">$1.50</div>
+    <button onclick="buyTipsManual(150,'aba_payway')">Pay with ABA</button>
+    <button class="dark" onclick="buyStars(150)">Telegram Stars</button>
+    <button class="dark" onclick="buyTipsManual(150,'usdt_ton')">USDT (TON)</button>
+  </div>
+  <div class="card">
+    <h3>200 Tips</h3><div class="price">$2.00</div>
+    <button onclick="buyTipsManual(200,'aba_payway')">Pay with ABA</button>
+    <button class="dark" onclick="buyStars(200)">Telegram Stars</button>
+    <button class="dark" onclick="buyTipsManual(200,'usdt_ton')">USDT (TON)</button>
+  </div>
+  <p class="muted">ABA and USDT payments require transaction-reference submission and admin approval. Configure the corresponding prices and payment wallet details on Render.</p>
 </section>
 
 
@@ -544,7 +561,8 @@ hr {
     <button class="gold full" onclick="subscribe('Silver')">
       Subscribe Silver
     </button>
-    <button class="full" onclick="buyPlanWithCoins('Silver')">Subscribe with 49900 Coins</button>
+    <button class="full" onclick="subscribeManual('Silver','aba_payway')">Pay with ABA</button>
+    <button class="dark full" onclick="subscribeManual('Silver','usdt_ton')">Pay with USDT (TON)</button>
 
   </div>
 
@@ -565,7 +583,8 @@ hr {
     <button class="gold full" onclick="subscribe('Gold')">
       Subscribe Gold
     </button>
-    <button class="full" onclick="buyPlanWithCoins('Gold')">Subscribe with 69900 Coins</button>
+    <button class="full" onclick="subscribeManual('Gold','aba_payway')">Pay with ABA</button>
+    <button class="dark full" onclick="subscribeManual('Gold','usdt_ton')">Pay with USDT (TON)</button>
 
   </div>
 
@@ -586,7 +605,8 @@ hr {
     <button class="gold full" onclick="subscribe('Diamond')">
       Subscribe Diamond
     </button>
-    <button class="full" onclick="buyPlanWithCoins('Diamond')">Subscribe with 99900 Coins</button>
+    <button class="full" onclick="subscribeManual('Diamond','aba_payway')">Pay with ABA</button>
+    <button class="dark full" onclick="subscribeManual('Diamond','usdt_ton')">Pay with USDT (TON)</button>
 
   </div>
 
@@ -693,14 +713,45 @@ hr {
 <!-- ================= WALLET ================= -->
 
 <section id="wallet" class="page">
+
   <h2>💰 Wallet</h2>
-  <div class="card"><h3>App Coins</h3><div class="price"><span id="walletCoins">0</span> Coins</div><p class="muted">Used for quiz rewards and instant Tips/Plan purchases.</p></div>
-  <div class="card"><h3>USD-Coins</h3><div class="price" id="usdWalletBalance">0</div><p>10,000 USD-Coins = $1 USD</p></div>
-  <div class="card"><h3>USDT-Coins</h3><div class="price" id="usdtWalletBalance">0</div><p>10,000 USDT-Coins = 1 USDT</p></div>
-  <div class="card"><h3>Deposit</h3><label>Currency</label><select id="depositCurrency"><option value="USD">USD-Coins</option><option value="USDT">USDT-Coins</option></select><label>Amount in wallet Coins (minimum 10,000)</label><input id="depositAmount" type="number" min="10000" step="1" placeholder="10000"><label>Payment method</label><select id="depositMethod" onchange="loadDepositInstructions()"><option>ABA Bank</option><option>USDT - TON Network</option></select><div id="depositInstructions" class="muted" style="margin:12px 0;padding:12px;border:1px solid #293a55;border-radius:10px">Select a payment method to view deposit instructions.</div><label>Transaction reference/hash</label><input id="depositReference" placeholder="Enter payment reference"><label>Proof note (optional)</label><input id="depositProof" placeholder="Optional proof URL or note"><button class="full" onclick="submitWalletDeposit()">Submit Deposit for Approval</button><p class="muted">Deposits are credited only after manual admin approval.</p></div>
-  <div class="card"><h3>Withdraw</h3><label>Currency</label><select id="withdrawCurrency"><option value="USD">USD-Coins</option><option value="USDT">USDT-Coins</option></select><label>Amount in wallet Coins (minimum 10,000)</label><input id="walletWithdrawAmount" type="number" min="10000" placeholder="10000"><label>Payment method</label><select id="walletWithdrawMethod"><option>ABA Bank</option><option>USDT - TON Network</option></select><label>Payment details</label><input id="walletWithdrawDetails" placeholder="ABA account or USDT TON wallet"><button class="full" onclick="submitWalletWithdrawal()">Request Withdrawal</button><p class="muted">Withdrawals require manual admin approval. Balance is reserved while pending.</p></div>
-  <div class="card"><h3>Exchange · 0% Fee</h3><p>1 USD-Coin = 1 USDT-Coin. No exchange fee.</p><label>Convert from</label><select id="exchangeFrom"><option value="USD">USD-Coins</option><option value="USDT">USDT-Coins</option></select><label>Convert to</label><select id="exchangeTo"><option value="USDT">USDT-Coins</option><option value="USD">USD-Coins</option></select><label>Amount</label><input id="exchangeAmount" type="number" min="1" placeholder="10000"><button class="full" onclick="exchangeWalletCoins()">Exchange Now</button></div>
-  <div class="card"><h3>Wallet Request History</h3><button class="dark" onclick="loadWalletData()">Refresh Wallet</button><div id="walletRequestHistory" class="muted">Open wallet to load history.</div></div>
+
+  <div class="card">
+
+    <h3>Available Balance</h3>
+
+    <div class="price">
+      <span id="walletCoins">1000</span> Coins
+    </div>
+
+    <p>10,000 coins = $1.00</p>
+    <p>Minimum withdrawal: 2,000 coins ($0.20)</p>
+
+    <label>Withdrawal Amount</label>
+    <input
+      type="number"
+      id="withdrawAmount"
+      placeholder="Enter coins"
+      min="2000"
+    >
+
+    <label>Payment Method</label>
+
+    <select id="withdrawMethod">
+      <option>ABA Bank</option>
+      <option>USDT - TON Network</option>
+    </select>
+
+    <button class="full" onclick="requestWithdrawal()">
+      Request Withdrawal
+    </button>
+
+    <p class="muted">
+      Demo only. No real payment is sent.
+    </p>
+
+  </div>
+
 </section>
 
 
@@ -776,7 +827,8 @@ hr {
 // CONFIGURATION
 // ==========================================
 
-const API_URL = "https://khmer-quiz-backend.onrender.com"; 
+const API_URL = "https://khmer-quiz-backend.onrender.com";
+
 const DEMO_AD_MODE = true;
 const ADSGRAM_BLOCK_ID = "YOUR_ADSGRAM_BLOCK_ID";
 
@@ -785,150 +837,11 @@ let starsCatalog = {};
 let paymentBusy = false;
 
 // ==========================================
-// QUESTION BANKS
+// GLOBAL ENGLISH QUESTION BANK
 // ==========================================
-
-// The code supports up to 2,000 questions per difficulty.
-// These are sample questions, not the full 2,000-question datasets.
-
-const questionBanks = {
-
-  easy: [
-
-    {
-      q:"What is the capital city of Cambodia?",
-      a:["Phnom Penh","Siem Reap","Battambang","Kampot"],
-      c:0
-    },
-
-    {
-      q:"In which province is Angkor Wat located?",
-      a:["Kampong Cham","Siem Reap","Kandal","Kep"],
-      c:1
-    },
-
-    {
-      q:"What is the official language of Cambodia?",
-      a:["Thai","English","Khmer","Chinese"],
-      c:2
-    },
-
-    {
-      q:"How many colors are on the Cambodian flag?",
-      a:["Two","Three","Four","Five"],
-      c:1
-    },
-
-    {
-      q:"What is the national currency of Cambodia?",
-      a:["Baht","Riel","Dong","Kip"],
-      c:1
-    }
-
-  ],
-
-  medium: [
-
-    {
-      q:"Which Cambodian city does the Mekong River flow through?",
-      a:["Phnom Penh","Poipet","Kep","Banlung"],
-      c:0
-    },
-
-    {
-      q:"When is Cambodia’s Independence Day?",
-      a:["November 9","January 1","April 13","May 1"],
-      c:0
-    },
-
-    {
-      q:"During which historical period was Angkor Wat built?",
-      a:["Chenla","Angkor","Funan","Longvek"],
-      c:1
-    },
-
-    {
-      q:"What is the name of Cambodia’s largest freshwater lake?",
-      a:["Boeng Kanseng","Tonle Sap","Yeak Laom Lake","Kamping Puoy"],
-      c:1
-    },
-
-    {
-      q:"In which part of Cambodia is Kep located?",
-      a:["Southern","Northern","Eastern","Northwestern"],
-      c:0
-    }
-
-  ],
-
-  hard: [
-
-    {
-      q:"In which century did King Jayavarman VII reign?",
-      a:["10th","11th","12th","14th"],
-      c:2
-    },
-
-    {
-      q:"Which deity was Angkor Wat originally dedicated to?",
-      a:["Brahma","Vishnu","Shiva","Buddha"],
-      c:1
-    },
-
-    {
-      q:"What is Bayon Temple best known for?",
-      a:["Face towers","A large lake","A wooden bridge","Glass walls"],
-      c:0
-    },
-
-    {
-      q:"Which temple is associated with King Suryavarman II?",
-      a:["Angkor Wat","Bayon","Ta Prohm","Banteay Srei"],
-      c:0
-    },
-
-    {
-      q:"Which king built Angkor Thom?",
-      a:["Jayavarman VII","Suryavarman II","Jayavarman II","Indravarman I"],
-      c:0
-    }
-
-  ]
-
-};
-
-
-// Load a question bank from another JavaScript file or admin system.
-// Example: loadQuestionBank("easy", yourQuestionArray)
-
-function loadQuestionBank(level,arr) {
-
-  if (!["easy","medium","hard"].includes(level)) {
-    throw new Error("Invalid difficulty.");
-  }
-
-  if (!Array.isArray(arr) || arr.length > 2000) {
-    throw new Error("Maximum 2,000 questions per difficulty.");
-  }
-
-  const valid = arr.every(q =>
-    q &&
-    typeof q.q === "string" &&
-    Array.isArray(q.a) &&
-    q.a.length === 4 &&
-    Number.isInteger(q.c) &&
-    q.c >= 0 &&
-    q.c <= 3
-  );
-
-  if (!valid) {
-    throw new Error("Invalid question format.");
-  }
-
-  questionBanks[level] = arr;
-
-  alert(level + ": " + arr.length + " questions loaded.");
-}
+// Quiz questions are loaded securely from the backend database.
+// Import 1,000 global English questions per difficulty using
+// global-quiz-import.js. No local sample bank is used.
 
 
 // ==========================================
@@ -1028,6 +941,7 @@ let data = {
 
 let quiz = {
   level:"easy",
+  sessionId:null,
   list:[],
   index:0,
   score:0,
@@ -1277,181 +1191,166 @@ function refreshDailyTips() {
 // QUIZ SYSTEM
 // ==========================================
 
-function startQuiz(level) {
+async function startQuiz(level) {
+
+  if (!['easy','medium','hard'].includes(level)) {
+    alert('Please choose a valid difficulty.');
+    return;
+  }
 
   refreshDailyTips();
 
-  const bank = questionBanks[level];
+  const startButtons = [...document.querySelectorAll('button[onclick^="startQuiz("]')];
+  startButtons.forEach(button => button.disabled = true);
 
-  if (!bank || bank.length === 0) {
-    alert("No questions are available for this difficulty.");
-    return;
+  try {
+    const result = await backendRequest('/api/quiz/start', {
+      method: 'POST',
+      body: JSON.stringify({ level })
+    });
+
+    if (!result.sessionId || !Array.isArray(result.questions) || result.questions.length !== 10) {
+      throw new Error('The server did not return a complete 10-question quiz.');
+    }
+
+    quiz.level = result.level || level;
+    quiz.sessionId = result.sessionId;
+    quiz.list = result.questions.map(q => ({
+      id: String(q.id),
+      q: q.question,
+      a: q.answers,
+      hintIndexes: Array.isArray(q.hintIndexes) ? q.hintIndexes : []
+    }));
+
+    quiz.index = 0;
+    quiz.score = 0;
+    quiz.answered = false;
+    quiz.finished = false;
+    quiz.reward = 0;
+    quizSessionFinished = false;
+
+    document.getElementById('quizCard').classList.remove('hidden');
+    document.getElementById('quizComplete').classList.add('hidden');
+    showPage('game');
+    showQuestion();
+
+  } catch (error) {
+    alert('Unable to start quiz. ' + error.message);
+  } finally {
+    startButtons.forEach(button => button.disabled = false);
   }
-
-  if (bank.length > 2000) {
-    alert("Question bank limit is 2,000.");
-    return;
-  }
-
-  quiz.level = level;
-
-  quiz.list = [...bank]
-    .sort(() => Math.random() - 0.5)
-    .slice(0,10);
-
-  quiz.index = 0;
-  quiz.score = 0;
-  quiz.answered = false;
-  quiz.finished = false;
-  quiz.reward = 0;
-
-  quizSessionFinished = false;
-
-  document.getElementById("quizCard").classList.remove("hidden");
-
-  document.getElementById("quizComplete").classList.add("hidden");
-
-  showPage("game");
-
-  showQuestion();
-
 }
 
 
 function showQuestion() {
 
   const q = quiz.list[quiz.index];
-
   quiz.answered = false;
 
-  document.getElementById("difficulty").textContent =
-    quiz.level.toUpperCase();
+  document.getElementById('difficulty').textContent = quiz.level.toUpperCase();
+  document.getElementById('questionNumber').textContent =
+    (quiz.index + 1) + '/' + quiz.list.length;
+  document.getElementById('potentialReward').textContent =
+    Math.floor(gameBaseReward[quiz.level] * plans[data.membership].game) + ' Coins';
+  document.getElementById('questionText').textContent = q.q;
+  document.getElementById('quizFeedback').textContent = '';
+  document.getElementById('nextButton').disabled = true;
+  document.getElementById('tipButton').disabled = availableTips() <= 0;
 
-  document.getElementById("questionNumber").textContent =
-    (quiz.index + 1) + "/" + quiz.list.length;
+  const list = document.getElementById('answerList');
+  list.innerHTML = '';
 
-  document.getElementById("potentialReward").textContent =
-    Math.floor(
-      gameBaseReward[quiz.level] *
-      plans[data.membership].game
-    ) + " Coins";
-
-  document.getElementById("questionText").textContent = q.q;
-
-  document.getElementById("quizFeedback").textContent = "";
-
-  document.getElementById("nextButton").disabled = true;
-
-  document.getElementById("tipButton").disabled =
-    availableTips() <= 0;
-
-  const list = document.getElementById("answerList");
-
-  list.innerHTML = "";
-
-  q.a.forEach((answer,i) => {
-
-    const button = document.createElement("button");
-
-    button.className = "answer";
-
-    button.textContent =
-      String.fromCharCode(65+i) + ". " + answer;
-
+  q.a.forEach((answer, i) => {
+    const button = document.createElement('button');
+    button.className = 'answer';
+    button.textContent = String.fromCharCode(65 + i) + '. ' + answer;
     button.onclick = () => answerQuestion(i);
-
     list.appendChild(button);
-
   });
-
 }
 
 
-function answerQuestion(index) {
+async function answerQuestion(index) {
 
-  if (quiz.answered || quiz.finished) return;
+  if (quiz.answered || quiz.finished || !quiz.sessionId) return;
 
   quiz.answered = true;
+  const buttons = [...document.querySelectorAll('.answer')];
+  buttons.forEach(button => button.disabled = true);
 
-  const q = quiz.list[quiz.index];
+  try {
+    const q = quiz.list[quiz.index];
+    const result = await backendRequest('/api/quiz/answer', {
+      method: 'POST',
+      body: JSON.stringify({
+        sessionId: quiz.sessionId,
+        questionId: q.id,
+        answerIndex: index
+      })
+    });
 
-  const buttons = [
-    ...document.querySelectorAll(".answer")
-  ];
-
-  buttons.forEach((button,i) => {
-
-    button.disabled = true;
-
-    if (i === q.c) {
-      button.classList.add("correct");
-    } else if (i === index) {
-      button.classList.add("wrong");
+    if (result.correct) {
+      quiz.score++;
+      document.getElementById('quizFeedback').textContent = 'Correct!';
+    } else {
+      document.getElementById('quizFeedback').textContent = 'Incorrect.';
     }
 
-  });
+    buttons.forEach((button, i) => {
+      if (i === result.correctIndex) {
+        button.classList.add('correct');
+      } else if (i === index) {
+        button.classList.add('wrong');
+      }
+    });
 
-  if (index === q.c) {
+    document.getElementById('nextButton').disabled = false;
+    document.getElementById('tipButton').disabled = true;
 
-    quiz.score++;
-
-    document.getElementById("quizFeedback").textContent =
-      "Correct!";
-
-  } else {
-
-    document.getElementById("quizFeedback").textContent =
-      "Incorrect.";
-
+  } catch (error) {
+    quiz.answered = false;
+    buttons.forEach(button => button.disabled = false);
+    alert('Your answer could not be submitted. Please try again. ' + error.message);
   }
-
-  document.getElementById("nextButton").disabled = false;
-
-  document.getElementById("tipButton").disabled = true;
-
 }
 
 
-function useTip() {
+async function useTip() {
 
-  if (
-    quiz.answered ||
-    quiz.finished ||
-    availableTips() <= 0
-  ) return;
+  if (quiz.answered || quiz.finished || availableTips() <= 0) return;
 
   const q = quiz.list[quiz.index];
-
-  const wrongAnswers = [0,1,2,3].filter(i => i !== q.c);
-
-  const remove = wrongAnswers.slice(0,2);
-
-  remove.forEach(i => {
-
-    const button = document.querySelectorAll(".answer")[i];
-
-    button.disabled = true;
-
-    button.textContent = "Removed";
-
-    button.classList.add("removed");
-
-  });
-
-  if (data.dailyTipsRemaining > 0) {
-
-    data.dailyTipsRemaining--;
-
-  } else {
-
-    data.purchasedTips--;
-
+  if (!Array.isArray(q.hintIndexes) || q.hintIndexes.length !== 2) {
+    alert('A hint is not available for this question.');
+    return;
   }
 
-  save();
+  const tipButton = document.getElementById('tipButton');
+  tipButton.disabled = true;
 
-  document.getElementById("tipButton").disabled = true;
+  try {
+    const result = await backendRequest('/api/tips/use', {
+      method: 'POST',
+      body: JSON.stringify({})
+    });
 
+    data.dailyTipsRemaining = Number(result.dailyTips || 0);
+    data.purchasedTips = Number(result.purchasedTips || 0);
+    save();
+
+    q.hintIndexes.forEach(i => {
+      const button = document.querySelectorAll('.answer')[i];
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Removed';
+        button.classList.add('removed');
+      }
+    });
+
+  } catch (error) {
+    tipButton.disabled = false;
+    alert('Unable to use Tip. ' + error.message);
+  }
 }
 
 
@@ -1478,47 +1377,50 @@ function nextQuestion() {
 // QUIZ COMPLETION
 // ==========================================
 
-function completeQuiz() {
+async function completeQuiz() {
 
-  if (quiz.finished) return;
+  if (quiz.finished || !quiz.sessionId) return;
 
   quiz.finished = true;
+  const nextButton = document.getElementById('nextButton');
+  nextButton.disabled = true;
 
-  const reward = Math.floor(
-    gameBaseReward[quiz.level] *
-    plans[data.membership].game
-  );
+  try {
+    const result = await backendRequest('/api/quiz/complete', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId: quiz.sessionId })
+    });
 
-  quiz.reward = reward;
+    if (!result.success) {
+      throw new Error(result.error || 'The server could not complete this quiz.');
+    }
 
-  // Basic reward is credited once here.
-  addCoins(reward);
+    quiz.reward = Number(result.basicReward || 0);
+    quiz.score = Number(result.score || quiz.score);
+    data.coins = result.coins !== undefined ? Number(result.coins) : data.coins;
+    data.games = Number(data.games || 0) + 1;
+    quizSessionFinished = true;
+    save();
 
-  data.games++;
+    document.getElementById('quizCard').classList.add('hidden');
+    document.getElementById('quizComplete').classList.remove('hidden');
+    document.getElementById('finalScore').textContent =
+      'Your score: ' + quiz.score + '/' + (result.totalQuestions || quiz.list.length);
+    document.getElementById('normalReward').textContent =
+      'You earned ' + quiz.reward + ' coins!';
 
-  save();
+    // The backend currently credits only the basic quiz reward.
+    // Hide the old client-side demo ad reward to prevent duplicate coins.
+    const adSection = document.getElementById('watchAdButton')?.closest('.reward-section');
+    if (adSection) adSection.classList.add('hidden');
+    document.getElementById('adMessage').textContent =
+      'Your quiz reward has been credited securely to your account.';
 
-  document.getElementById("quizCard").classList.add("hidden");
-
-  document.getElementById("quizComplete").classList.remove("hidden");
-
-  document.getElementById("finalScore").textContent =
-    "Your score: " + quiz.score + "/" + quiz.list.length;
-
-  document.getElementById("normalReward").textContent =
-    "You earned " + reward + " coins!";
-
-  document.getElementById("watchAdButton").textContent =
-    "▶ Watch Ads — Get +" + reward + " Coins";
-
-  document.getElementById("watchAdButton").disabled = false;
-
-  document.getElementById("watchAdButton").classList.remove("hidden");
-
-  document.getElementById("adMessage").textContent =
-    "Complete one rewarded ad to receive an additional " +
-    reward + " coins.";
-
+  } catch (error) {
+    quiz.finished = false;
+    nextButton.disabled = false;
+    alert('Quiz completion failed. Please try again. ' + error.message);
+  }
 }
 
 
@@ -1644,8 +1546,8 @@ function grantDoubleReward() {
 
 function finishAndReturn() {
 
-  // User chooses the basic reward option.
-  // Do not award the extra ad reward.
+  // The backend has already credited the basic reward.
+  // Returning home does not add any additional coins.
   quizSessionFinished = true;
 
   document.getElementById("quizComplete").classList.add("hidden");
@@ -1912,6 +1814,51 @@ async function createStarsInvoice(productCode) {
 // ==========================================
 
 // ==========================================
+// MANUAL ABA / USDT PAYMENTS FOR TIPS + PLANS
+// ==========================================
+
+async function createManualPayment(productCode, method) {
+  if (!authToken) {
+    alert("Open this Mini App inside Telegram and sign in first.");
+    return;
+  }
+  const order = await backendRequest("/api/payments/manual/create", {
+    method: "POST",
+    body: JSON.stringify({ productCode, method })
+  });
+  const details = order.instructions || {};
+  let instructions = `Order: ${order.orderId}\nAmount: ${order.amount} ${order.currency}\n`;
+  if (method === "aba_payway") {
+    instructions += `Pay to: ${details.accountName || "ABA account"}\nAccount: ${details.accountNumber || "Not configured"}\n`;
+    if (details.qrImageUrl) instructions += `QR: ${details.qrImageUrl}\n`;
+  } else {
+    instructions += `Network: TON\nUSDT wallet: ${details.walletAddress || "Not configured"}\n`;
+  }
+  instructions += "\nAfter payment, enter the transaction reference/hash.";
+  alert(instructions);
+  const reference = prompt("Enter your payment transaction reference or hash:");
+  if (!reference) return;
+  const proof = prompt("Optional proof note or image URL (leave blank if none):") || "";
+  const submitted = await backendRequest(`/api/payments/manual/${order.orderId}/submit`, {
+    method: "POST",
+    body: JSON.stringify({ reference, proof })
+  });
+  alert(submitted.message || "Payment submitted for admin review.");
+}
+
+async function buyTipsManual(amount, method) {
+  const codes = {100:"tips_100",150:"tips_150",200:"tips_200"};
+  try { await createManualPayment(codes[amount], method); }
+  catch (error) { alert(error.message); }
+}
+
+async function subscribeManual(name, method) {
+  const codes = {Silver:"silver",Gold:"gold",Diamond:"diamond"};
+  try { await createManualPayment(codes[name], method); }
+  catch (error) { alert(error.message); }
+}
+
+// ==========================================
 // TASK CAMPAIGNS
 // ==========================================
 
@@ -2133,74 +2080,10 @@ initialize();
 // START TELEGRAM BACKEND CONNECTION
 // ==========================================
 
-async function copyDepositDetail(value) {
-  const text = String(value || "");
-  if (!text) return;
-  try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text);
-    } else {
-      const field = document.createElement("textarea");
-      field.value = text; document.body.appendChild(field); field.select();
-      document.execCommand("copy"); field.remove();
-    }
-    alert("Copied to clipboard.");
-  } catch (e) { alert("Copy failed. Please select and copy this detail manually: " + text); }
-}
-
-async function loadDepositInstructions() {
-  const box = document.getElementById("depositInstructions");
-  if (!box) return;
-  const method = document.getElementById("depositMethod")?.value || "ABA Bank";
-  box.textContent = "Loading payment details…";
-  try {
-    const info = await backendRequest("/api/wallet/deposit-instructions?method=" + encodeURIComponent(method));
-    if (method === "ABA Bank") {
-      box.innerHTML = `<strong>ABA Bank transfer</strong><p>Account name: <strong>${escapeTaskText(info.accountName)}</strong></p><p>Account number: <strong>${escapeTaskText(info.accountNumber)}</strong></p><button type="button" class="dark" onclick='copyDepositDetail(${JSON.stringify(info.accountNumber)})'>Copy ABA account number</button>${info.qrImageUrl ? `<p><img src="${safeTaskUrl(info.qrImageUrl)}" alt="ABA payment QR" style="max-width:220px;width:100%;height:auto;border-radius:8px"></p>` : ""}<p class="muted">Transfer to this account, then enter your bank transaction reference below.</p>`;
-    } else {
-      box.innerHTML = `<strong>USDT deposit · TON Network only</strong><p>Wallet address:</p><p style="overflow-wrap:anywhere"><strong>${escapeTaskText(info.walletAddress)}</strong></p><button type="button" class="dark" onclick='copyDepositDetail(${JSON.stringify(info.walletAddress)})'>Copy USDT wallet address</button><p class="muted">Send USDT using the TON network only. Do not send through another network. Enter the transaction hash below.</p>`;
-    }
-  } catch (e) {
-    box.textContent = e.message || "Unable to load deposit instructions. Please contact support.";
-  }
-}
-
-async function loadWalletData() {
-  if (!authToken) return;
-  try {
-    const [w, r] = await Promise.all([backendRequest("/api/wallet"), backendRequest("/api/wallet/requests")]);
-    loadDepositInstructions();
-    document.getElementById("usdWalletBalance").textContent = Number(w.wallet.usdCoins).toLocaleString();
-    document.getElementById("usdtWalletBalance").textContent = Number(w.wallet.usdtCoins).toLocaleString();
-    const host=document.getElementById("walletRequestHistory");
-    host.innerHTML=(r.requests||[]).map(x=>`<p>${x.request_type} · ${Number(x.amount_coins).toLocaleString()} ${x.currency}-Coins · ${x.status}</p>`).join("")||"No wallet requests yet.";
-  } catch(e) { console.error("Wallet load failed",e); }
-}
-async function buyProductWithCoins(productCode) {
-  if(!authToken){alert("Open the app inside Telegram first.");return;}
-  try { const r=await backendRequest("/api/purchases/coins",{method:"POST",body:JSON.stringify({productCode})}); alert(r.message||"Purchase successful."); await refreshAccountFromServer(); }
-  catch(e){alert(e.message);}
-}
-function buyTipsWithCoins(n){return buyProductWithCoins("tips_"+n);}
-function buyPlanWithCoins(name){return buyProductWithCoins(name.toLowerCase());}
-async function submitWalletDeposit(){
-  try{const amount=Number(document.getElementById("depositAmount").value);const r=await backendRequest("/api/wallet/deposit",{method:"POST",body:JSON.stringify({currency:document.getElementById("depositCurrency").value,amount,method:document.getElementById("depositMethod").value,reference:document.getElementById("depositReference").value,proof:document.getElementById("depositProof").value})});alert(r.message);await loadWalletData();}
-  catch(e){alert(e.message);}
-}
-async function submitWalletWithdrawal(){
-  try{const amount=Number(document.getElementById("walletWithdrawAmount").value);const r=await backendRequest("/api/wallet/withdraw",{method:"POST",body:JSON.stringify({currency:document.getElementById("withdrawCurrency").value,amount,method:document.getElementById("walletWithdrawMethod").value,paymentDetails:document.getElementById("walletWithdrawDetails").value})});alert(r.message);await loadWalletData();}
-  catch(e){alert(e.message);}
-}
-async function exchangeWalletCoins(){
-  try{const from=document.getElementById("exchangeFrom").value;const to=document.getElementById("exchangeTo").value;const amount=Number(document.getElementById("exchangeAmount").value);const r=await backendRequest("/api/wallet/exchange",{method:"POST",body:JSON.stringify({from,to,amount})});alert(`Exchange complete. Received ${Number(r.received).toLocaleString()} ${to}-Coins. Fee: 0%.`);await loadWalletData();}
-  catch(e){alert(e.message);}
-}
-
 async function initializeTelegramPayments() {
   try {
     await loginWithTelegram();
     await refreshAccountFromServer();
-    await loadWalletData();
     await loadStarsCatalog();
     await loadMyCampaigns();
     await loadAvailableTasks();
