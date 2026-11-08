@@ -2250,10 +2250,39 @@ async function initializeTelegramPayments() {
   }
 }
 
+<!-- Load Telegram Web App SDK FIRST -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<!-- Your main application JavaScript -->
+<script>
+
+// Keep all your existing JavaScript code here,
+// including initialize() and initializeTelegramPayments().
+
+initialize();
+
+async function initializeTelegramPayments() {
+  try {
+    await loginWithTelegram();
+    await refreshAccountFromServer();
+    await loadStarsCatalog();
+
+    console.log("Telegram backend connected.");
+    console.log("Telegram Stars catalog loaded.");
+
+  } catch (error) {
+    console.error("Backend connection error:", error);
+
+    alert(
+      "Unable to connect to your account.\n\n" +
+      error.message
+    );
+  }
+}
+
 initializeTelegramPayments();
 
 </script>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="script.js"></script>
+
 </body>
 </html>
