@@ -111,7 +111,7 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
 
  <div class="card">
   <h3>🚰 Faucet</h3>
-  <p class="muted">A separate free-coin feature remains available. Claim timing and rewards will be verified by the server.</p>
+  <p class="muted">A separate free-coin feature remains available. Claim timing and rewards will be verified by the backend.</p>
   <button class="dark" onclick="go('faucet')">Open Faucet</button>
  </div>
 
@@ -215,12 +215,17 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
  <h2>🚰 Faucet</h2>
 
  <div class="card">
-  <h3>Claim Free Coins</h3>
+  <div class="notice success">DEMO MODE ONLY — Test coins are stored in this browser. They have no cash value and cannot be withdrawn, exchanged or used for campaigns.</div>
+  <h3>Claim Free Demo Coins</h3>
+  <div class="feature"><span>Demo balance</span><strong><span id="faucetBalance">20.00</span> coins</strong></div>
   <div class="feature"><span>Base reward</span><strong>5 coins</strong></div>
   <div class="feature"><span>Claim interval</span><strong>5 minutes</strong></div>
-  <div class="feature"><span>Membership multiplier</span><strong>Applied by server</strong></div>
-  <p class="muted">Your claim history and reward multiplier will be checked by the backend.</p>
-  <button class="green full" disabled>Faucet backend connection — Step 5</button>
+  <div class="feature"><span>Total demo claims</span><strong id="faucetClaims">0</strong></div>
+  <div class="feature"><span>Demo reward multiplier</span><strong id="faucetMultiplier">×1.00</strong></div>
+  <p id="faucetStatus" class="muted" aria-live="polite">You can claim your demo reward now.</p>
+  <button id="faucetClaimButton" class="green full" onclick="claimDemoFaucet()">Claim 5 Demo Coins</button>
+  <button class="dark full" onclick="resetDemoFaucet()">Reset Demo Faucet</button>
+  <p class="fine">The demo multiplier increases by 0.01 for every 100 demo claims. This browser preview is not connected to Telegram authentication or the live backend.</p>
  </div>
 
 </section>
@@ -577,27 +582,324 @@ if (tg) {
  tg.expand();
 }
 
+// ============================================
+// TEMPORARY DEMO FAUCET — BROWSER ONLY
+// These test coins are not real earnings.
+// ============================================
+
+const DEMO_FAUCET_BALANCE_KEY = 'khmerEarnDemoFaucetBalance';
+const DEMO_FAUCET_LAST_CLAIM_KEY = 'khmerEarnDemoFaucetLastClaim';
+const DEMO_FAUCET_CLAIM_COUNT_KEY = 'khmerEarnDemoFaucetClaimCount';
+
+const DEMO_FAUCET_COOLDOWN_MS = 5 * 60 * 1000;
+const DEMO_FAUCET_BASE_REWARD = 5;
+
+
+// Load saved demo number
+function readDemoFaucetNumber(key, fallback) {
+ const raw = localStorage.getItem(key);
+
+ if (raw === null) {
+  return fallback;
+ }
+
+ const value = Number(raw);
+
+ return Number.isFinite(value) && value >= 0
+  ? value
+  : fallback;
+}
+
+
+// Get saved demo Faucet data
+function getDemoFaucetState() {
+ return {
+  balance: readDemoFaucetNumber(
+   DEMO_FAUCET_BALANCE_KEY,
+   20
+  ),
+
+  lastClaim: readDemoFaucetNumber(
+   DEMO_FAUCET_LAST_CLAIM_KEY,
+   0
+  ),
+
+  claims: Math.floor(
+   readDemoFaucetNumber(
+    DEMO_FAUCET_CLAIM_COUNT_KEY,
+    0
+   )
+  )
+ };
+}
+
+
+// Save demo Faucet data
+function saveDemoFaucetState(state) {
+ localStorage.setItem(
+  DEMO_FAUCET_BALANCE_KEY,
+  state.balance.toFixed(2)
+ );
+
+ localStorage.setItem(
+  DEMO_FAUCET_LAST_CLAIM_KEY,
+  String(state.lastClaim)
+ );
+
+ localStorage.setItem(
+  DEMO_FAUCET_CLAIM_COUNT_KEY,
+  String(state.claims)
+ );
+}
+
+
+// Update Faucet display and countdown
+function renderDemoFaucet() {
+ const state = getDemoFaucetState();
+
+ const multiplier =
+  1 + Math.floor(state.claims / 100) * 0.01;
+
+ const remaining = Math.max(
+  0,
+  state.lastClaim +
+  DEMO_FAUCET_COOLDOWN_MS -
+  Date.now()
+ );
+
+ const balanceText = state.balance.toFixed(2);
+
+
+ // Update demo balance displays
+ [
+  'coinBalance',
+  'walletCoins',
+  'faucetBalance'
+ ].forEach(id => {
+  const element = document.getElementById(id);
+
+  if (element) {
+   element.textContent = balanceText;
+  }
+ });
+
+
+ const homeCoins = document.getElementById('homeCoins');
+
+ if (homeCoins) {
+  homeCoins.textContent = `${balanceText} coins (demo)`;
+ }
+
+
+ // Update claim count and multiplier
+ const claimsElement = document.getElementById(
+  'faucetClaims'
+ );
+
+ const multiplierElement = document.getElementById(
+  'faucetMultiplier'
+ );
+
+ const button = document.getElementById(
+  'faucetClaimButton'
+ );
+
+ const status = document.getElementById(
+  'faucetStatus'
+ );
+
+
+ if (claimsElement) {
+  claimsElement.textContent = String(state.claims);
+ }
+
+ if (multiplierElement) {
+  multiplierElement.textContent =
+   `×${multiplier.toFixed(2)}`;
+ }
+
+
+ // Update countdown
+ if (button && status) {
+
+  button.disabled = remaining > 0;
+
+  if (remaining > 0) {
+
+   const minutes = Math.floor(
+    remaining / 60000
+   );
+
+   const seconds = Math.ceil(
+    (remaining % 60000) / 1000
+   );
+
+   const countdown =
+    `${minutes}:${String(seconds).padStart(2, '0')}`;
+
+   status.textContent =
+    `Next demo claim available in ${countdown}.`;
+
+   button.textContent =
+    `Please wait ${countdown}`;
+
+  } else {
+
+   const reward =
+    DEMO_FAUCET_BASE_REWARD * multiplier;
+
+   status.textContent =
+    `Ready! Your next demo reward is ${reward.toFixed(2)} coins.`;
+
+   button.textContent =
+    `Claim ${reward.toFixed(2)} Demo Coins`;
+
+  }
+ }
+}
+
+
+// Claim demo Faucet
+function claimDemoFaucet() {
+ const state = getDemoFaucetState();
+
+ const remaining =
+  state.lastClaim +
+  DEMO_FAUCET_COOLDOWN_MS -
+  Date.now();
+
+
+ // Prevent claims before cooldown ends
+ if (remaining > 0) {
+  renderDemoFaucet();
+  return;
+ }
+
+
+ const multiplier =
+  1 + Math.floor(state.claims / 100) * 0.01;
+
+ const reward =
+  DEMO_FAUCET_BASE_REWARD * multiplier;
+
+
+ // Add demo coins
+ state.balance = Number(
+  (state.balance + reward).toFixed(2)
+ );
+
+ state.claims += 1;
+ state.lastClaim = Date.now();
+
+
+ try {
+
+  saveDemoFaucetState(state);
+  renderDemoFaucet();
+
+  const status = document.getElementById(
+   'faucetStatus'
+  );
+
+  if (status) {
+   status.textContent =
+    `Success! ${reward.toFixed(2)} demo coins added to your browser test balance.`;
+  }
+
+ } catch (error) {
+
+  alert(
+   'Your browser could not save the demo balance. ' +
+   'Please enable browser storage and try again.'
+  );
+
+ }
+
+}
+
+
+// Reset demo Faucet
+function resetDemoFaucet() {
+
+ const confirmed = confirm(
+  'Reset the demo balance to 20 coins and clear the demo claim cooldown?'
+ );
+
+ if (!confirmed) {
+  return;
+ }
+
+ localStorage.removeItem(
+  DEMO_FAUCET_BALANCE_KEY
+ );
+
+ localStorage.removeItem(
+  DEMO_FAUCET_LAST_CLAIM_KEY
+ );
+
+ localStorage.removeItem(
+  DEMO_FAUCET_CLAIM_COUNT_KEY
+ );
+
+ renderDemoFaucet();
+
+}
+
+
+// Load saved demo Faucet values when the app opens
+try {
+ renderDemoFaucet();
+ window.setInterval(renderDemoFaucet, 1000);
+} catch (error) {
+ console.warn(
+  'Demo Faucet could not initialize:',
+  error
+ );
+}
+
+
+// Navigate between pages
 function go(id,btn) {
- document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+ document.querySelectorAll('.page').forEach(
+  p => p.classList.remove('active')
+ );
 
  const page = document.getElementById(id);
- if (page) page.classList.add('active');
 
- document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+ if (page) {
+  page.classList.add('active');
+ }
+
+ document.querySelectorAll('nav button').forEach(
+  b => b.classList.remove('active')
+ );
 
  if (btn && btn.closest('nav')) {
+
   btn.classList.add('active');
+
  } else {
-  const navBtn = [...document.querySelectorAll('nav button')].find(
+
+  const navBtn = [
+   ...document.querySelectorAll('nav button')
+  ].find(
    b => b.getAttribute('onclick')?.includes("'" + id + "'")
   );
 
-  if (navBtn) navBtn.classList.add('active');
+  if (navBtn) {
+   navBtn.classList.add('active');
+  }
+
  }
 
- window.scrollTo({top:0,behavior:'smooth'});
+ window.scrollTo({
+  top:0,
+  behavior:'smooth'
+ });
 }
 
+
+// Task category tabs
 function taskTab(type,btn) {
  document.querySelectorAll('#tasks .tabs button').forEach(
   b => b.classList.remove('selected')
@@ -613,6 +915,8 @@ function taskTab(type,btn) {
  });
 }
 
+
+// Wallet tabs
 function walletTab(id,btn) {
  document.querySelectorAll('#wallet .tabs button').forEach(
   b => b.classList.remove('selected')
@@ -629,32 +933,53 @@ function walletTab(id,btn) {
  ).classList.add('active');
 }
 
+
+// Campaign form fields
 function campaignFields() {
  const type = document.getElementById('campaignType').value;
 
  document.getElementById('ptcFields').classList.toggle(
-  'hidden',type !== 'ptc'
+  'hidden',
+  type !== 'ptc'
  );
 
  document.getElementById('videoFields').classList.toggle(
-  'hidden',type !== 'video'
+  'hidden',
+  type !== 'video'
  );
 
  document.getElementById('jobFields').classList.toggle(
-  'hidden',type !== 'job'
+  'hidden',
+  type !== 'job'
  );
 
  document.getElementById('shortlinkFields').classList.toggle(
-  'hidden',type !== 'shortlink'
+  'hidden',
+  type !== 'shortlink'
  );
 }
 
+
+// Campaign preview
 function previewCampaign() {
  const type = document.getElementById('campaignType').value;
- const title = document.getElementById('campaignTitle').value.trim();
- const budget = Number(document.getElementById('campaignBudget').value);
- const quantity = Number(document.getElementById('campaignQuantity').value);
- const out = document.getElementById('campaignPreview');
+
+ const title = document.getElementById(
+  'campaignTitle'
+ ).value.trim();
+
+ const budget = Number(
+  document.getElementById('campaignBudget').value
+ );
+
+ const quantity = Number(
+  document.getElementById('campaignQuantity').value
+ );
+
+ const out = document.getElementById(
+  'campaignPreview'
+ );
+
 
  if (
   !title ||
@@ -663,14 +988,20 @@ function previewCampaign() {
   !Number.isInteger(quantity) ||
   quantity < 1
  ) {
-  out.textContent = 'Please enter a campaign title, a positive USD budget and a whole-number quantity.';
+
+  out.textContent =
+   'Please enter a campaign title, a positive USD budget and a whole-number quantity.';
+
   return;
  }
+
 
  out.textContent =
   `Preview only — ${title} (${type.toUpperCase()}): campaign budget $${budget.toFixed(2)}; quantity ${quantity}. Final campaign setup is subject to backend validation. No campaign has been created or charged.`;
 }
 
+
+// Switch account role
 function setRole(role,btn) {
  document.querySelectorAll('#profile .tabs button').forEach(
   b => b.classList.remove('selected')
