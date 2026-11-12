@@ -215,17 +215,55 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
  <h2>🚰 Faucet</h2>
 
  <div class="card">
-  <div class="notice success">DEMO MODE ONLY — Test coins are stored in this browser. They have no cash value and cannot be withdrawn, exchanged or used for campaigns.</div>
-  <h3>Claim Free Demo Coins</h3>
-  <div class="feature"><span>Demo balance</span><strong><span id="faucetBalance">20.00</span> coins</strong></div>
-  <div class="feature"><span>Base reward</span><strong>5 coins</strong></div>
-  <div class="feature"><span>Claim interval</span><strong>5 minutes</strong></div>
-  <div class="feature"><span>Total demo claims</span><strong id="faucetClaims">0</strong></div>
-  <div class="feature"><span>Demo reward multiplier</span><strong id="faucetMultiplier">×1.00</strong></div>
-  <p id="faucetStatus" class="muted" aria-live="polite">You can claim your demo reward now.</p>
-  <button id="faucetClaimButton" class="green full" onclick="claimDemoFaucet()">Claim 5 Demo Coins</button>
-  <button class="dark full" onclick="resetDemoFaucet()">Reset Demo Faucet</button>
-  <p class="fine">The demo multiplier increases by 0.01 for every 100 demo claims. This browser preview is not connected to Telegram authentication or the live backend.</p>
+  <h3>Claim Free Coins</h3>
+
+  <div class="feature">
+   <span>Demo Faucet Balance</span>
+   <strong><span id="faucetBalance">20.00</span> coins</strong>
+  </div>
+
+  <div class="feature">
+   <span>Base reward</span>
+   <strong>5 coins</strong>
+  </div>
+
+  <div class="feature">
+   <span>Claim interval</span>
+   <strong>5 minutes</strong>
+  </div>
+
+  <div class="feature">
+   <span>Total claims</span>
+   <strong id="faucetClaims">0</strong>
+  </div>
+
+  <div class="feature">
+   <span>Reward multiplier</span>
+   <strong id="faucetMultiplier">×1.00</strong>
+  </div>
+
+  <div class="feature">
+   <span>Next claim</span>
+   <strong id="faucetCountdown">Ready</strong>
+  </div>
+
+  <button
+   id="faucetClaimBtn"
+   class="green full"
+   onclick="claimDemoFaucet()">
+   Claim 5 Coins
+  </button>
+
+  <button
+   class="dark full"
+   onclick="resetDemoFaucet()">
+   Reset Demo Faucet
+  </button>
+
+  <div class="notice">
+   DEMO MODE ONLY: Coins are saved in this browser and are not real,
+   withdrawable worker earnings. This is not connected to the backend.
+  </div>
  </div>
 
 </section>
