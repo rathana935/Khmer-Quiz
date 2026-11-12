@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0b1120">
 <title>Khmer Earn Marketplace</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <style>
 :root{--bg:#0b1120;--panel:#151f32;--panel2:#202e45;--text:#f5f7ff;--muted:#9ba9c0;--gold:#f6c453;--blue:#61a9ff;--green:#37d69a;--red:#f16b6b;--border:#293953}
 *{box-sizing:border-box}
@@ -33,8 +34,8 @@ button.dark{background:var(--panel2);color:white;border:1px solid var(--border)}
 button.full{width:100%;margin:7px 0}
 button:disabled{opacity:.45;cursor:not-allowed}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.stat{background:var(--panel2);padding:13px;border-radius:10px;color:var(--muted);font-size:13px}
-.stat strong{display:block;color:var(--gold);font-size:20px;margin-top:6px}
+.stat{background:var(--panel2);padding:13px;border-radius:10px;color:var(--muted);font-size:13px;min-width:0}
+.stat strong{display:block;color:var(--gold);font-size:20px;margin-top:6px;overflow-wrap:anywhere}
 .row{display:flex;justify-content:space-between;gap:10px;align-items:center}
 .price{font-size:25px;color:var(--gold);font-weight:bold;margin:10px 0}
 .pill{display:inline-block;padding:5px 9px;border-radius:20px;background:#263b61;color:#d4e1ff;font-size:11px;margin:2px}
@@ -43,12 +44,13 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .task-card .grow{flex:1;min-width:0}
 .reward{color:var(--gold);font-weight:bold;white-space:nowrap}
 .feature{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
-.feature strong{color:var(--gold)}
+.feature strong{color:var(--gold);text-align:right}
 label{display:block;font-size:13px;color:#d4deee;margin:11px 0 5px}
 input,select,textarea{width:100%;padding:12px;margin:5px 0 10px;background:#0d1728;color:white;border:1px solid var(--border);border-radius:8px;font:inherit}
 textarea{min-height:90px;resize:vertical}
 .notice{padding:11px 12px;border-radius:9px;background:#332b19;border:1px solid #6c592e;color:#f5d98c;font-size:12px;line-height:1.5;margin:10px 0}
 .success{background:#12372d;border-color:#246b52;color:#a8f1d3}
+.error{background:#3b2027;border-color:#763b48;color:#ffc0c8}
 .tabs{display:flex;gap:7px;overflow-x:auto;padding:3px 0 8px}
 .tabs button{white-space:nowrap;font-size:12px;padding:9px 12px}
 .tabs button.selected{background:var(--gold);color:#18202d}
@@ -60,6 +62,12 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
 .subpage{display:none}
 .subpage.active{display:block}
 .fine{font-size:11px;color:var(--muted)}
+.status{font-size:11px;padding:5px 8px;border-radius:20px;background:#263b61;color:#d4e1ff}
+.empty{text-align:center;padding:22px 10px;color:var(--muted);font-size:13px}
+.proof-box{background:#0d1728;border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:10px}
+.proof-box label{margin-top:5px}
+a{color:var(--blue);overflow-wrap:anywhere}
+@media(max-width:380px){header strong{font-size:13px}.grid{gap:6px}.stat{padding:10px}.stat strong{font-size:17px}nav button{font-size:9px}}
 </style>
 </head>
 
@@ -67,10 +75,14 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
 
 <header>
  <strong>🇰🇭 Khmer Earn Marketplace</strong>
- <span class="balance">🪙 <span id="coinBalance">20</span></span>
+ <span class="balance">🪙 <span id="coinBalance">0</span></span>
 </header>
 
 <main>
+
+<div id="connectionNotice" class="notice">
+Connecting to your Telegram account...
+</div>
 
 <!-- HOME -->
 <section id="home" class="page active">
@@ -85,9 +97,9 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
  <h2>Welcome to Khmer Earn Marketplace</h2>
 
  <div class="grid">
-  <div class="stat">Worker balance<strong id="homeCoins">20 coins</strong></div>
+  <div class="stat">Worker balance<strong id="homeCoins">0 coins</strong></div>
   <div class="stat">Membership<strong id="homePlan">Free</strong></div>
-  <div class="stat">Available tasks<strong>Browse tasks</strong></div>
+  <div class="stat">Available tasks<strong id="homeTaskCount">Loading...</strong></div>
   <div class="stat">Account mode<strong>Worker + Advertiser</strong></div>
  </div>
 
@@ -96,7 +108,7 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
    <h3>Earn by completing tasks</h3>
    <span class="pill">Worker</span>
   </div>
-  <p class="muted">Choose an available task, follow its instructions and submit valid completion. Rewards are credited only after server verification.</p>
+  <p class="muted">Choose an available task, follow its instructions and submit valid completion. Rewards are credited only after approval.</p>
   <button class="full" onclick="go('tasks')">Browse Available Tasks</button>
  </div>
 
@@ -105,13 +117,13 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
    <h3>Promote your business</h3>
    <span class="pill">Advertiser</span>
   </div>
-  <p class="muted">Create PTC, video or job campaigns with a USD budget and track their progress.</p>
+  <p class="muted">Create PTC, video, shortlink or micro-job campaigns and track their progress.</p>
   <button class="full gold" onclick="go('advertise')">Create an Advertising Campaign</button>
  </div>
 
  <div class="card">
   <h3>🚰 Faucet</h3>
-  <p class="muted">A separate free-coin feature remains available. Claim timing and rewards will be verified by the backend.</p>
+  <p class="muted">Faucet rewards are separate from marketplace task earnings and must be verified by the backend.</p>
   <button class="dark" onclick="go('faucet')">Open Faucet</button>
  </div>
 
@@ -121,85 +133,26 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
 <section id="tasks" class="page">
 
  <h2>Available Tasks</h2>
- <p class="muted">Select a task category. Task availability and final rewards will come from the backend.</p>
+ <p class="muted">Choose a task and submit the required proof after completing it.</p>
 
- <div class="tabs">
+ <div class="tabs" id="taskTabs">
   <button class="selected" onclick="taskTab('all',this)">All Tasks</button>
   <button onclick="taskTab('ptc',this)">PTC</button>
   <button onclick="taskTab('video',this)">Videos</button>
-  <button onclick="taskTab('jobs',this)">Jobs</button>
+  <button onclick="taskTab('job',this)">Jobs</button>
   <button onclick="taskTab('shortlink',this)">Shortlinks</button>
  </div>
 
  <div id="taskList">
-
-  <div class="card task-item" data-type="ptc">
-   <div class="task-card">
-    <div class="task-icon">🌐</div>
-    <div class="grow">
-     <div class="row">
-      <h3>PTC Website Visit</h3>
-      <span class="reward">2.25–11.25 coins</span>
-     </div>
-     <p class="muted">Visit an advertiser's website and remain on the page for the required time.</p>
-     <span class="pill">5–60 seconds</span>
-     <span class="pill">PTC</span>
-    </div>
-   </div>
-   <button class="dark full" disabled>Tasks will load from server</button>
-  </div>
-
-  <div class="card task-item" data-type="video">
-   <div class="task-card">
-    <div class="task-icon">▶️</div>
-    <div class="grow">
-     <div class="row">
-      <h3>Watch a Video</h3>
-      <span class="reward">5.25–18 coins</span>
-     </div>
-     <p class="muted">Watch the required video duration and complete the server's verification.</p>
-     <span class="pill">15–120 seconds</span>
-     <span class="pill">Video</span>
-    </div>
-   </div>
-   <button class="dark full" disabled>Tasks will load from server</button>
-  </div>
-
-  <div class="card task-item" data-type="jobs">
-   <div class="task-card">
-    <div class="task-icon">🧰</div>
-    <div class="grow">
-     <div class="row">
-      <h3>Micro Jobs</h3>
-      <span class="reward">Varies by job</span>
-     </div>
-     <p class="muted">Complete a task such as social media, website, app or content review work. Submit the requested proof.</p>
-     <span class="pill">Easy / Medium / Hard</span>
-     <span class="pill">Proof review</span>
-    </div>
-   </div>
-   <button class="dark full" disabled>Jobs will load from server</button>
-  </div>
-
-  <div class="card task-item" data-type="shortlink">
-   <div class="task-card">
-    <div class="task-icon">🔗</div>
-    <div class="grow">
-     <div class="row">
-      <h3>Shortlink Visit</h3>
-      <span class="reward">Advertiser-defined reward</span>
-     </div>
-     <p class="muted">Open an advertiser shortlink, complete its redirect steps and return for server-side verification.</p>
-     <span class="pill">Shortlink</span>
-     <span class="pill">Completion verification</span>
-    </div>
-   </div>
-   <button class="dark full" disabled>Shortlink tasks will load from server</button>
-  </div>
-
+  <div class="empty">Loading available tasks...</div>
  </div>
 
- <div class="notice">Preview stage: these sample cards are for layout only. They do not create real tasks or pay rewards yet.</div>
+ <div class="card">
+  <h3>My Task Submissions</h3>
+  <p class="muted">Check the status of your claimed tasks and submitted proof.</p>
+  <button class="dark full" onclick="loadMyClaims()">Refresh My Submissions</button>
+  <div id="myClaimsList"><div class="empty">Loading your submissions...</div></div>
+ </div>
 
 </section>
 
@@ -215,59 +168,11 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
  <h2>🚰 Faucet</h2>
 
  <div class="card">
-  <h3>Claim Free Coins</h3>
-
-  <div class="feature">
-   <span>Demo Faucet Balance</span>
-   <strong><span id="faucetBalance">20.00</span> coins</strong>
-  </div>
-
-  <div class="feature">
-   <span>Base reward</span>
-   <strong>5 coins</strong>
-  </div>
-
-  <div class="feature">
-   <span>Claim interval</span>
-   <strong>5 minutes</strong>
-  </div>
-
-  <div class="feature">
-   <span>Total claims</span>
-   <strong id="faucetClaims">0</strong>
-  </div>
-
-  <div class="feature">
-   <span>Reward multiplier</span>
-   <strong id="faucetMultiplier">×1.00</strong>
-  </div>
-
-  <div class="feature">
- <span>Next claim</span>
- <strong id="faucetCountdown">Ready</strong>
-</div>
-
-<p id="faucetStatus" class="muted">
- Your demo Faucet is ready.
-</p>
-
-  <button
-   id="faucetClaimBtn"
-   class="green full"
-   onclick="claimDemoFaucet()">
-   Claim 5 Coins
-  </button>
-
-  <button
-   class="dark full"
-   onclick="resetDemoFaucet()">
-   Reset Demo Faucet
-  </button>
-
-  <div class="notice">
-   DEMO MODE ONLY: Coins are saved in this browser and are not real,
-   withdrawable worker earnings. This is not connected to the backend.
-  </div>
+  <h3>Faucet</h3>
+  <p class="muted">Faucet claims are not simulated in this version. The backend must verify claim timing, limits and rewards.</p>
+  <div class="notice">Your marketplace worker balance will not be increased by browser-only demo coins.</div>
+  <button class="dark full" onclick="showMessage('faucetMessage','Faucet backend integration is not enabled in this frontend build.','notice')">Check Faucet Status</button>
+  <div id="faucetMessage"></div>
  </div>
 
 </section>
@@ -276,17 +181,16 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
 <section id="advertise" class="page">
 
  <h2>Advertiser Center</h2>
- <p class="muted">Use your account's Advertiser role to create campaigns. Campaign funds are separate from your withdrawable worker earnings.</p>
+ <p class="muted">Create campaigns and review submissions from workers. Campaign funds are separate from worker earnings.</p>
 
  <div class="grid">
-  <div class="stat">Campaign wallet<strong>$0.00</strong></div>
-  <div class="stat">Active campaigns<strong>0</strong></div>
-  <div class="stat">Pending review<strong>0</strong></div>
-  <div class="stat">Remaining budget<strong>$0.00</strong></div>
+  <div class="stat">Campaign wallet<strong id="advertiserWallet">$0.00</strong></div>
+  <div class="stat">My campaigns<strong id="myCampaignCount">0</strong></div>
+  <div class="stat">Pending submissions<strong id="pendingSubmissionCount">0</strong></div>
+  <div class="stat">Campaign status<strong id="advertiserStatus">Loading...</strong></div>
  </div>
 
  <div class="card">
-
   <h3>Create a Campaign</h3>
 
   <label for="campaignType">Campaign type</label>
@@ -297,7 +201,7 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
    <option value="shortlink">Shortlink</option>
   </select>
 
-  <label>Campaign title</label>
+  <label for="campaignTitle">Campaign title</label>
   <input id="campaignTitle" type="text" maxlength="100" placeholder="Enter campaign title">
 
   <div id="ptcFields">
@@ -359,10 +263,10 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
    </select>
 
    <label>Reward per completed job (coins)</label>
-   <input id="jobReward" type="number" min="1" placeholder="Enter worker reward">
+   <input id="jobReward" type="number" min="1" step="0.01" placeholder="Enter worker reward">
 
    <label>Total job slots</label>
-   <input id="jobSlots" type="number" min="1" placeholder="Number of workers">
+   <input id="jobSlots" type="number" min="1" step="1" placeholder="Number of workers">
   </div>
 
   <div id="shortlinkFields" class="hidden">
@@ -373,35 +277,49 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
    <input id="shortlinkUrl" type="url" placeholder="https://example.com">
 
    <label>Reward per completed shortlink (coins)</label>
-   <input id="shortlinkReward" type="number" min="1" placeholder="Enter reward per completion">
+   <input id="shortlinkReward" type="number" min="1" step="0.01" placeholder="Enter reward per completion">
 
    <label>Total shortlink slots</label>
-   <input id="shortlinkSlots" type="number" min="1" placeholder="Number of completions">
+   <input id="shortlinkSlots" type="number" min="1" step="1" placeholder="Number of completions">
   </div>
 
   <label>Campaign quantity</label>
-  <input id="campaignQuantity" type="number" min="1" value="100">
+  <input id="campaignQuantity" type="number" min="1" step="1" value="100">
 
   <label>Daily limit (0 = unlimited)</label>
-  <input id="campaignDaily" type="number" min="0" value="0">
+  <input id="campaignDaily" type="number" min="0" step="1" value="0">
 
   <label>Campaign budget (USD)</label>
-  <input id="campaignBudget" type="number" min="1" step="0.01" placeholder="e.g. 10.00">
+  <input id="campaignBudget" type="number" min="0.01" step="0.01" placeholder="e.g. 10.00">
 
   <button class="gold full" onclick="previewCampaign()">Preview Campaign Details</button>
-
   <p id="campaignPreview" class="muted" aria-live="polite"></p>
 
-  <button class="full" disabled>Submit for Admin Review — Backend Step</button>
+  <button id="createCampaignBtn" class="full" onclick="createCampaign()">Submit Campaign for Admin Review</button>
+  <div id="campaignMessage"></div>
 
+  <div class="notice">Campaigns may require administrator approval and verified campaign funding before workers can see them. The backend validates the budget and campaign settings.</div>
  </div>
 
  <div class="card">
   <h3>My Campaigns</h3>
-  <p class="muted">Your draft, pending, active, paused and completed campaigns will appear here after backend integration.</p>
-  <div class="feature"><span>Draft</span><strong>0</strong></div>
-  <div class="feature"><span>Pending approval</span><strong>0</strong></div>
-  <div class="feature"><span>Active</span><strong>0</strong></div>
+  <button class="dark full" onclick="loadAdvertiserData()">Refresh Campaigns</button>
+  <div id="myCampaignsList"><div class="empty">Loading your campaigns...</div></div>
+ </div>
+
+ <div class="card">
+  <h3>Worker Submissions</h3>
+  <p class="muted">Review proof submitted for your campaigns. Approving a valid submission triggers the worker reward through the backend.</p>
+
+  <div class="tabs" id="submissionTabs">
+   <button class="selected" onclick="submissionTab('submitted',this)">Pending</button>
+   <button onclick="submissionTab('approved',this)">Approved</button>
+   <button onclick="submissionTab('rejected',this)">Rejected</button>
+   <button onclick="submissionTab('all',this)">All</button>
+  </div>
+
+  <button class="dark full" onclick="loadSubmissions()">Refresh Submissions</button>
+  <div id="submissionsList"><div class="empty">Loading submissions...</div></div>
  </div>
 
 </section>
@@ -413,10 +331,9 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
 
  <div class="card">
   <h3>Worker Earnings Wallet</h3>
-  <div class="price"><span id="walletCoins">20</span> Coins</div>
+  <div class="price"><span id="walletCoins">0</span> Coins</div>
   <p class="muted">10,000 coins = $1.00 · Minimum withdrawal: 2,000 coins ($0.20)</p>
-
-  <div class="notice">Worker earnings are separate from advertiser campaign funds. Only approved, withdrawable earnings can be withdrawn.</div>
+  <div class="notice">Only approved worker earnings are shown here. Advertiser campaign funds are kept separate.</div>
 
   <div class="tabs">
    <button class="selected" onclick="walletTab('withdraw',this)">Withdraw</button>
@@ -425,49 +342,39 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
   </div>
 
   <div id="walletWithdraw" class="subpage active">
+   <p class="muted">Withdrawal requests require a connected and verified payment backend.</p>
    <label>Withdrawal amount (coins)</label>
    <input type="number" min="2000" placeholder="Minimum 2,000 coins">
-
    <label>Payment method</label>
-   <select>
-    <option>ABA Bank</option>
-    <option>USDT · TON Network</option>
-   </select>
-
-   <button class="full" disabled>Request Withdrawal — Backend Step</button>
+   <select><option>ABA Bank</option><option>USDT · TON Network</option></select>
+   <button class="full" disabled>Withdrawal backend not connected</button>
   </div>
 
   <div id="walletDeposit" class="subpage">
-   <p class="muted">Deposit funds to your personal wallet using an available verified payment method.</p>
-
+   <p class="muted">Deposit funds to your account using an available verified payment method.</p>
    <label>Deposit amount (USD)</label>
    <input type="number" min="1" step="0.01" placeholder="e.g. 5.00">
-
    <label>Payment method</label>
    <select>
     <option>ABA Bank · Manual review</option>
     <option>USDT · TON · Manual review</option>
-    <option>Telegram Stars · Server verified</option>
+    <option>Telegram Stars</option>
    </select>
-
-   <button class="full" disabled>Create Deposit — Backend Step</button>
+   <button class="full" disabled>Deposit backend not connected</button>
   </div>
 
   <div id="walletExchange" class="subpage">
-   <p class="muted">Exchange eligible wallet value according to the platform's current conversion rules.</p>
-
+   <p class="muted">Exchange features require backend validation.</p>
    <label>Coins to exchange</label>
    <input type="number" min="1" placeholder="Enter coins">
-
-   <button class="full" disabled>Exchange — Backend Step</button>
+   <button class="full" disabled>Exchange backend not connected</button>
   </div>
-
  </div>
 
  <div class="card">
   <h3>Advertiser Campaign Wallet</h3>
-  <div class="price">$0.00</div>
-  <p class="muted">This separate balance funds campaigns. It is not part of worker earnings and cannot be withdrawn as task income.</p>
+  <div class="price" id="walletAdvertiser">$0.00</div>
+  <p class="muted">This separate balance funds campaigns. It is not worker earnings and cannot be withdrawn as task income.</p>
   <button class="dark full" onclick="go('advertise')">Manage Campaign Budget</button>
  </div>
 
@@ -475,138 +382,86 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
 
 <!-- PLANS -->
 <section id="plans" class="page">
-
  <h2>👑 Membership Plans</h2>
-
- <p class="muted">Membership benefits shown below are your requested plan settings. Faucet limits and referral rewards must also be enforced by the backend before subscriptions go live.</p>
+ <p class="muted">Membership benefits are displayed for information. Subscribe only after the payment provider has been connected and verified.</p>
 
  <div class="card">
-  <span class="tag">FREE</span>
-  <h3>🆓 Free</h3>
-  <div class="price">Forever</div>
+  <span class="tag">FREE</span><h3>🆓 Free</h3><div class="price">Forever</div>
   <ul>
    <li>Faucet multiplier ×1</li>
    <li>Daily Faucet Limit: Not specified</li>
    <li>Referral commission 10%</li>
-   <li>Referral bonus 200 coins per successful invite</li>
+   <li>Referral bonus 200 coins</li>
   </ul>
-  <button class="full" disabled>Current / Free Plan</button>
+  <button class="full" disabled>Free Plan</button>
  </div>
 
  <div class="card">
-  <span class="tag">BRONZE</span>
-  <h3>🥉 Bronze</h3>
-  <div class="price">$2.99 / month</div>
-  <ul>
-   <li>Faucet multiplier ×1.6</li>
-   <li>Daily Faucet Limit 160 claims</li>
-   <li>Referral commission 15%</li>
-   <li>Referral bonus 200 coins per successful invite</li>
-  </ul>
-  <button class="full" disabled>Subscribe — Payment integration step</button>
+  <span class="tag">BRONZE</span><h3>🥉 Bronze</h3><div class="price">$2.99 / month</div>
+  <ul><li>Faucet multiplier ×1.6</li><li>160 daily claims</li><li>15% referral commission</li><li>200 coin referral bonus</li></ul>
+  <button class="full" disabled>Payment integration required</button>
  </div>
 
  <div class="card">
-  <span class="tag">SILVER</span>
-  <h3>🥈 Silver</h3>
-  <div class="price">$5.99 / month</div>
-  <ul>
-   <li>Faucet multiplier ×2</li>
-   <li>Daily Faucet Limit 200 claims</li>
-   <li>Referral commission 20%</li>
-   <li>Referral bonus 250 coins per successful invite</li>
-  </ul>
-  <button class="full" disabled>Subscribe — Payment integration step</button>
+  <span class="tag">SILVER</span><h3>🥈 Silver</h3><div class="price">$5.99 / month</div>
+  <ul><li>Faucet multiplier ×2</li><li>200 daily claims</li><li>20% referral commission</li><li>250 coin referral bonus</li></ul>
+  <button class="full" disabled>Payment integration required</button>
  </div>
 
  <div class="card">
-  <span class="tag">GOLD</span>
-  <h3>🥇 Gold</h3>
-  <div class="price">$9.99 / month</div>
-  <ul>
-   <li>Faucet multiplier ×5</li>
-   <li>Daily Faucet Limit 250 claims</li>
-   <li>Referral commission 25%</li>
-   <li>Referral bonus 300 coins per successful invite</li>
-  </ul>
-  <button class="full" disabled>Subscribe — Payment integration step</button>
+  <span class="tag">GOLD</span><h3>🥇 Gold</h3><div class="price">$9.99 / month</div>
+  <ul><li>Faucet multiplier ×5</li><li>250 daily claims</li><li>25% referral commission</li><li>300 coin referral bonus</li></ul>
+  <button class="full" disabled>Payment integration required</button>
  </div>
 
  <div class="card">
-  <span class="tag">VIP</span>
-  <h3>💎 VIP</h3>
-  <div class="price">$16.99 / month</div>
-  <ul>
-   <li>Faucet multiplier ×7</li>
-   <li>Daily Faucet Limit 288 claims</li>
-   <li>Referral commission 30%</li>
-   <li>Referral bonus 350 coins per successful invite</li>
-  </ul>
-  <button class="full" disabled>Subscribe — Payment integration step</button>
+  <span class="tag">VIP</span><h3>💎 VIP</h3><div class="price">$16.99 / month</div>
+  <ul><li>Faucet multiplier ×7</li><li>288 daily claims</li><li>30% referral commission</li><li>350 coin referral bonus</li></ul>
+  <button class="full" disabled>Payment integration required</button>
  </div>
-
- <p class="muted">A successful invite and eligible referral earnings will be verified by the backend. Membership does not guarantee earnings or bypass task verification.</p>
-
 </section>
 
 <!-- INVITE -->
 <section id="invite" class="page">
-
  <h2>👥 Invite Friends</h2>
-
  <div class="card">
   <h3>Referral Program</h3>
-  <p class="muted">Invite friends and earn eligible referral commissions based on your membership. Commission rules will be calculated by the backend on verified worker earnings only.</p>
-
-  <div class="feature">
-   <span>Free commission</span>
-   <strong>10%</strong>
-  </div>
-
-  <div class="feature">
-   <span>Free referral bonus</span>
-   <strong>200 coins</strong>
-  </div>
-
-  <p class="muted">Bronze 15% · Silver 20% · Gold 25% · VIP 30%. Successful referral bonuses: 200 / 250 / 300 / 350 coins for Bronze / Silver / Gold / VIP.</p>
-
-  <button class="dark full" disabled>Copy Referral Link — Backend Step</button>
+  <p class="muted">Referral commissions are calculated by the backend on eligible verified earnings.</p>
+  <div class="feature"><span>Free commission</span><strong>10%</strong></div>
+  <div class="feature"><span>Free referral bonus</span><strong>200 coins</strong></div>
+  <p class="muted">Bronze 15% · Silver 20% · Gold 25% · VIP 30%.</p>
+  <button class="dark full" disabled>Referral backend not connected</button>
  </div>
-
 </section>
 
 <!-- PROFILE -->
 <section id="profile" class="page">
-
  <h2>Profile & Account Mode</h2>
 
  <div class="card">
   <h3>One Telegram Account · Two Roles</h3>
-  <p class="muted">Use the same account to complete tasks as a Worker and create campaigns as an Advertiser.</p>
-
+  <p class="muted">Use the same Telegram account to complete tasks as a Worker and create campaigns as an Advertiser.</p>
   <div class="tabs">
    <button class="selected" onclick="setRole('worker',this)">Worker Mode</button>
    <button onclick="setRole('advertiser',this)">Advertiser Mode</button>
   </div>
-
   <p id="roleDescription" class="muted">Worker mode: browse tasks, submit proof and view approved earnings.</p>
  </div>
 
  <div class="card">
   <h3>Account Information</h3>
-  <p class="muted">Telegram profile and membership information will be loaded securely after authentication is connected.</p>
-  <div class="feature"><span>Current plan</span><strong>Free</strong></div>
+  <div class="feature"><span>Telegram user</span><strong id="profileName">Loading...</strong></div>
+  <div class="feature"><span>Current plan</span><strong id="profilePlan">Free</strong></div>
   <div class="feature"><span>Account roles</span><strong>Worker + Advertiser</strong></div>
+  <div class="feature"><span>Authentication</span><strong id="authStatus">Checking...</strong></div>
  </div>
 
  <button class="dark full" onclick="go('plans')">View Membership Plans</button>
  <button class="dark full" onclick="go('invite')">Invite Friends</button>
-
 </section>
 
 </main>
 
-<!-- BOTTOM NAVIGATION -->
 <nav>
  <button class="active" onclick="go('home',this)"><span>🏠</span>Home</button>
  <button onclick="go('tasks',this)"><span>📋</span>Tasks</button>
@@ -617,442 +472,971 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
 </nav>
 
 <script>
+// ============================================
+// CONFIGURATION
+// ============================================
+
+const API_URL = "https://khmer-quiz-backend.onrender.com";
 const tg = window.Telegram?.WebApp;
 
+let authToken = null;
+let currentUser = null;
+let currentTaskFilter = "all";
+let currentSubmissionFilter = "submitted";
+let taskCache = [];
+let claimCache = [];
+let campaignCache = [];
+let submissionCache = [];
+let requestBusy = false;
+
 if (tg) {
- tg.ready();
- tg.expand();
+  tg.ready();
+  tg.expand();
 }
 
 // ============================================
-// TEMPORARY DEMO FAUCET — BROWSER ONLY
-// These test coins are not real earnings.
+// GENERAL HELPERS
 // ============================================
 
-const DEMO_FAUCET_BALANCE_KEY = 'khmerEarnDemoFaucetBalance';
-const DEMO_FAUCET_LAST_CLAIM_KEY = 'khmerEarnDemoFaucetLastClaim';
-const DEMO_FAUCET_CLAIM_COUNT_KEY = 'khmerEarnDemoFaucetClaimCount';
-
-const DEMO_FAUCET_COOLDOWN_MS = 5 * 60 * 1000;
-const DEMO_FAUCET_BASE_REWARD = 5;
-
-
-// Load saved demo number
-function readDemoFaucetNumber(key, fallback) {
- const raw = localStorage.getItem(key);
-
- if (raw === null) {
-  return fallback;
- }
-
- const value = Number(raw);
-
- return Number.isFinite(value) && value >= 0
-  ? value
-  : fallback;
+function $(id) {
+  return document.getElementById(id);
 }
 
-
-// Get saved demo Faucet data
-function getDemoFaucetState() {
- return {
-  balance: readDemoFaucetNumber(
-   DEMO_FAUCET_BALANCE_KEY,
-   20
-  ),
-
-  lastClaim: readDemoFaucetNumber(
-   DEMO_FAUCET_LAST_CLAIM_KEY,
-   0
-  ),
-
-  claims: Math.floor(
-   readDemoFaucetNumber(
-    DEMO_FAUCET_CLAIM_COUNT_KEY,
-    0
-   )
-  )
- };
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
 }
 
-
-// Save demo Faucet data
-function saveDemoFaucetState(state) {
- localStorage.setItem(
-  DEMO_FAUCET_BALANCE_KEY,
-  state.balance.toFixed(2)
- );
-
- localStorage.setItem(
-  DEMO_FAUCET_LAST_CLAIM_KEY,
-  String(state.lastClaim)
- );
-
- localStorage.setItem(
-  DEMO_FAUCET_CLAIM_COUNT_KEY,
-  String(state.claims)
- );
+function showMessage(id, message, type = "notice") {
+  const element = $(id);
+  if (!element) return;
+  element.className = type;
+  element.textContent = message;
 }
 
+function formatCoins(value) {
+  const number = Number(value || 0);
+  return Number.isFinite(number)
+    ? number.toLocaleString(undefined, {maximumFractionDigits: 2})
+    : "0";
+}
 
-// Update Faucet display and countdown
-function renderDemoFaucet() {
- const state = getDemoFaucetState();
+function formatUSD(value) {
+  const number = Number(value || 0);
+  return Number.isFinite(number) ? "$" + number.toFixed(2) : "$0.00";
+}
 
- const multiplier =
-  1 + Math.floor(state.claims / 100) * 0.01;
+function extractArray(data, keys = []) {
+  if (Array.isArray(data)) return data;
 
- const remaining = Math.max(
-  0,
-  state.lastClaim +
-  DEMO_FAUCET_COOLDOWN_MS -
-  Date.now()
- );
-
- const balanceText = state.balance.toFixed(2);
-
-
- // Update demo balance displays
-[
-  'faucetBalance'
-].forEach(id => {
-  const element = document.getElementById(id);
-
-  if (element) {
-   element.textContent = balanceText;
+  for (const key of keys) {
+    if (Array.isArray(data?.[key])) return data[key];
+    if (Array.isArray(data?.data?.[key])) return data.data[key];
   }
- });
 
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
+}
 
- const homeCoins = document.getElementById('homeCoins');
+function getErrorMessage(data, fallback) {
+  return data?.message || data?.error || data?.details || fallback;
+}
 
- if (homeCoins) {
-  homeCoins.textContent = `${balanceText} coins (demo)`;
- }
+async function apiRequest(path, options = {}) {
+  if (!authToken) {
+    throw new Error("Your Telegram account is not authenticated. Open this app inside Telegram.");
+  }
 
+  const headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + authToken,
+    ...(options.headers || {})
+  };
 
- // Update claim count and multiplier
- const claimsElement = document.getElementById(
-  'faucetClaims'
- );
+  const response = await fetch(API_URL + path, {
+    ...options,
+    headers
+  });
 
- const multiplierElement = document.getElementById(
-  'faucetMultiplier'
- );
+  let data = {};
+  try {
+    data = await response.json();
+  } catch {
+    data = {};
+  }
 
- const button = document.getElementById('faucetClaimBtn');
+  if (!response.ok || data.success === false) {
+    throw new Error(getErrorMessage(data, `Request failed (${response.status})`));
+  }
 
- const status = document.getElementById(
-  'faucetStatus'
- );
+  return data;
+}
 
+// ============================================
+// TELEGRAM AUTHENTICATION
+// ============================================
 
- if (claimsElement) {
-  claimsElement.textContent = String(state.claims);
- }
+async function authenticateTelegram() {
+  const notice = $("connectionNotice");
 
- if (multiplierElement) {
-  multiplierElement.textContent =
-   `×${multiplier.toFixed(2)}`;
- }
+  if (!tg || !tg.initData) {
+    showMessage(
+      "connectionNotice",
+      "Open this Mini App from your Telegram bot. Browser preview does not provide Telegram authentication.",
+      "error"
+    );
+    $("authStatus").textContent = "Not authenticated";
+    return false;
+  }
 
+  try {
+    notice.textContent = "Authenticating your Telegram account...";
 
- // Update countdown
- if (button && status) {
+    const response = await fetch(API_URL + "/api/auth/telegram", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({initData: tg.initData})
+    });
 
-  button.disabled = remaining > 0;
+    const data = await response.json();
 
-  if (remaining > 0) {
+    if (!response.ok || data.success === false) {
+      throw new Error(getErrorMessage(data, "Telegram authentication failed."));
+    }
 
-   const minutes = Math.floor(
-    remaining / 60000
-   );
+    authToken = data.token || data.accessToken || data.data?.token;
 
-   const seconds = Math.ceil(
-    (remaining % 60000) / 1000
-   );
+    if (!authToken) {
+      throw new Error("The backend did not return an authentication token.");
+    }
 
-   const countdown =
-    `${minutes}:${String(seconds).padStart(2, '0')}`;
+    $("authStatus").textContent = "Authenticated";
+    showMessage("connectionNotice", "Connected to your Telegram account.", "success");
 
-   status.textContent =
-    `Next demo claim available in ${countdown}.`;
+    await refreshAll();
+    return true;
 
-   button.textContent =
-    `Please wait ${countdown}`;
+  } catch (error) {
+    console.error("Authentication error:", error);
+    showMessage("connectionNotice", error.message, "error");
+    $("authStatus").textContent = "Authentication failed";
+    return false;
+  }
+}
 
+// ============================================
+// LOAD USER PROFILE AND BALANCES
+// ============================================
+
+async function loadProfile() {
+  const data = await apiRequest("/api/me");
+  currentUser = data.user || data.data?.user || data.data || data;
+
+  // Use marketplace worker earnings fields only.
+  // Do not use the old legacy users.coins field.
+  const workerBalance =
+    currentUser.workerEarnings ??
+    currentUser.availableCoins ??
+    currentUser.workerBalance ??
+    currentUser.worker_balance ??
+    0;
+
+  const plan =
+    currentUser.planName ||
+    currentUser.membership ||
+    currentUser.plan ||
+    "Free";
+
+  $("coinBalance").textContent = formatCoins(workerBalance);
+  $("homeCoins").textContent = formatCoins(workerBalance) + " coins";
+  $("walletCoins").textContent = formatCoins(workerBalance);
+  $("homePlan").textContent = String(plan);
+  $("profilePlan").textContent = String(plan);
+
+  const firstName =
+    currentUser.firstName ||
+    currentUser.first_name ||
+    currentUser.username ||
+    currentUser.telegramId ||
+    currentUser.telegram_id ||
+    "Telegram User";
+
+  $("profileName").textContent = String(firstName);
+}
+
+// ============================================
+// TASK LIST
+// ============================================
+
+function taskType(task) {
+  const type = String(
+    task.type || task.campaignType || task.campaign_type || ""
+  ).toLowerCase();
+
+  if (type === "job" || type === "jobs") return "job";
+  if (type === "shortlink") return "shortlink";
+  if (type === "video") return "video";
+  return "ptc";
+}
+
+function taskTitle(task) {
+  return task.title || task.campaignTitle || task.campaign_title || "Marketplace Task";
+}
+
+function taskReward(task) {
+  return task.rewardCoins ??
+    task.reward_coins ??
+    task.rewardPerTaskCoins ??
+    task.reward_per_task_coins ??
+    task.workerReward ??
+    0;
+}
+
+function taskId(task) {
+  return task.id ?? task.campaignId ?? task.campaign_id;
+}
+
+function taskDescription(task) {
+  return task.description ||
+    task.instructions ||
+    task.jobDescription ||
+    task.job_description ||
+    "Follow the advertiser's instructions and submit the required proof.";
+}
+
+function taskIcon(type) {
+  return {
+    ptc: "🌐",
+    video: "▶️",
+    job: "🧰",
+    shortlink: "🔗"
+  }[type] || "📋";
+}
+
+async function loadTasks() {
+  const container = $("taskList");
+  container.innerHTML = '<div class="empty">Loading tasks...</div>';
+
+  const data = await apiRequest("/api/tasks");
+  taskCache = extractArray(data, ["tasks", "campaigns", "items"]);
+
+  $("homeTaskCount").textContent = String(taskCache.length);
+
+  renderTasks();
+}
+
+function renderTasks() {
+  const container = $("taskList");
+
+  const filtered = taskCache.filter(task => {
+    return currentTaskFilter === "all" ||
+      taskType(task) === currentTaskFilter;
+  });
+
+  if (!filtered.length) {
+    container.innerHTML = '<div class="empty">No available tasks in this category right now.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(task => {
+    const type = taskType(task);
+    const id = taskId(task);
+    const reward = taskReward(task);
+    const title = taskTitle(task);
+    const description = taskDescription(task);
+    const slots = task.remainingSlots ??
+      task.remaining_slots ??
+      task.availableSlots ??
+      task.available_slots;
+
+    return `
+      <div class="card">
+        <div class="task-card">
+          <div class="task-icon">${taskIcon(type)}</div>
+          <div class="grow">
+            <div class="row">
+              <h3>${escapeHTML(title)}</h3>
+              <span class="reward">${formatCoins(reward)} coins</span>
+            </div>
+            <p class="muted">${escapeHTML(description)}</p>
+            <span class="pill">${escapeHTML(type.toUpperCase())}</span>
+            ${slots !== undefined ? `<span class="pill">${escapeHTML(slots)} slots left</span>` : ""}
+          </div>
+        </div>
+        <button class="full" onclick="claimTask('${escapeHTML(id)}')">Claim Task</button>
+      </div>
+    `;
+  }).join("");
+}
+
+function taskTab(type, button) {
+  currentTaskFilter = type;
+
+  document.querySelectorAll("#taskTabs button").forEach(item => {
+    item.classList.remove("selected");
+  });
+
+  button.classList.add("selected");
+  renderTasks();
+}
+
+// ============================================
+// CLAIM TASK
+// ============================================
+
+async function claimTask(id) {
+  if (!id) {
+    alert("Task ID is missing.");
+    return;
+  }
+
+  if (!confirm("Claim this task?")) return;
+
+  try {
+    const data = await apiRequest(
+      "/api/tasks/" + encodeURIComponent(id) + "/claim",
+      {method: "POST", body: JSON.stringify({})}
+    );
+
+    alert(data.message || "Task claimed successfully. Please complete it and submit your proof.");
+
+    await loadTasks();
+    await loadMyClaims();
+
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+// ============================================
+// WORKER CLAIMS AND PROOF SUBMISSION
+// ============================================
+
+function claimStatus(claim) {
+  return String(claim.status || "claimed").toLowerCase();
+}
+
+function claimIdentifier(claim) {
+  return claim.id ?? claim.claimId ?? claim.claim_id;
+}
+
+async function loadMyClaims() {
+  const container = $("myClaimsList");
+  container.innerHTML = '<div class="empty">Loading your task history...</div>';
+
+  try {
+    const data = await apiRequest("/api/tasks/my-claims");
+    claimCache = extractArray(data, ["claims", "tasks", "items"]);
+    renderMyClaims();
+  } catch (error) {
+    container.innerHTML = `<div class="notice error">${escapeHTML(error.message)}</div>`;
+  }
+}
+
+function renderMyClaims() {
+  const container = $("myClaimsList");
+
+  if (!claimCache.length) {
+    container.innerHTML = '<div class="empty">You have not claimed any tasks yet.</div>';
+    return;
+  }
+
+  container.innerHTML = claimCache.map(claim => {
+    const id = claimIdentifier(claim);
+    const status = claimStatus(claim);
+    const title = claim.title ||
+      claim.campaignTitle ||
+      claim.campaign_title ||
+      "Claimed Task";
+
+    const reason = claim.rejectionReason ||
+      claim.rejection_reason ||
+      "";
+
+    const verification = String(
+      claim.verificationType ||
+      claim.verification_type ||
+      "text"
+    ).toLowerCase();
+
+    const targetUrl = claim.targetUrl ||
+      claim.target_url ||
+      claim.url ||
+      "";
+
+    let proofForm = "";
+
+    if (status === "claimed") {
+      if (verification === "screenshot") {
+        proofForm = `
+          <div class="notice">
+            Screenshot proof is not enabled in this build. Please contact support or wait until secure screenshot upload is configured.
+          </div>
+        `;
+      } else {
+        proofForm = `
+          <div class="proof-box">
+            <h3>Submit Your Proof</h3>
+            ${verification === "link" ? `
+              <label>Proof URL</label>
+              <input id="proofUrl_${escapeHTML(id)}" type="url" placeholder="https://example.com/proof">
+            ` : `
+              <label>Proof text</label>
+              <textarea id="proofText_${escapeHTML(id)}" placeholder="Enter your completion proof"></textarea>
+            `}
+            <button class="green full" onclick="submitTaskProof('${escapeHTML(id)}','${escapeHTML(verification)}')">Submit for Advertiser Review</button>
+          </div>
+        `;
+      }
+    }
+
+    return `
+      <div class="card">
+        <div class="row">
+          <h3>${escapeHTML(title)}</h3>
+          <span class="status">${escapeHTML(status.toUpperCase())}</span>
+        </div>
+        <p class="muted">Reward: ${formatCoins(taskReward(claim))} coins</p>
+        ${targetUrl ? `<p class="muted">Task URL: <a href="${escapeHTML(targetUrl)}" target="_blank" rel="noopener noreferrer">Open task</a></p>` : ""}
+        ${reason ? `<div class="notice error">Rejection reason: ${escapeHTML(reason)}</div>` : ""}
+        ${proofForm}
+      </div>
+    `;
+  }).join("");
+}
+
+async function submitTaskProof(claimId, verification) {
+  let body = {};
+
+  if (verification === "link") {
+    const proofUrl = $("proofUrl_" + claimId)?.value.trim();
+
+    if (!proofUrl) {
+      alert("Please enter your proof URL.");
+      return;
+    }
+
+    try {
+      new URL(proofUrl);
+    } catch {
+      alert("Please enter a valid URL.");
+      return;
+    }
+
+    body.proofUrl = proofUrl;
   } else {
+    const proofText = $("proofText_" + claimId)?.value.trim();
 
-   const reward =
-    DEMO_FAUCET_BASE_REWARD * multiplier;
+    if (!proofText) {
+      alert("Please enter your proof text.");
+      return;
+    }
 
-   status.textContent =
-    `Ready! Your next demo reward is ${reward.toFixed(2)} coins.`;
-
-   button.textContent =
-    `Claim ${reward.toFixed(2)} Demo Coins`;
-
-  }
- }
-}
-
-
-// Claim demo Faucet
-function claimDemoFaucet() {
- const state = getDemoFaucetState();
-
- const remaining =
-  state.lastClaim +
-  DEMO_FAUCET_COOLDOWN_MS -
-  Date.now();
-
-
- // Prevent claims before cooldown ends
- if (remaining > 0) {
-  renderDemoFaucet();
-  return;
- }
-
-
- const multiplier =
-  1 + Math.floor(state.claims / 100) * 0.01;
-
- const reward =
-  DEMO_FAUCET_BASE_REWARD * multiplier;
-
-
- // Add demo coins
- state.balance = Number(
-  (state.balance + reward).toFixed(2)
- );
-
- state.claims += 1;
- state.lastClaim = Date.now();
-
-
- try {
-
-  saveDemoFaucetState(state);
-  renderDemoFaucet();
-
-  const status = document.getElementById(
-   'faucetStatus'
-  );
-
-  if (status) {
-   status.textContent =
-    `Success! ${reward.toFixed(2)} demo coins added to your browser test balance.`;
+    body.proofText = proofText;
   }
 
- } catch (error) {
+  try {
+    const data = await apiRequest(
+      "/api/tasks/" + encodeURIComponent(claimId) + "/submit",
+      {method: "POST", body: JSON.stringify(body)}
+    );
 
-  alert(
-   'Your browser could not save the demo balance. ' +
-   'Please enable browser storage and try again.'
-  );
+    alert(data.message || "Your proof has been submitted for review.");
+    await loadMyClaims();
 
- }
-
-}
-
-
-// Reset demo Faucet
-function resetDemoFaucet() {
-
- const confirmed = confirm(
-  'Reset the demo balance to 20 coins and clear the demo claim cooldown?'
- );
-
- if (!confirmed) {
-  return;
- }
-
- localStorage.removeItem(
-  DEMO_FAUCET_BALANCE_KEY
- );
-
- localStorage.removeItem(
-  DEMO_FAUCET_LAST_CLAIM_KEY
- );
-
- localStorage.removeItem(
-  DEMO_FAUCET_CLAIM_COUNT_KEY
- );
-
- renderDemoFaucet();
-
-}
-
-
-// Load saved demo Faucet values when the app opens
-try {
- renderDemoFaucet();
- window.setInterval(renderDemoFaucet, 1000);
-} catch (error) {
- console.warn(
-  'Demo Faucet could not initialize:',
-  error
- );
-}
-
-
-// Navigate between pages
-function go(id,btn) {
- document.querySelectorAll('.page').forEach(
-  p => p.classList.remove('active')
- );
-
- const page = document.getElementById(id);
-
- if (page) {
-  page.classList.add('active');
- }
-
- document.querySelectorAll('nav button').forEach(
-  b => b.classList.remove('active')
- );
-
- if (btn && btn.closest('nav')) {
-
-  btn.classList.add('active');
-
- } else {
-
-  const navBtn = [
-   ...document.querySelectorAll('nav button')
-  ].find(
-   b => b.getAttribute('onclick')?.includes("'" + id + "'")
-  );
-
-  if (navBtn) {
-   navBtn.classList.add('active');
+  } catch (error) {
+    alert(error.message);
   }
-
- }
-
- window.scrollTo({
-  top:0,
-  behavior:'smooth'
- });
 }
 
+// ============================================
+// CAMPAIGN FORM
+// ============================================
 
-// Task category tabs
-function taskTab(type,btn) {
- document.querySelectorAll('#tasks .tabs button').forEach(
-  b => b.classList.remove('selected')
- );
-
- btn.classList.add('selected');
-
- document.querySelectorAll('.task-item').forEach(card => {
-  card.classList.toggle(
-   'hidden',
-   type !== 'all' && card.dataset.type !== type
-  );
- });
-}
-
-
-// Wallet tabs
-function walletTab(id,btn) {
- document.querySelectorAll('#wallet .tabs button').forEach(
-  b => b.classList.remove('selected')
- );
-
- btn.classList.add('selected');
-
- document.querySelectorAll('#wallet .subpage').forEach(
-  p => p.classList.remove('active')
- );
-
- document.getElementById(
-  'wallet' + id[0].toUpperCase() + id.slice(1)
- ).classList.add('active');
-}
-
-
-// Campaign form fields
 function campaignFields() {
- const type = document.getElementById('campaignType').value;
+  const type = $("campaignType").value;
 
- document.getElementById('ptcFields').classList.toggle(
-  'hidden',
-  type !== 'ptc'
- );
-
- document.getElementById('videoFields').classList.toggle(
-  'hidden',
-  type !== 'video'
- );
-
- document.getElementById('jobFields').classList.toggle(
-  'hidden',
-  type !== 'job'
- );
-
- document.getElementById('shortlinkFields').classList.toggle(
-  'hidden',
-  type !== 'shortlink'
- );
+  $("ptcFields").classList.toggle("hidden", type !== "ptc");
+  $("videoFields").classList.toggle("hidden", type !== "video");
+  $("jobFields").classList.toggle("hidden", type !== "job");
+  $("shortlinkFields").classList.toggle("hidden", type !== "shortlink");
 }
 
+function getCampaignFormData() {
+  const type = $("campaignType").value;
+  const title = $("campaignTitle").value.trim();
+  const quantity = Number($("campaignQuantity").value);
+  const dailyLimit = Number($("campaignDaily").value);
+  const budgetUsd = Number($("campaignBudget").value);
 
-// Campaign preview
+  if (!title) throw new Error("Please enter a campaign title.");
+  if (!Number.isInteger(quantity) || quantity < 1) {
+    throw new Error("Campaign quantity must be a whole number greater than zero.");
+  }
+  if (!Number.isInteger(dailyLimit) || dailyLimit < 0) {
+    throw new Error("Daily limit must be zero or a positive whole number.");
+  }
+  if (!Number.isFinite(budgetUsd) || budgetUsd <= 0) {
+    throw new Error("Please enter a valid campaign budget.");
+  }
+
+  const payload = {
+    type,
+    title,
+    quantity,
+    totalSlots: quantity,
+    dailyLimit,
+    budgetUsd
+  };
+
+  if (type === "ptc") {
+    payload.package = $("ptcPackage").value;
+    payload.url = $("ptcUrl").value.trim();
+    if (!isValidHttpUrl(payload.url)) {
+      throw new Error("Please enter a valid PTC website URL.");
+    }
+  }
+
+  if (type === "video") {
+    payload.package = $("videoPackage").value;
+    payload.url = $("videoUrl").value.trim();
+    if (!isValidHttpUrl(payload.url)) {
+      throw new Error("Please enter a valid video URL.");
+    }
+  }
+
+  if (type === "job") {
+    payload.category = $("jobCategory").value;
+    payload.difficulty = $("jobDifficulty").value;
+    payload.expectedTime = $("jobTime").value.trim();
+    payload.description = $("jobDescription").value.trim();
+    payload.url = $("jobUrl").value.trim();
+    payload.verificationType = $("jobVerification").value;
+    payload.rewardCoins = Number($("jobReward").value);
+    payload.totalSlots = Number($("jobSlots").value);
+    payload.quantity = payload.totalSlots;
+
+    if (!payload.description) throw new Error("Please enter the job instructions.");
+    if (!Number.isFinite(payload.rewardCoins) || payload.rewardCoins <= 0) {
+      throw new Error("Enter a valid reward per job.");
+    }
+    if (!Number.isInteger(payload.totalSlots) || payload.totalSlots < 1) {
+      throw new Error("Enter a valid number of job slots.");
+    }
+    if (payload.url && !isValidHttpUrl(payload.url)) {
+      throw new Error("Please enter a valid job URL or leave it empty.");
+    }
+  }
+
+  if (type === "shortlink") {
+    payload.providerName = $("shortlinkProvider").value.trim();
+    payload.url = $("shortlinkUrl").value.trim();
+    payload.rewardCoins = Number($("shortlinkReward").value);
+    payload.totalSlots = Number($("shortlinkSlots").value);
+    payload.quantity = payload.totalSlots;
+
+    if (!payload.providerName) throw new Error("Please enter the shortlink provider name.");
+    if (!isValidHttpUrl(payload.url)) throw new Error("Please enter a valid shortlink destination URL.");
+    if (!Number.isFinite(payload.rewardCoins) || payload.rewardCoins <= 0) {
+      throw new Error("Enter a valid shortlink reward.");
+    }
+    if (!Number.isInteger(payload.totalSlots) || payload.totalSlots < 1) {
+      throw new Error("Enter a valid number of shortlink slots.");
+    }
+  }
+
+  return payload;
+}
+
+function isValidHttpUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 function previewCampaign() {
- const type = document.getElementById('campaignType').value;
-
- const title = document.getElementById(
-  'campaignTitle'
- ).value.trim();
-
- const budget = Number(
-  document.getElementById('campaignBudget').value
- );
-
- const quantity = Number(
-  document.getElementById('campaignQuantity').value
- );
-
- const out = document.getElementById(
-  'campaignPreview'
- );
-
-
- if (
-  !title ||
-  !Number.isFinite(budget) ||
-  budget <= 0 ||
-  !Number.isInteger(quantity) ||
-  quantity < 1
- ) {
-
-  out.textContent =
-   'Please enter a campaign title, a positive USD budget and a whole-number quantity.';
-
-  return;
- }
-
-
- out.textContent =
-  `Preview only — ${title} (${type.toUpperCase()}): campaign budget $${budget.toFixed(2)}; quantity ${quantity}. Final campaign setup is subject to backend validation. No campaign has been created or charged.`;
+  try {
+    const data = getCampaignFormData();
+    $("campaignPreview").textContent =
+      `Preview: ${data.title} · ${data.type.toUpperCase()} · ${data.totalSlots} slots · Budget ${formatUSD(data.budgetUsd)}. The backend will validate the campaign before creation.`;
+    showMessage("campaignMessage", "", "notice");
+  } catch (error) {
+    $("campaignPreview").textContent = "";
+    showMessage("campaignMessage", error.message, "error");
+  }
 }
 
+async function createCampaign() {
+  if (requestBusy) return;
 
-// Switch account role
-function setRole(role,btn) {
- document.querySelectorAll('#profile .tabs button').forEach(
-  b => b.classList.remove('selected')
- );
+  let payload;
 
- btn.classList.add('selected');
+  try {
+    payload = getCampaignFormData();
+  } catch (error) {
+    showMessage("campaignMessage", error.message, "error");
+    return;
+  }
 
- document.getElementById('roleDescription').textContent =
-  role === 'worker'
-   ? 'Worker mode: browse tasks, submit proof and view approved earnings.'
-   : 'Advertiser mode: create campaigns, fund budgets and track campaign performance.';
+  if (!confirm("Submit this campaign for administrator review?")) return;
+
+  requestBusy = true;
+  $("createCampaignBtn").disabled = true;
+  $("createCampaignBtn").textContent = "Submitting...";
+
+  try {
+    const data = await apiRequest("/api/campaigns", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    showMessage(
+      "campaignMessage",
+      data.message || "Campaign submitted. It may require administrator approval and funding before becoming active.",
+      "success"
+    );
+
+    $("campaignTitle").value = "";
+    $("campaignPreview").textContent = "";
+
+    await loadAdvertiserData();
+
+  } catch (error) {
+    showMessage("campaignMessage", error.message, "error");
+  } finally {
+    requestBusy = false;
+    $("createCampaignBtn").disabled = false;
+    $("createCampaignBtn").textContent = "Submit Campaign for Admin Review";
+  }
 }
+
+// ============================================
+// ADVERTISER WALLET AND CAMPAIGNS
+// ============================================
+
+async function loadAdvertiserData() {
+  try {
+    const walletData = await apiRequest("/api/advertiser/wallet");
+    const wallet = walletData.wallet || walletData.data?.wallet || walletData.data || walletData;
+
+    const balance =
+      wallet.balanceUsd ??
+      wallet.balance_usd ??
+      wallet.availableBalance ??
+      wallet.available_balance ??
+      wallet.balance ??
+      0;
+
+    $("advertiserWallet").textContent = formatUSD(balance);
+    $("walletAdvertiser").textContent = formatUSD(balance);
+
+    const campaignData = await apiRequest("/api/campaigns/my");
+    campaignCache = extractArray(campaignData, ["campaigns", "items"]);
+    renderCampaigns();
+
+    $("myCampaignCount").textContent = String(campaignCache.length);
+    $("advertiserStatus").textContent = "Connected";
+
+  } catch (error) {
+    $("advertiserStatus").textContent = "Unavailable";
+    $("myCampaignsList").innerHTML =
+      `<div class="notice error">${escapeHTML(error.message)}</div>`;
+  }
+}
+
+function renderCampaigns() {
+  const container = $("myCampaignsList");
+
+  if (!campaignCache.length) {
+    container.innerHTML = '<div class="empty">You have not created any campaigns yet.</div>';
+    return;
+  }
+
+  container.innerHTML = campaignCache.map(campaign => {
+    const title = campaign.title || "Campaign";
+    const status = campaign.status || "unknown";
+    const total = campaign.totalSlots ??
+      campaign.total_slots ??
+      campaign.quantity ??
+      0;
+    const completed = campaign.completedCount ??
+      campaign.completed_count ??
+      0;
+
+    return `
+      <div class="card">
+        <div class="row">
+          <h3>${escapeHTML(title)}</h3>
+          <span class="status">${escapeHTML(String(status).toUpperCase())}</span>
+        </div>
+        <div class="feature"><span>Type</span><strong>${escapeHTML(campaign.type || campaign.campaignType || campaign.campaign_type || "—")}</strong></div>
+        <div class="feature"><span>Completed</span><strong>${escapeHTML(completed)} / ${escapeHTML(total)}</strong></div>
+      </div>
+    `;
+  }).join("");
+}
+
+// ============================================
+// ADVERTISER SUBMISSION REVIEW
+// ============================================
+
+function submissionTab(status, button) {
+  currentSubmissionFilter = status;
+
+  document.querySelectorAll("#submissionTabs button").forEach(item => {
+    item.classList.remove("selected");
+  });
+
+  button.classList.add("selected");
+  loadSubmissions();
+}
+
+async function loadSubmissions() {
+  const container = $("submissionsList");
+  container.innerHTML = '<div class="empty">Loading submissions...</div>';
+
+  try {
+    const data = await apiRequest(
+      "/api/advertiser/submissions?status=" +
+      encodeURIComponent(currentSubmissionFilter)
+    );
+
+    submissionCache = extractArray(data, ["submissions", "claims", "items"]);
+    renderSubmissions();
+
+    const pending = submissionCache.filter(item =>
+      String(item.status || "").toLowerCase() === "submitted"
+    ).length;
+
+    $("pendingSubmissionCount").textContent = String(pending);
+
+  } catch (error) {
+    container.innerHTML =
+      `<div class="notice error">${escapeHTML(error.message)}</div>`;
+  }
+}
+
+function renderSubmissions() {
+  const container = $("submissionsList");
+
+  if (!submissionCache.length) {
+    container.innerHTML = '<div class="empty">No submissions found in this category.</div>';
+    return;
+  }
+
+  container.innerHTML = submissionCache.map(item => {
+    const id = item.id ?? item.claimId ?? item.claim_id;
+    const status = String(item.status || "submitted").toLowerCase();
+    const title = item.title ||
+      item.campaignTitle ||
+      item.campaign_title ||
+      "Worker Submission";
+
+    const proofText = item.proofText ||
+      item.proof_text ||
+      "";
+
+    const proofUrl = item.proofUrl ||
+      item.proof_url ||
+      "";
+
+    const worker = item.workerUsername ||
+      item.worker_username ||
+      item.workerTelegramId ||
+      item.worker_telegram_id ||
+      "Worker";
+
+    const reason = item.rejectionReason ||
+      item.rejection_reason ||
+      "";
+
+    const reviewButtons = status === "submitted" ? `
+      <button class="green full" onclick="reviewSubmission('${escapeHTML(id)}','approve')">Approve &amp; Pay</button>
+      <button class="dark full" onclick="reviewSubmission('${escapeHTML(id)}','reject')">Reject Submission</button>
+    ` : "";
+
+    return `
+      <div class="card">
+        <div class="row">
+          <h3>${escapeHTML(title)}</h3>
+          <span class="status">${escapeHTML(status.toUpperCase())}</span>
+        </div>
+        <p class="muted">Worker: ${escapeHTML(worker)}</p>
+        ${proofText ? `<div class="proof-box"><strong>Submitted text</strong><p class="muted">${escapeHTML(proofText)}</p></div>` : ""}
+        ${proofUrl ? `<div class="proof-box"><strong>Proof URL</strong><p><a href="${escapeHTML(proofUrl)}" target="_blank" rel="noopener noreferrer">Open submitted proof</a></p></div>` : ""}
+        ${reason ? `<div class="notice error">Rejection reason: ${escapeHTML(reason)}</div>` : ""}
+        ${reviewButtons}
+      </div>
+    `;
+  }).join("");
+}
+
+async function reviewSubmission(id, action) {
+  if (!id) {
+    alert("Submission ID is missing.");
+    return;
+  }
+
+  let reason = "";
+
+  if (action === "approve") {
+    if (!confirm("Approve this submission and pay the worker reward? This action should only be used for valid proof.")) {
+      return;
+    }
+  } else {
+    reason = prompt("Please enter a reason for rejecting this submission:");
+
+    if (reason === null) return;
+
+    reason = reason.trim();
+
+    if (reason.length < 5) {
+      alert("Please provide a rejection reason of at least 5 characters.");
+      return;
+    }
+  }
+
+  try {
+    const data = await apiRequest(
+      "/api/advertiser/submissions/" +
+      encodeURIComponent(id) +
+      "/review",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          action,
+          reason
+        })
+      }
+    );
+
+    alert(data.message || (
+      action === "approve"
+        ? "Submission approved. The backend processed the worker reward."
+        : "Submission rejected."
+    ));
+
+    await loadSubmissions();
+    await loadAdvertiserData();
+    await loadMyClaims();
+    await loadProfile();
+
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+// ============================================
+// NAVIGATION AND TABS
+// ============================================
+
+function go(id, button) {
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.remove("active");
+  });
+
+  const page = $(id);
+  if (page) page.classList.add("active");
+
+  document.querySelectorAll("nav button").forEach(item => {
+    item.classList.remove("active");
+  });
+
+  if (button && button.closest("nav")) {
+    button.classList.add("active");
+  } else {
+    const navButton = [...document.querySelectorAll("nav button")].find(item => {
+      return item.getAttribute("onclick")?.includes("'" + id + "'");
+    });
+
+    if (navButton) navButton.classList.add("active");
+  }
+
+  window.scrollTo({top: 0, behavior: "smooth"});
+
+  if (id === "tasks" && authToken) {
+    loadTasks().catch(error => console.error(error));
+    loadMyClaims();
+  }
+
+  if (id === "advertise" && authToken) {
+    loadAdvertiserData();
+    loadSubmissions();
+  }
+
+  if (id === "wallet" && authToken) {
+    loadProfile().catch(error => console.error(error));
+    loadAdvertiserData();
+  }
+}
+
+function walletTab(id, button) {
+  document.querySelectorAll("#wallet .tabs button").forEach(item => {
+    item.classList.remove("selected");
+  });
+
+  button.classList.add("selected");
+
+  document.querySelectorAll("#wallet .subpage").forEach(page => {
+    page.classList.remove("active");
+  });
+
+  const target = $("wallet" + id.charAt(0).toUpperCase() + id.slice(1));
+  if (target) target.classList.add("active");
+}
+
+function setRole(role, button) {
+  document.querySelectorAll("#profile .tabs button").forEach(item => {
+    item.classList.remove("selected");
+  });
+
+  button.classList.add("selected");
+
+  $("roleDescription").textContent = role === "worker"
+    ? "Worker mode: browse tasks, submit proof and view approved earnings."
+    : "Advertiser mode: create campaigns, fund budgets and review worker submissions.";
+}
+
+// ============================================
+// REFRESH ALL DATA
+// ============================================
+
+async function refreshAll() {
+  const results = await Promise.allSettled([
+    loadProfile(),
+    loadTasks(),
+    loadMyClaims(),
+    loadAdvertiserData(),
+    loadSubmissions()
+  ]);
+
+  results.forEach(result => {
+    if (result.status === "rejected") {
+      console.error("A marketplace data request failed:", result.reason);
+    }
+  });
+}
+
+// ============================================
+// START APPLICATION
+// ============================================
+
+campaignFields();
+
+authenticateTelegram().then(authenticated => {
+  if (!authenticated) {
+    $("homeTaskCount").textContent = "Login required";
+  }
+});
+
 </script>
-
 </body>
 </html>
