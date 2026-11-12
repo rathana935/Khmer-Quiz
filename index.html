@@ -168,11 +168,68 @@ Connecting to your Telegram account...
  <h2>🚰 Faucet</h2>
 
  <div class="card">
-  <h3>Faucet</h3>
-  <p class="muted">Faucet claims are not simulated in this version. The backend must verify claim timing, limits and rewards.</p>
-  <div class="notice">Your marketplace worker balance will not be increased by browser-only demo coins.</div>
-  <button class="dark full" onclick="showMessage('faucetMessage','Faucet backend integration is not enabled in this frontend build.','notice')">Check Faucet Status</button>
-  <div id="faucetMessage"></div>
+  <h3>Worker Faucet Rewards</h3>
+  <p class="muted">
+   Claim coins every five minutes. Successful rewards are credited
+   directly to your marketplace Worker Earnings Wallet.
+  </p>
+
+  <div class="grid">
+   <div class="stat">
+    Reward per claim
+    <strong id="faucetReward">Loading...</strong>
+   </div>
+
+   <div class="stat">
+    Worker balance
+    <strong id="faucetBalance">0 coins</strong>
+   </div>
+
+   <div class="stat">
+    Claims today
+    <strong id="faucetClaimsToday">0</strong>
+   </div>
+
+   <div class="stat">
+    Daily limit
+    <strong id="faucetDailyLimit">Loading...</strong>
+   </div>
+  </div>
+
+  <div class="notice" id="faucetStatus">
+   Checking Faucet availability...
+  </div>
+
+  <div class="card">
+   <div style="text-align:center;padding:10px">
+    <div class="muted">Next claim available in</div>
+    <div id="faucetCountdown"
+         style="font-size:30px;font-weight:bold;color:var(--gold);margin:12px 0">
+     --:--
+    </div>
+   </div>
+
+   <button
+    id="faucetClaimBtn"
+    class="green full"
+    onclick="claimFaucet()"
+    disabled>
+    Loading Faucet...
+   </button>
+
+   <button
+    class="dark full"
+    onclick="loadFaucetStatus()">
+    Refresh Faucet Status
+   </button>
+
+   <div id="faucetMessage"></div>
+  </div>
+
+  <div class="notice">
+   Faucet rewards go to your Worker Earnings Wallet.
+   Advertiser campaign funds and your old legacy coin balance are separate.
+  </div>
  </div>
 
 </section>
@@ -488,6 +545,12 @@ let claimCache = [];
 let campaignCache = [];
 let submissionCache = [];
 let requestBusy = false;
+ // Faucet state
+let faucetRemainingMs = 0;
+let faucetCountdownTimer = null;
+let faucetReady = false;
+let faucetBusy = false;
+let faucetDailyLimit = null;
 
 if (tg) {
   tg.ready();
@@ -668,7 +731,255 @@ async function loadProfile() {
 
   $("profileName").textContent = String(firstName);
 }
+// ============================================
+// REAL BACKEND FAUCET
+// ============================================
 
+function formatFaucetTime(milliseconds) {
+  const totalSeconds = Math.max(
+    0,
+    Math.ceil(milliseconds / 1000)
+  );
+
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return (
+    String(minutes).padStart(2, "0") +
+    ":" +
+    String(seconds).padStart(2, "0")
+  );
+}
+
+function stopFaucetCountdown() {
+  if (faucetCountdownTimer) {
+    clearInterval(faucetCountdownTimer);
+    faucetCountdownTimer = null;
+  }
+}
+
+function startFaucetCountdown(remainingMs) {
+  stopFaucetCountdown();
+
+  faucetRemainingMs = Math.max(0, Number(remainingMs) || 0);
+
+  const countdown = $("faucetCountdown");
+
+  if (!countdown) return;
+
+  countdown.textContent = formatFaucetTime(faucetRemainingMs);
+
+  if (faucetRemainingMs <= 0) {
+    return;
+  }
+
+  faucetCountdownTimer = setInterval(() => {
+    faucetRemainingMs = Math.max(
+      0,
+      faucetRemainingMs - 1000
+    );
+
+    countdown.textContent = formatFaucetTime(faucetRemainingMs);
+
+    if (faucetRemainingMs <= 0) {
+      stopFaucetCountdown();
+      loadFaucetStatus();
+    }
+  }, 1000);
+}
+
+function renderFaucetStatus(data) {
+  const reward = Number(data.reward || 0);
+  const balance = Number(data.workerEarnings || 0);
+  const claims = Number(data.claimsToday || 0);
+  const limit = data.dailyLimit;
+
+  faucetDailyLimit = limit;
+  faucetReady = Boolean(data.ready);
+
+  $("faucetReward").textContent =
+    formatCoins(reward) + " coins";
+
+  $("faucetBalance").textContent =
+    formatCoins(balance) + " coins";
+
+  $("faucetClaimsToday").textContent =
+    formatCoins(claims);
+
+  $("faucetDailyLimit").textContent =
+    limit === null || limit === undefined
+      ? "Unlimited"
+      : formatCoins(limit);
+
+  // Update the main worker balance display.
+  $("coinBalance").textContent = formatCoins(balance);
+  $("homeCoins").textContent = formatCoins(balance) + " coins";
+  $("walletCoins").textContent = formatCoins(balance);
+
+  startFaucetCountdown(data.remainingMs || 0);
+
+  const button = $("faucetClaimBtn");
+
+  if (limit !== null && limit !== undefined && claims >= limit) {
+    button.disabled = true;
+    button.textContent = "Daily Limit Reached";
+
+    showMessage(
+      "faucetStatus",
+      "You have reached your daily Faucet claim limit. Please try again tomorrow.",
+      "notice"
+    );
+
+    return;
+  }
+
+  if (Number(data.remainingMs || 0) > 0) {
+    button.disabled = true;
+    button.textContent = "Please Wait";
+
+    showMessage(
+      "faucetStatus",
+      "Your next Faucet claim is not ready yet.",
+      "notice"
+    );
+
+    return;
+  }
+
+  if (faucetReady) {
+    button.disabled = false;
+    button.textContent = "Claim " + formatCoins(reward) + " Coins";
+
+    showMessage(
+      "faucetStatus",
+      "Your Faucet is ready. You can claim your reward now.",
+      "success"
+    );
+  } else {
+    button.disabled = true;
+    button.textContent = "Not Available";
+
+    showMessage(
+      "faucetStatus",
+      "Faucet is currently unavailable. Refresh the status to check again.",
+      "notice"
+    );
+  }
+}
+
+async function loadFaucetStatus() {
+  if (!authToken) {
+    showMessage(
+      "faucetStatus",
+      "Please open the app through Telegram and authenticate first.",
+      "error"
+    );
+    return;
+  }
+
+  const button = $("faucetClaimBtn");
+
+  if (button && !faucetBusy) {
+    button.disabled = true;
+    button.textContent = "Checking...";
+  }
+
+  try {
+    const data = await apiRequest("/api/faucet/status");
+
+    if (!data.success) {
+      throw new Error("Unable to retrieve Faucet status.");
+    }
+
+    renderFaucetStatus(data);
+
+  } catch (error) {
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Faucet Unavailable";
+    }
+
+    showMessage(
+      "faucetStatus",
+      error.message,
+      "error"
+    );
+  }
+}
+
+async function claimFaucet() {
+  if (faucetBusy) return;
+
+  if (!authToken) {
+    showMessage(
+      "faucetMessage",
+      "Please authenticate through Telegram first.",
+      "error"
+    );
+    return;
+  }
+
+  if (!faucetReady) {
+    await loadFaucetStatus();
+    return;
+  }
+
+  if (!confirm("Claim your Faucet reward now?")) {
+    return;
+  }
+
+  faucetBusy = true;
+
+  const button = $("faucetClaimBtn");
+  button.disabled = true;
+  button.textContent = "Claiming...";
+
+  try {
+    const data = await apiRequest("/api/faucet/claim", {
+      method: "POST",
+      body: JSON.stringify({})
+    });
+
+    if (!data.success) {
+      throw new Error("Faucet claim was unsuccessful.");
+    }
+
+    if (data.balanceType !== "worker_earnings") {
+      throw new Error(
+        "Unexpected reward destination. Please contact support."
+      );
+    }
+
+    showMessage(
+      "faucetMessage",
+      "Success! You received " +
+        formatCoins(data.reward) +
+        " coins in your Worker Earnings Wallet.",
+      "success"
+    );
+
+    // Refresh actual backend balances and Faucet status.
+    await loadProfile();
+    await loadFaucetStatus();
+
+  } catch (error) {
+    showMessage(
+      "faucetMessage",
+      error.message,
+      "error"
+    );
+
+    // Refresh status after cooldown or daily-limit errors.
+    await loadFaucetStatus();
+
+  } finally {
+    faucetBusy = false;
+
+    if (faucetReady && faucetRemainingMs <= 0) {
+      button.disabled = false;
+    }
+  }
+}
 // ============================================
 // TASK LIST
 // ============================================
@@ -1376,6 +1687,9 @@ function go(id, button) {
     loadProfile().catch(error => console.error(error));
     loadAdvertiserData();
   }
+ if (id === "faucet" && authToken) {
+  loadFaucetStatus();
+ }
 }
 
 function walletTab(id, button) {
@@ -1415,16 +1729,19 @@ async function refreshAll() {
     loadTasks(),
     loadMyClaims(),
     loadAdvertiserData(),
-    loadSubmissions()
+    loadSubmissions(),
+    loadFaucetStatus()
   ]);
 
   results.forEach(result => {
     if (result.status === "rejected") {
-      console.error("A marketplace data request failed:", result.reason);
+      console.error(
+        "A marketplace data request failed:",
+        result.reason
+      );
     }
   });
 }
-
 // ============================================
 // START APPLICATION
 // ============================================
