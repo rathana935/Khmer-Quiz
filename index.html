@@ -399,25 +399,40 @@ Connecting to your Telegram account...
   </div>
 
   <div id="walletWithdraw" class="subpage active">
-   <p class="muted">Withdrawal requests require a connected and verified payment backend.</p>
+   <p class="muted">Withdraw approved worker earnings. Minimum 2,000 coins. Requests are reviewed by an administrator.</p>
    <label>Withdrawal amount (coins)</label>
-   <input type="number" min="2000" placeholder="Minimum 2,000 coins">
+   <input id="withdrawAmount" type="number" min="2000" step="1" placeholder="Minimum 2,000 coins">
    <label>Payment method</label>
-   <select><option>ABA Bank</option><option>USDT · TON Network</option></select>
-   <button class="full" disabled>Withdrawal backend not connected</button>
+   <select id="withdrawMethod">
+    <option value="ABA Bank">ABA Bank</option>
+    <option value="USDT - TON Network">USDT · TON Network</option>
+   </select>
+   <label>Payment details</label>
+   <textarea id="withdrawDetails" maxlength="300" placeholder="ABA account name and number, or USDT TON wallet address"></textarea>
+   <div id="withdrawMessage" class="notice">Your coins are reserved when the request is submitted. Rejected requests are refunded.</div>
+   <button id="withdrawSubmitBtn" class="full" onclick="submitWithdrawal()">Submit Withdrawal Request</button>
+   <div class="row"><h3>Withdrawal History</h3><button class="dark" onclick="loadWithdrawalHistory()">Refresh</button></div>
+   <div id="withdrawHistory"><div class="empty">Loading withdrawal history...</div></div>
   </div>
 
   <div id="walletDeposit" class="subpage">
-   <p class="muted">Deposit funds to your account using an available verified payment method.</p>
+   <p class="muted">Add funds to your Advertiser Campaign Wallet only. Deposits are manually checked; funds are not credited until approved.</p>
    <label>Deposit amount (USD)</label>
-   <input type="number" min="1" step="0.01" placeholder="e.g. 5.00">
+   <input id="depositAmount" type="number" min="1" max="10000" step="0.01" placeholder="e.g. 5.00">
    <label>Payment method</label>
-   <select>
-    <option>ABA Bank · Manual review</option>
-    <option>USDT · TON · Manual review</option>
-    <option>Telegram Stars</option>
+   <select id="depositMethod" onchange="showDepositInstructions()">
+    <option value="ABA Bank">ABA Bank · Manual review</option>
+    <option value="USDT - TON Network">USDT · TON · Manual review</option>
    </select>
-   <button class="full" disabled>Deposit backend not connected</button>
+   <div id="depositInstructions" class="notice">Loading available payment instructions...</div>
+   <label>Payment transaction reference</label>
+   <input id="depositReference" maxlength="200" placeholder="Enter transaction ID / reference">
+   <label>Additional payment details (optional)</label>
+   <textarea id="depositDetails" maxlength="1000" placeholder="Sender name, transfer time, or other useful details"></textarea>
+   <div id="depositMessage" class="notice">Minimum deposit: $1.00. Submit only after you have sent the payment.</div>
+   <button id="depositSubmitBtn" class="full" onclick="submitDeposit()">Submit Deposit for Review</button>
+   <div class="row"><h3>Deposit History</h3><button class="dark" onclick="loadDepositHistory()">Refresh</button></div>
+   <div id="depositHistory"><div class="empty">Loading deposit history...</div></div>
   </div>
 
   <div id="walletExchange" class="subpage">
@@ -1686,10 +1701,149 @@ function go(id, button) {
   if (id === "wallet" && authToken) {
     loadProfile().catch(error => console.error(error));
     loadAdvertiserData();
+    loadWalletTransactions();
   }
  if (id === "faucet" && authToken) {
   loadFaucetStatus();
  }
+}
+
+// ============================================
+// CONNECTED WITHDRAWAL + DEPOSIT WORKFLOWS
+// ============================================
+
+let depositMethodConfig = [];
+
+function showHistory(containerId, rows, kind) {
+  const container = $(containerId);
+  if (!container) return;
+  if (!rows.length) {
+    container.innerHTML = '<div class="empty">No ' + (kind === 'withdrawal' ? 'withdrawal' : 'deposit') + ' requests yet.</div>';
+    return;
+  }
+  container.innerHTML = rows.map(item => {
+    const amount = kind === 'withdrawal'
+      ? formatCoins(item.amount_coins ?? item.amountCoins) + ' coins'
+      : formatUSD(item.amountUsd ?? (Number(item.amount_usd_micros || 0) / 1000000));
+    const method = item.method || 'Payment method';
+    const status = String(item.status || 'pending').toUpperCase();
+    const date = item.created_at || item.createdAt;
+    return `<div class="proof-box"><div class="row"><strong>${escapeHTML(amount)}</strong><span class="status">${escapeHTML(status)}</span></div><p class="muted">${escapeHTML(method)}</p>${date ? `<p class="fine">${escapeHTML(new Date(date).toLocaleString())}</p>` : ''}${item.adminNote || item.admin_note ? `<p class="muted">Admin note: ${escapeHTML(item.adminNote || item.admin_note)}</p>` : ''}</div>`;
+  }).join('');
+}
+
+async function submitWithdrawal() {
+  const button = $('withdrawSubmitBtn');
+  const amountCoins = Number($('withdrawAmount').value);
+  const method = $('withdrawMethod').value;
+  const paymentDetails = $('withdrawDetails').value.trim();
+  if (!Number.isFinite(amountCoins) || amountCoins < 2000 || !Number.isInteger(amountCoins)) {
+    showMessage('withdrawMessage', 'Enter a whole-number amount of at least 2,000 coins.', 'error'); return;
+  }
+  if (paymentDetails.length < 3) {
+    showMessage('withdrawMessage', 'Enter your ABA account details or USDT TON wallet address.', 'error'); return;
+  }
+  if (!confirm(`Submit a withdrawal request for ${formatCoins(amountCoins)} coins using ${method}?`)) return;
+  button.disabled = true; button.textContent = 'Submitting...';
+  try {
+    const data = await apiRequest('/api/worker/withdraw', {
+      method: 'POST',
+      body: JSON.stringify({ amountCoins, method, paymentDetails })
+    });
+    showMessage('withdrawMessage', data.message || 'Withdrawal request submitted and is pending administrator review.', 'success');
+    $('withdrawAmount').value = ''; $('withdrawDetails').value = '';
+    await Promise.all([loadProfile(), loadWithdrawalHistory()]);
+  } catch (error) {
+    showMessage('withdrawMessage', error.message, 'error');
+  } finally {
+    button.disabled = false; button.textContent = 'Submit Withdrawal Request';
+  }
+}
+
+async function loadWithdrawalHistory() {
+  const container = $('withdrawHistory');
+  if (!container) return;
+  container.innerHTML = '<div class="empty">Loading withdrawal history...</div>';
+  try {
+    const data = await apiRequest('/api/worker/withdrawals');
+    showHistory('withdrawHistory', extractArray(data, ['withdrawals']), 'withdrawal');
+  } catch (error) {
+    container.innerHTML = `<div class="notice error">${escapeHTML(error.message)}</div>`;
+  }
+}
+
+async function loadDepositMethods() {
+  const box = $('depositInstructions');
+  try {
+    const data = await apiRequest('/api/advertiser/deposit-methods');
+    depositMethodConfig = extractArray(data, ['methods']);
+    const select = $('depositMethod');
+    const available = depositMethodConfig.filter(item => item.enabled);
+    select.innerHTML = depositMethodConfig.map(item =>
+      `<option value="${escapeHTML(item.method)}" ${item.enabled ? '' : 'disabled'}>${escapeHTML(item.method)}${item.enabled ? ' · Manual review' : ' · Not configured'}</option>`
+    ).join('');
+    if (available.length) select.value = available[0].method;
+    showDepositInstructions();
+    if (!available.length) showMessage('depositMessage', 'No deposit method is configured yet. The administrator must set ABA_DEPOSIT_INSTRUCTIONS or USDT_TON_DEPOSIT_ADDRESS in Render.', 'error');
+  } catch (error) {
+    box.textContent = error.message;
+    showMessage('depositMessage', 'Could not load deposit methods. Check the backend connection and try again.', 'error');
+  }
+}
+
+function showDepositInstructions() {
+  const selected = depositMethodConfig.find(item => item.method === $('depositMethod')?.value);
+  const box = $('depositInstructions');
+  if (!selected || !selected.enabled) {
+    box.textContent = 'This payment method is not configured yet. Please choose another method or contact support.';
+    return;
+  }
+  box.textContent = (selected.instructions || 'Follow the payment instructions provided by support.') + ' Payment review is manual. Keep your transaction reference.';
+}
+
+async function submitDeposit() {
+  const button = $('depositSubmitBtn');
+  const amountUsd = $('depositAmount').value.trim();
+  const method = $('depositMethod').value;
+  const paymentReference = $('depositReference').value.trim();
+  const paymentDetails = $('depositDetails').value.trim();
+  if (!amountUsd || Number(amountUsd) < 1 || Number(amountUsd) > 10000) {
+    showMessage('depositMessage', 'Enter a deposit amount between $1.00 and $10,000.00.', 'error'); return;
+  }
+  if (paymentReference.length < 4) {
+    showMessage('depositMessage', 'Enter the payment transaction ID or reference (at least 4 characters).', 'error'); return;
+  }
+  if (!confirm(`Submit a ${formatUSD(amountUsd)} ${method} deposit for manual review? Your campaign wallet will be credited only after approval.`)) return;
+  button.disabled = true; button.textContent = 'Submitting...';
+  try {
+    const data = await apiRequest('/api/advertiser/deposits', {
+      method: 'POST',
+      body: JSON.stringify({ amountUsd, method, paymentReference, paymentDetails })
+    });
+    showMessage('depositMessage', data.message || 'Deposit request submitted. Waiting for administrator review.', 'success');
+    $('depositAmount').value = ''; $('depositReference').value = ''; $('depositDetails').value = '';
+    await loadDepositHistory();
+  } catch (error) {
+    showMessage('depositMessage', error.message, 'error');
+  } finally {
+    button.disabled = false; button.textContent = 'Submit Deposit for Review';
+  }
+}
+
+async function loadDepositHistory() {
+  const container = $('depositHistory');
+  if (!container) return;
+  container.innerHTML = '<div class="empty">Loading deposit history...</div>';
+  try {
+    const data = await apiRequest('/api/advertiser/deposits');
+    showHistory('depositHistory', extractArray(data, ['deposits']), 'deposit');
+  } catch (error) {
+    container.innerHTML = `<div class="notice error">${escapeHTML(error.message)}</div>`;
+  }
+}
+
+async function loadWalletTransactions() {
+  await Promise.all([loadWithdrawalHistory(), loadDepositMethods(), loadDepositHistory()]);
 }
 
 function walletTab(id, button) {
@@ -1730,7 +1884,8 @@ async function refreshAll() {
     loadMyClaims(),
     loadAdvertiserData(),
     loadSubmissions(),
-    loadFaucetStatus()
+    loadFaucetStatus(),
+    loadWalletTransactions()
   ]);
 
   results.forEach(result => {
