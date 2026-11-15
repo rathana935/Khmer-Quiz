@@ -1200,8 +1200,11 @@ function renderMyClaims() {
     if (status === "claimed") {
       if (verification === "screenshot") {
         proofForm = `
-          <div class="notice">
-            Screenshot proof is not enabled in this build. Please contact support or wait until secure screenshot upload is configured.
+          <div class="proof-box">
+            <h3>Upload Screenshot Proof</h3>
+            <p class="muted">Choose a JPG, PNG or WEBP image. Maximum size: 5 MB.</p>
+            <input id="proofImage_${escapeHTML(id)}" type="file" accept="image/jpeg,image/png,image/webp">
+            <button class="green full" onclick="submitTaskProof('${escapeHTML(id)}','screenshot')">Upload &amp; Submit for Review</button>
           </div>
         `;
       } else {
@@ -1230,6 +1233,7 @@ function renderMyClaims() {
         <p class="muted">Reward: ${formatCoins(taskReward(claim))} coins</p>
         ${targetUrl ? `<p class="muted">Task URL: <a href="${escapeHTML(targetUrl)}" target="_blank" rel="noopener noreferrer">Open task</a></p>` : ""}
         ${reason ? `<div class="notice error">Rejection reason: ${escapeHTML(reason)}</div>` : ""}
+        ${(claim.proof_image_url || claim.proofImageUrl) ? `<div class="proof-box"><strong>Your uploaded screenshot</strong><p><a href="${escapeHTML(claim.proof_image_url || claim.proofImageUrl)}" target="_blank" rel="noopener noreferrer">View screenshot</a></p></div>` : ""}
         ${proofForm}
       </div>
     `;
@@ -1237,44 +1241,54 @@ function renderMyClaims() {
 }
 
 async function submitTaskProof(claimId, verification) {
-  let body = {};
-
-  if (verification === "link") {
-    const proofUrl = $("proofUrl_" + claimId)?.value.trim();
-
-    if (!proofUrl) {
-      alert("Please enter your proof URL.");
-      return;
-    }
-
-    try {
-      new URL(proofUrl);
-    } catch {
-      alert("Please enter a valid URL.");
-      return;
-    }
-
-    body.proofUrl = proofUrl;
-  } else {
-    const proofText = $("proofText_" + claimId)?.value.trim();
-
-    if (!proofText) {
-      alert("Please enter your proof text.");
-      return;
-    }
-
-    body.proofText = proofText;
-  }
-
   try {
+    if (verification === "screenshot") {
+      const file = $("proofImage_" + claimId)?.files?.[0];
+      if (!file) {
+        alert("Please choose a screenshot image.");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Screenshot must be 5 MB or smaller.");
+        return;
+      }
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        alert("Please upload a JPG, PNG or WEBP image.");
+        return;
+      }
+      if (!authToken) throw new Error("Open this app inside Telegram to authenticate.");
+      const formData = new FormData();
+      formData.append("screenshot", file);
+      const response = await fetch(API_URL + "/api/tasks/" + encodeURIComponent(claimId) + "/submit", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + authToken },
+        body: formData
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success === false) throw new Error(getErrorMessage(data, `Upload failed (${response.status})`));
+      alert(data.message || "Screenshot submitted for advertiser review.");
+      await loadMyClaims();
+      return;
+    }
+
+    let body = {};
+    if (verification === "link") {
+      const proofUrl = $("proofUrl_" + claimId)?.value.trim();
+      if (!proofUrl) { alert("Please enter your proof URL."); return; }
+      try { new URL(proofUrl); } catch { alert("Please enter a valid URL."); return; }
+      body.proofUrl = proofUrl;
+    } else {
+      const proofText = $("proofText_" + claimId)?.value.trim();
+      if (!proofText) { alert("Please enter your proof text."); return; }
+      body.proofText = proofText;
+    }
+
     const data = await apiRequest(
       "/api/tasks/" + encodeURIComponent(claimId) + "/submit",
       {method: "POST", body: JSON.stringify(body)}
     );
-
     alert(data.message || "Your proof has been submitted for review.");
     await loadMyClaims();
-
   } catch (error) {
     alert(error.message);
   }
@@ -1598,6 +1612,7 @@ function renderSubmissions() {
         <p class="muted">Worker: ${escapeHTML(worker)}</p>
         ${proofText ? `<div class="proof-box"><strong>Submitted text</strong><p class="muted">${escapeHTML(proofText)}</p></div>` : ""}
         ${proofUrl ? `<div class="proof-box"><strong>Proof URL</strong><p><a href="${escapeHTML(proofUrl)}" target="_blank" rel="noopener noreferrer">Open submitted proof</a></p></div>` : ""}
+        ${(item.proof_image_url || item.proofImageUrl) ? `<div class="proof-box"><strong>Screenshot proof</strong><p><a href="${escapeHTML(item.proof_image_url || item.proofImageUrl)}" target="_blank" rel="noopener noreferrer">View uploaded screenshot</a></p><img src="${escapeHTML(item.proof_image_url || item.proofImageUrl)}" alt="Worker screenshot proof" style="display:block;max-width:100%;height:auto;border-radius:10px;margin-top:10px"></div>` : ""}
         ${reason ? `<div class="notice error">Rejection reason: ${escapeHTML(reason)}</div>` : ""}
         ${reviewButtons}
       </div>
