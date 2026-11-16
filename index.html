@@ -727,6 +727,7 @@ async function authenticateTelegram() {
 async function loadProfile() {
   const data = await apiRequest("/api/me");
   currentUser = data.user || data.data?.user || data.data || data;
+  const telegramUser = tg?.initDataUnsafe?.user || {};
 
   // Telegram provides the optional profile photo through initDataUnsafe.user.
   // The backend remains the trusted source for the authenticated Telegram ID.
