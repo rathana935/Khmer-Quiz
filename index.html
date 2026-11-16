@@ -45,6 +45,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .reward{color:var(--gold);font-weight:bold;white-space:nowrap}
 .feature{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
 .feature strong{color:var(--gold);text-align:right}
+.profile-identity{display:flex;align-items:center;gap:13px;padding:10px 0 16px;margin-bottom:5px;border-bottom:1px solid var(--border)}
+.profile-avatar{width:68px;height:68px;flex:0 0 68px;border-radius:50%;background:var(--panel2);border:2px solid var(--gold);display:grid;place-items:center;overflow:hidden;font-size:30px;color:var(--gold)}
+.profile-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.profile-identity-details{min-width:0;display:flex;flex-direction:column;gap:5px}
+.profile-identity-details strong{font-size:16px;color:var(--text);overflow-wrap:anywhere}
+.profile-username{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
 label{display:block;font-size:13px;color:#d4deee;margin:11px 0 5px}
 input,select,textarea{width:100%;padding:12px;margin:5px 0 10px;background:#0d1728;color:white;border:1px solid var(--border);border-radius:8px;font:inherit}
 textarea{min-height:90px;resize:vertical}
@@ -522,7 +528,14 @@ Connecting to your Telegram account...
 
  <div class="card">
   <h3>Account Information</h3>
-  <div class="feature"><span>Telegram user</span><strong id="profileName">Loading...</strong></div>
+  <div class="profile-identity">
+   <div class="profile-avatar" id="profileAvatar" aria-label="Telegram profile photo">👤</div>
+   <div class="profile-identity-details">
+    <strong id="profileName">Loading...</strong>
+    <span class="profile-username" id="profileUsername">@username</span>
+   </div>
+  </div>
+  <div class="feature"><span>Telegram ID</span><strong id="profileTelegramId">Loading...</strong></div>
   <div class="feature"><span>Current plan</span><strong id="profilePlan">Free</strong></div>
   <div class="feature"><span>Account roles</span><strong>Worker + Advertiser</strong></div>
   <div class="feature"><span>Authentication</span><strong id="authStatus">Checking...</strong></div>
@@ -715,6 +728,10 @@ async function loadProfile() {
   const data = await apiRequest("/api/me");
   currentUser = data.user || data.data?.user || data.data || data;
 
+  // Telegram provides the optional profile photo through initDataUnsafe.user.
+  // The backend remains the trusted source for the authenticated Telegram ID.
+  const telegramUser = tg?.initDataUnsafe?.user || {};
+
   // Use marketplace worker earnings fields only.
   // Do not use the old legacy users.coins field.
   const workerBalance =
@@ -736,15 +753,41 @@ async function loadProfile() {
   $("homePlan").textContent = String(plan);
   $("profilePlan").textContent = String(plan);
 
-  const firstName =
-    currentUser.firstName ||
-    currentUser.first_name ||
-    currentUser.username ||
-    currentUser.telegramId ||
-    currentUser.telegram_id ||
-    "Telegram User";
+  const firstName = telegramUser.first_name || currentUser.firstName ||
+    currentUser.first_name || currentUser.username || "Telegram User";
+  const lastName = telegramUser.last_name || "";
+  const displayName = [firstName, lastName].filter(Boolean).join(" ");
 
-  $("profileName").textContent = String(firstName);
+  $("profileName").textContent = displayName;
+
+  const username = telegramUser.username || currentUser.username || "";
+  $("profileUsername").textContent = username ? "@" + username : "Username not set";
+
+  const telegramId = currentUser.telegramId || currentUser.telegram_id || telegramUser.id || "";
+  $("profileTelegramId").textContent = telegramId ? String(telegramId) : "Unavailable";
+
+  const avatar = $("profileAvatar");
+  const photoUrl = telegramUser.photo_url || "";
+  avatar.replaceChildren();
+
+  if (photoUrl && /^https:\/\//i.test(photoUrl)) {
+    const image = document.createElement("img");
+    image.src = photoUrl;
+    image.alt = "Telegram profile photo";
+    image.referrerPolicy = "no-referrer";
+    image.onerror = () => {
+      avatar.replaceChildren(document.createTextNode("👤"));
+    };
+    avatar.appendChild(image);
+  } else {
+    const initials = [firstName, lastName]
+      .filter(Boolean)
+      .map(part => part.trim().charAt(0))
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+    avatar.textContent = initials || "👤";
+  }
 }
 // ============================================
 // REAL BACKEND FAUCET
