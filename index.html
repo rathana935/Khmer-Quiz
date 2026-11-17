@@ -499,12 +499,23 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <section id="invite" class="page">
  <h2>👥 Invite Friends</h2>
  <div class="card">
+  <h3>Your Personal Referral Link</h3>
+  <p class="muted">Share this link with friends. When a new user opens the Mini App through your link and registers, they will be connected to your account.</p>
+  <div class="feature" style="display:block">
+   <label for="referralLink" class="muted">Your referral link</label>
+   <input id="referralLink" type="text" readonly value="Loading your referral link..." style="width:100%;margin-top:8px;box-sizing:border-box" />
+  </div>
+  <button class="dark full" id="copyReferralButton" onclick="copyReferralLink()">📋 Copy Referral Link</button>
+  <div class="feature"><span>Invited users</span><strong id="referralInvited">0</strong></div>
+  <div class="feature"><span>Successful referrals</span><strong id="referralSuccessful">0</strong></div>
+  <div class="feature"><span>Referral earnings</span><strong id="referralEarnings">0 coins</strong></div>
+ </div>
+ <div class="card">
   <h3>Referral Program</h3>
-  <p class="muted">Referral commissions are calculated by the backend on eligible verified earnings.</p>
+  <p class="muted">Referral commissions are credited to your Worker wallet when your referred users complete eligible tasks and their rewards are approved.</p>
   <div class="feature"><span>Free commission</span><strong>10%</strong></div>
   <div class="feature"><span>Free referral bonus</span><strong>200 coins</strong></div>
   <p class="muted">Bronze 15% · Silver 20% · Gold 25% · VIP 30%.</p>
-  <button class="dark full" disabled>Referral backend not connected</button>
  </div>
 </section>
 
@@ -1937,6 +1948,41 @@ function setRole(role, button) {
     : "Advertiser mode: create campaigns, fund budgets and review worker submissions.";
 }
 
+async function loadReferralData() {
+  const data = await apiRequest("/api/referrals");
+  const referral = data.referral || {};
+  const linkInput = $("referralLink");
+  if (linkInput) linkInput.value = referral.link || "Referral link unavailable";
+  if ($("referralInvited")) $("referralInvited").textContent = String(referral.totalInvited ?? 0);
+  if ($("referralSuccessful")) $("referralSuccessful").textContent = String(referral.successfulReferrals ?? 0);
+  if ($("referralEarnings")) $("referralEarnings").textContent = formatCoins(referral.earningsCoins ?? 0) + " coins";
+}
+
+async function copyReferralLink() {
+  const field = $("referralLink");
+  const link = field?.value || "";
+  if (!link.startsWith("https://t.me/")) {
+    showMessage("connectionNotice", "Your referral link is not ready yet. Please reopen Invite Friends.", "error");
+    return;
+  }
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(link);
+    } else {
+      field.focus();
+      field.select();
+      if (!document.execCommand("copy")) throw new Error("Copy not supported");
+    }
+    const button = $("copyReferralButton");
+    if (button) button.textContent = "✓ Link Copied";
+    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
+  } catch (error) {
+    field.focus();
+    field.select();
+    showMessage("connectionNotice", "Please copy the selected referral link manually.", "notice");
+  }
+}
+
 // ============================================
 // REFRESH ALL DATA
 // ============================================
@@ -1949,7 +1995,8 @@ async function refreshAll() {
     loadAdvertiserData(),
     loadSubmissions(),
     loadFaucetStatus(),
-    loadWalletTransactions()
+    loadWalletTransactions(),
+    loadReferralData()
   ]);
 
   results.forEach(result => {
