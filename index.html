@@ -438,17 +438,22 @@ a{color:var(--blue);overflow-wrap:anywhere}
   </div>
 
   <div id="walletExchange" class="subpage">
-   <p class="muted">Exchange features require backend validation.</p>
-   <label>Coins to exchange</label>
-   <input type="number" min="1" placeholder="Enter coins">
-   <button class="full" disabled>Exchange backend not connected</button>
+   <p class="muted">Transfer approved worker earnings into your Advertiser Campaign Wallet. No transfer fee.</p>
+   <p class="muted">Conversion: 10,000 coins = $1.00</p>
+   <label>Coins to transfer</label>
+   <input id="transferCoins" type="number" min="1" step="1" inputmode="numeric" placeholder="Enter whole coins" oninput="previewWalletTransfer()">
+   <div class="feature"><span>Campaign wallet receives</span><strong id="transferPreview">$0.00</strong></div>
+   <div class="feature"><span>Transfer fee</span><strong>$0.00</strong></div>
+   <div id="transferMessage" class="notice">Transfers are instant after server confirmation.</div>
+   <button id="transferButton" class="full" onclick="transferToCampaignWallet()">Transfer to Campaign Wallet</button>
   </div>
  </div>
 
  <div class="card">
   <h3>Advertiser Campaign Wallet</h3>
   <div class="price" id="walletAdvertiser">$0.00</div>
-  <p class="muted">This separate balance funds campaigns. It is not worker earnings and cannot be withdrawn as task income.</p>
+  <p class="muted">Use this balance to fund campaigns and subscribe to membership plans. Worker earnings remain separate unless you transfer them here. No transfer fee.</p>
+  <button class="dark full" onclick="walletTab('exchange',document.querySelector('#wallet .tabs button:nth-child(3)'))">Transfer Worker Earnings</button>
   <button class="dark full" onclick="go('advertise')">Manage Campaign Budget</button>
  </div>
 
@@ -457,7 +462,8 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <!-- PLANS -->
 <section id="plans" class="page">
  <h2>👑 Membership Plans</h2>
- <p class="muted">Membership benefits are displayed for information. Subscribe only after the payment provider has been connected and verified.</p>
+ <p class="muted">Subscribe directly using your Advertiser Campaign Wallet. Each paid plan lasts 30 days.</p>
+ <div class="card"><div class="feature"><span>Advertiser Campaign Wallet balance</span><strong id="plansWalletBalance">$0.00</strong></div><p class="muted">Add funds or transfer worker earnings in the Wallet section. No transfer fee.</p></div>
 
  <div class="card">
   <span class="tag">FREE</span><h3>🆓 Free</h3><div class="price">Forever</div>
@@ -473,25 +479,25 @@ a{color:var(--blue);overflow-wrap:anywhere}
  <div class="card">
   <span class="tag">BRONZE</span><h3>🥉 Bronze</h3><div class="price">$2.99 / month</div>
   <ul><li>Faucet multiplier ×1.6</li><li>160 daily claims</li><li>15% referral commission</li><li>200 coin referral bonus</li></ul>
-  <button class="full" disabled>Payment integration required</button>
+  <button class="full" onclick="subscribeWithWallet('Bronze')">Subscribe Bronze with Campaign Wallet</button>
  </div>
 
  <div class="card">
   <span class="tag">SILVER</span><h3>🥈 Silver</h3><div class="price">$5.99 / month</div>
   <ul><li>Faucet multiplier ×2</li><li>200 daily claims</li><li>20% referral commission</li><li>250 coin referral bonus</li></ul>
-  <button class="full" disabled>Payment integration required</button>
+  <button class="full" onclick="subscribeWithWallet('Silver')">Subscribe Silver with Campaign Wallet</button>
  </div>
 
  <div class="card">
   <span class="tag">GOLD</span><h3>🥇 Gold</h3><div class="price">$9.99 / month</div>
   <ul><li>Faucet multiplier ×5</li><li>250 daily claims</li><li>25% referral commission</li><li>300 coin referral bonus</li></ul>
-  <button class="full" disabled>Payment integration required</button>
+  <button class="full" onclick="subscribeWithWallet('Gold')">Subscribe Gold with Campaign Wallet</button>
  </div>
 
  <div class="card">
   <span class="tag">VIP</span><h3>💎 VIP</h3><div class="price">$16.99 / month</div>
   <ul><li>Faucet multiplier ×7</li><li>288 daily claims</li><li>30% referral commission</li><li>350 coin referral bonus</li></ul>
-  <button class="full" disabled>Payment integration required</button>
+  <button class="full" onclick="subscribeWithWallet('VIP')">Subscribe VIP with Campaign Wallet</button>
  </div>
 </section>
 
@@ -1522,6 +1528,62 @@ async function createCampaign() {
 // ADVERTISER WALLET AND CAMPAIGNS
 // ============================================
 
+function previewWalletTransfer() {
+  const coins = Number($("transferCoins")?.value || 0);
+  const usd = Number.isSafeInteger(coins) && coins > 0 ? coins / 10000 : 0;
+  if ($("transferPreview")) $("transferPreview").textContent = formatUSD(usd);
+}
+
+async function transferToCampaignWallet() {
+  const button = $("transferButton");
+  const amountCoins = Number($("transferCoins")?.value || 0);
+  if (!Number.isSafeInteger(amountCoins) || amountCoins < 1) {
+    showMessage("transferMessage", "Enter a whole number of coins greater than zero.", "error");
+    return;
+  }
+  if (!confirm(`Transfer ${formatCoins(amountCoins)} worker coins to your Advertiser Campaign Wallet? You will receive ${formatUSD(amountCoins / 10000)}. Transfer fee: $0.00.`)) return;
+  button.disabled = true;
+  button.textContent = "Transferring...";
+  try {
+    const data = await apiRequest("/api/wallet/transfer-to-advertiser", {
+      method: "POST",
+      body: JSON.stringify({ amountCoins })
+    });
+    $("transferCoins").value = "";
+    previewWalletTransfer();
+    showMessage("transferMessage", `Transfer successful. ${formatUSD(data.creditedUsd)} added to your Campaign Wallet. No fee charged.`, "success");
+    await loadProfile();
+    await loadAdvertiserData();
+  } catch (error) {
+    showMessage("transferMessage", error.message, "error");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Transfer to Campaign Wallet";
+  }
+}
+
+async function subscribeWithWallet(plan) {
+  const button = [...document.querySelectorAll("#plans button")].find(item => item.textContent.includes(`Subscribe ${plan}`));
+  if (button) button.disabled = true;
+  try {
+    const catalog = await apiRequest("/api/plans");
+    const selected = (catalog.plans || []).find(item => item.name === plan);
+    const price = selected?.monthlyPriceUsd || "0.00";
+    if (!confirm(`Subscribe to ${plan} for ${formatUSD(price)} for 30 days using your Advertiser Campaign Wallet?`)) return;
+    const data = await apiRequest("/api/plans/subscribe", {
+      method: "POST",
+      body: JSON.stringify({ plan })
+    });
+    alert(data.message || `${plan} membership activated.`);
+    await loadProfile();
+    await loadAdvertiserData();
+  } catch (error) {
+    alert(error.message);
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
 async function loadAdvertiserData() {
   try {
     const walletData = await apiRequest("/api/advertiser/wallet");
@@ -1537,6 +1599,7 @@ async function loadAdvertiserData() {
 
     $("advertiserWallet").textContent = formatUSD(balance);
     $("walletAdvertiser").textContent = formatUSD(balance);
+    if ($("plansWalletBalance")) $("plansWalletBalance").textContent = formatUSD(balance);
 
     const campaignData = await apiRequest("/api/campaigns/my");
     campaignCache = extractArray(campaignData, ["campaigns", "items"]);
