@@ -45,6 +45,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .reward{color:var(--gold);font-weight:bold;white-space:nowrap}
 .feature{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
 .feature strong{color:var(--gold);text-align:right}
+.profile-identity{display:flex;align-items:center;gap:13px;padding:12px 0 16px;border-bottom:1px solid var(--border);margin-bottom:4px;min-width:0}
+.profile-avatar{width:58px;height:58px;flex:0 0 58px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:var(--panel2);border:2px solid var(--border);font-size:22px;font-weight:bold;color:var(--gold)}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-identity-details{display:flex;flex-direction:column;gap:5px;min-width:0;overflow-wrap:anywhere}
+.profile-identity-details strong{font-size:16px;color:var(--text)}
+.profile-identity-details span{font-size:13px;color:var(--muted)}
 label{display:block;font-size:13px;color:#d4deee;margin:11px 0 5px}
 input,select,textarea{width:100%;padding:12px;margin:5px 0 10px;background:#0d1728;color:white;border:1px solid var(--border);border-radius:8px;font:inherit}
 textarea{min-height:90px;resize:vertical}
@@ -79,10 +85,6 @@ a{color:var(--blue);overflow-wrap:anywhere}
 </header>
 
 <main>
-
-<div id="connectionNotice" class="notice">
-Connecting to your Telegram account...
-</div>
 
 <!-- HOME -->
 <section id="home" class="page active">
@@ -522,7 +524,14 @@ Connecting to your Telegram account...
 
  <div class="card">
   <h3>Account Information</h3>
-  <div class="feature"><span>Telegram user</span><strong id="profileName">Loading...</strong></div>
+  <div class="profile-identity">
+   <div id="profileAvatar" class="profile-avatar" aria-label="Telegram profile photo">👤</div>
+   <div class="profile-identity-details">
+    <strong id="profileName">Loading...</strong>
+    <span id="profileUsername">Username not set</span>
+   </div>
+  </div>
+  <div class="feature"><span>Telegram ID</span><strong id="profileTelegramId">Loading...</strong></div>
   <div class="feature"><span>Current plan</span><strong id="profilePlan">Free</strong></div>
   <div class="feature"><span>Account roles</span><strong>Worker + Advertiser</strong></div>
   <div class="feature"><span>Authentication</span><strong id="authStatus">Checking...</strong></div>
@@ -660,7 +669,6 @@ async function apiRequest(path, options = {}) {
 // ============================================
 
 async function authenticateTelegram() {
-  const notice = $("connectionNotice");
 
   if (!tg || !tg.initData) {
     showMessage(
@@ -673,13 +681,24 @@ async function authenticateTelegram() {
   }
 
   try {
-    notice.textContent = "Authenticating your Telegram account...";
-
-    const response = await fetch(API_URL + "/api/auth/telegram", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({initData: tg.initData})
-    });
+    const controller = new AbortController();
+    const authTimeout = setTimeout(() => controller.abort(), 20000);
+    let response;
+    try {
+      response = await fetch(API_URL + "/api/auth/telegram", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({initData: tg.initData}),
+        signal: controller.signal
+      });
+    } catch (error) {
+      if (error.name === "AbortError") {
+        throw new Error("Telegram authentication timed out. Please close and reopen the Mini App.");
+      }
+      throw error;
+    } finally {
+      clearTimeout(authTimeout);
+    }
 
     const data = await response.json();
 
@@ -735,15 +754,46 @@ async function loadProfile() {
   $("homePlan").textContent = String(plan);
   $("profilePlan").textContent = String(plan);
 
+  // Telegram may provide optional profile fields through initDataUnsafe.user.
+  // The profile photo is optional in Telegram, so use initials when absent.
+  const telegramUser = tg?.initDataUnsafe?.user || {};
   const firstName =
+    telegramUser.first_name ||
     currentUser.firstName ||
     currentUser.first_name ||
     currentUser.username ||
-    currentUser.telegramId ||
-    currentUser.telegram_id ||
     "Telegram User";
+  const lastName = telegramUser.last_name || currentUser.lastName || currentUser.last_name || "";
+  const displayName = [firstName, lastName].filter(Boolean).join(" ");
 
-  $("profileName").textContent = String(firstName);
+  $("profileName").textContent = displayName;
+
+  const username = telegramUser.username || currentUser.username || "";
+  $("profileUsername").textContent = username ? "@" + username : "Username not set";
+
+  const telegramId = currentUser.telegramId || currentUser.telegram_id || telegramUser.id || "";
+  $("profileTelegramId").textContent = telegramId ? String(telegramId) : "Unavailable";
+
+  const avatar = $("profileAvatar");
+  const photoUrl = typeof telegramUser.photo_url === "string" ? telegramUser.photo_url : "";
+  const initials = [firstName, lastName]
+    .filter(Boolean)
+    .map(part => part.trim().charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "👤";
+  avatar.replaceChildren();
+
+  if (photoUrl && /^https:\/\//i.test(photoUrl)) {
+    const image = document.createElement("img");
+    image.src = photoUrl;
+    image.alt = "Telegram profile photo";
+    image.referrerPolicy = "no-referrer";
+    image.onerror = () => { avatar.textContent = initials; };
+    avatar.appendChild(image);
+  } else {
+    avatar.textContent = initials;
+  }
 }
 // ============================================
 // REAL BACKEND FAUCET
