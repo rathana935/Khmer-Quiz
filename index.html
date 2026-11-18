@@ -7,6 +7,7 @@
 <title>Khmer Earn Marketplace</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoaded&render=explicit" async defer></script>
 
 <style>
 :root{--bg:#0b1120;--panel:#151f32;--panel2:#202e45;--text:#f5f7ff;--muted:#9ba9c0;--gold:#f6c453;--blue:#61a9ff;--green:#37d69a;--red:#f16b6b;--border:#293953}
@@ -211,6 +212,11 @@ a{color:var(--blue);overflow-wrap:anywhere}
      --:--
     </div>
    </div>
+
+   <div class="notice" style="margin:12px 0 8px">
+    Complete the security check below before claiming your Faucet reward.
+   </div>
+   <div id="faucetTurnstile" style="display:flex;justify-content:center;min-height:66px;margin:10px 0"></div>
 
    <button
     id="faucetClaimBtn"
@@ -601,12 +607,62 @@ let faucetCountdownTimer = null;
 let faucetReady = false;
 let faucetBusy = false;
 let faucetDailyLimit = null;
+let turnstileToken = null;
+let turnstileWidgetId = null;
+const TURNSTILE_SITE_KEY = "0x4AAAAAAGHRHCnCICOPF_YC";
 let adsgramBusy = false;
 let adsgramController = null;
 
 if (tg) {
   tg.ready();
   tg.expand();
+}
+
+// ============================================
+// CLOUDFLARE TURNSTILE CAPTCHA
+// ============================================
+function onTurnstileLoaded() {
+  const mount = $("faucetTurnstile");
+  if (!mount || !window.turnstile || turnstileWidgetId !== null) return;
+
+  turnstileWidgetId = window.turnstile.render(mount, {
+    sitekey: TURNSTILE_SITE_KEY,
+    theme: "dark",
+    callback(token) {
+      turnstileToken = token;
+      updateFaucetClaimButton();
+      showMessage("faucetMessage", "Security check completed. You can claim when the Faucet is ready.", "success");
+    },
+    "expired-callback"() {
+      turnstileToken = null;
+      updateFaucetClaimButton();
+      showMessage("faucetMessage", "CAPTCHA expired. Please complete the security check again.", "notice");
+    },
+    "error-callback"() {
+      turnstileToken = null;
+      updateFaucetClaimButton();
+      showMessage("faucetMessage", "CAPTCHA could not load. Please refresh and try again.", "error");
+    }
+  });
+}
+
+function resetFaucetCaptcha() {
+  turnstileToken = null;
+  if (window.turnstile && turnstileWidgetId !== null) {
+    window.turnstile.reset(turnstileWidgetId);
+  }
+  updateFaucetClaimButton();
+}
+
+function updateFaucetClaimButton() {
+  const button = $("faucetClaimBtn");
+  if (!button || faucetBusy) return;
+  const canClaim = faucetReady && faucetRemainingMs <= 0 && Boolean(turnstileToken);
+  button.disabled = !canClaim;
+  if (!faucetReady) return;
+  button.textContent = canClaim
+    ? "Claim Faucet Reward"
+    : (turnstileToken ? "Claim Not Available" : "Complete CAPTCHA to Claim");
 }
 
 // ============================================
@@ -939,8 +995,10 @@ function renderFaucetStatus(data) {
   }
 
   if (faucetReady) {
-    button.disabled = false;
-    button.textContent = "Claim " + formatCoins(reward) + " Coins";
+    button.disabled = !turnstileToken;
+    button.textContent = turnstileToken
+      ? "Claim " + formatCoins(reward) + " Coins"
+      : "Complete CAPTCHA to Claim";
 
     showMessage(
       "faucetStatus",
@@ -1016,6 +1074,12 @@ async function claimFaucet() {
     return;
   }
 
+  if (!turnstileToken) {
+    showMessage("faucetMessage", "Please complete the CAPTCHA before claiming your reward.", "error");
+    updateFaucetClaimButton();
+    return;
+  }
+
   if (!confirm("Claim your Faucet reward now?")) {
     return;
   }
@@ -1029,7 +1093,7 @@ async function claimFaucet() {
   try {
     const data = await apiRequest("/api/faucet/claim", {
       method: "POST",
-      body: JSON.stringify({})
+      body: JSON.stringify({ turnstileToken })
     });
 
     if (!data.success) {
@@ -1066,17 +1130,15 @@ async function claimFaucet() {
 
   } finally {
     faucetBusy = false;
-
-    if (faucetReady && faucetRemainingMs <= 0) {
-      button.disabled = false;
-    }
+    resetFaucetCaptcha();
+    updateFaucetClaimButton();
   }
 }
 // ============================================
 // ADSGRAM REWARDED VIDEO
 // ============================================
 
-const ADSGRAM_BLOCK_ID = "60499";
+const ADSGRAM_BLOCK_ID = "60494";
 const ADSGRAM_REWARD_COINS = 10;
 
 function getAdsgramController() {
