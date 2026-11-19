@@ -1,708 +1,2017 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Khmer Earn Marketplace - Admin</title>
-<style>
-:root{color-scheme:dark;--bg:#071225;--panel:#101f38;--line:#243957;--text:#edf4ff;--muted:#91a5c1;--blue:#4f8cff;--green:#25c58a;--red:#ef6675}
-*{box-sizing:border-box}
-body{margin:0;background:linear-gradient(135deg,#071225,#0b1830 55%,#101d36);color:var(--text);font:14px/1.5 Inter,system-ui,Segoe UI,Arial,sans-serif}
-button,input,select{font:inherit}
-button{cursor:pointer;border:1px solid var(--line);border-radius:10px;padding:9px 13px;background:#1a3152;color:var(--text);font-weight:650}
-button:hover{filter:brightness(1.15)}
-button:disabled{opacity:.5;cursor:not-allowed}
-.shell{display:grid;grid-template-columns:230px minmax(0,1fr);min-height:100vh}
-.side{padding:22px 15px;background:#08152a;border-right:1px solid var(--line);position:sticky;top:0;height:100vh}
-.brand{font-size:17px;font-weight:800;padding:5px 10px 24px}
-.brand small{display:block;color:var(--muted);font-size:11px;font-weight:500}
-.nav{display:grid;gap:7px}
-.nav button{text-align:left;background:transparent;border-color:transparent;color:#b6c6dd;padding:12px}
-.nav button.active{background:#18345a;border-color:#2b4c78;color:white}
-.sidefoot{position:absolute;bottom:20px;left:15px;right:15px;color:var(--muted);font-size:11px}
-main{padding:26px;max-width:1500px;width:100%;margin:auto}
-.top{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:22px}
-.eyebrow{color:#7fa9ec;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
-h1{font-size:26px;margin:3px 0}
-h2{font-size:18px;margin:0 0 14px}
-.sub{color:var(--muted)}
-.actions{display:flex;gap:8px;flex-wrap:wrap}
-.primary{background:var(--blue);border-color:var(--blue);color:white}
-.danger{background:#512532;border-color:#78404c}
-.success{background:#123f3b;border-color:#21695d}
-.ghost{background:transparent}
-.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:20px 0}
-.metric,.panel{background:linear-gradient(160deg,#122541,#0f1e35);border:1px solid var(--line);border-radius:15px;padding:17px}
-.metric .label{color:var(--muted);font-size:12px}
-.metric .num{font-size:29px;font-weight:800;margin-top:6px}
-.metric .hint{font-size:11px;color:var(--muted)}
-.panel{margin:14px 0}
-.toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-.toolbar h2{margin:0}
-.filters{display:flex;gap:8px;flex-wrap:wrap}
-.filters input,.filters select,.login input{background:#09172b;border:1px solid var(--line);color:var(--text);border-radius:9px;padding:9px 11px;min-width:150px}
-.tablewrap{overflow:auto}
-table{border-collapse:collapse;width:100%;min-width:780px}
-th,td{text-align:left;padding:12px 10px;border-bottom:1px solid #203450;vertical-align:top}
-th{font-size:11px;color:#8fa7c8;text-transform:uppercase;letter-spacing:.7px}
-td{font-size:13px}
-td small{display:block;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}
-.pill{display:inline-block;padding:3px 8px;border-radius:99px;background:#263b5a;color:#cbdaf0;font-size:10px;font-weight:800;text-transform:uppercase}
-.pill.pending{background:#49391d;color:#ffd47a}
-.pill.active,.pill.approved,.pill.paid{background:#123e36;color:#83e3bd}
-.pill.rejected,.pill.paused{background:#48232e;color:#ff9eaa}
-.rowbuttons{display:flex;gap:6px;flex-wrap:wrap}
-.rowbuttons button{font-size:11px;padding:6px 9px}
-.empty{padding:30px;text-align:center;color:var(--muted)}
-.notice{border:1px solid #655127;background:#332b19;color:#f6d58a;padding:12px;border-radius:10px;margin:12px 0}
-.page{display:none}
-.page.active{display:block}
-.login{max-width:470px;margin:9vh auto;background:var(--panel);border:1px solid var(--line);padding:25px;border-radius:17px}
-.login input{width:100%;margin:10px 0 13px}
-.login p{color:var(--muted)}
-.loginrow{display:flex;gap:8px}
-.loginrow button{flex:1}
-.hidden{display:none!important}
-.toast{position:fixed;right:20px;bottom:20px;max-width:360px;padding:12px 16px;border-radius:10px;background:#183b35;border:1px solid #2d7563;box-shadow:0 12px 35px #0008;z-index:5}
-.toast.bad{background:#46232c;border-color:#80414d}
-@media(max-width:900px){
-.shell{grid-template-columns:1fr}
-.side{height:auto;position:relative;padding:12px;border-right:0;border-bottom:1px solid var(--line)}
-.brand{padding:3px 6px 10px}
-.nav{display:flex;overflow:auto}
-.nav button{white-space:nowrap;padding:9px}
-.sidefoot{display:none}
-main{padding:17px}
-.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import pg from "pg";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import rateLimit from "express-rate-limit";
+import multer from "multer";
+import { createClient } from "@supabase/supabase-js";
+
+dotenv.config();
+const app = express();
+const { Pool } = pg;
+const PORT = Number(process.env.PORT || 3000);
+const TELEGRAM_BOT_USERNAME = String(process.env.TELEGRAM_BOT_USERNAME || "quizkhmerbot").replace(/^@/, "");
+const SUPABASE_URL = process.env.SUPABASE_URL || "";
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const TASK_PROOF_BUCKET = process.env.TASK_PROOF_BUCKET || "task-proof-private";
+const supabase = SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } })
+  : null;
+const screenshotUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  fileFilter(req, file, cb) {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.mimetype)) {
+      return cb(new Error("Only JPG, PNG or WEBP screenshots are accepted."));
+    }
+    cb(null, true);
+  }
+});
+
+function detectScreenshotType(buffer) {
+  if (buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) return { ext: "png", mime: "image/png" };
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return { ext: "jpg", mime: "image/jpeg" };
+  if (buffer.length >= 12 && buffer.toString("ascii", 0, 4) === "RIFF" && buffer.toString("ascii", 8, 12) === "WEBP") return { ext: "webp", mime: "image/webp" };
+  return null;
 }
-@media(max-width:480px){
-.grid{gap:8px}
-.metric{padding:12px}
-.metric .num{font-size:23px}
-.top{align-items:flex-start;flex-direction:column}
-h1{font-size:22px}
+
+async function signedProofUrl(path) {
+  if (!path || !supabase) return null;
+  const { data, error } = await supabase.storage.from(TASK_PROOF_BUCKET).createSignedUrl(path, 15 * 60);
+  if (error) {
+    console.error("Could not create private screenshot link:", error.message);
+    return null;
+  }
+  return data?.signedUrl || null;
 }
-</style>
-</head>
-<body>
 
-<div id="loginScreen" class="login">
-  <div class="eyebrow">Private administration</div>
-  <h1>Khmer Earn Marketplace</h1>
-  <p>Enter your existing Render ADMIN_SECRET to access the admin tools.</p>
-  <label for="secretInput">Admin secret</label>
-  <input id="secretInput" type="password" autocomplete="current-password" placeholder="Enter ADMIN_SECRET">
-  <div class="loginrow">
-    <button class="primary" id="loginBtn">Unlock dashboard</button>
-  </div>
-  <div id="loginError" class="notice hidden"></div>
-  <p><small>Keep this page private. Never share your admin secret.</small></p>
-</div>
+// Required Render environment variables: DATABASE_URL, BOT_TOKEN,
+// JWT_SECRET (32+ chars), ADMIN_SECRET (24+ chars), WEB_APP_ORIGIN.
+for (const key of ["DATABASE_URL", "BOT_TOKEN", "JWT_SECRET", "ADMIN_SECRET"]) {
+  if (!process.env[key]) throw new Error(`Missing environment variable: ${key}`);
+}
+if (process.env.JWT_SECRET.length < 32) throw new Error("JWT_SECRET must contain at least 32 characters.");
+if (process.env.ADMIN_SECRET.length < 24) throw new Error("ADMIN_SECRET must contain at least 24 characters.");
+if (process.env.NODE_ENV === "production" && !process.env.WEB_APP_ORIGIN) throw new Error("WEB_APP_ORIGIN is required in production.");
 
-<div id="app" class="shell hidden">
-  <aside class="side">
-    <div class="brand">⚡ Khmer Earn <small>Marketplace Admin</small></div>
-    <div class="nav">
-      <button class="active" data-page="overview">▦ &nbsp; Overview</button>
-      <button data-page="deposits">＄ &nbsp; Advertiser deposits</button>
-      <button data-page="withdrawals">⇧ &nbsp; Worker withdrawals</button>
-      <button data-page="campaigns">▤ &nbsp; Campaigns</button>
-      <button data-page="submissions">✓ &nbsp; Task submissions</button>
-    </div>
-    <div class="sidefoot">Admin access is protected by the backend.<br>Marketplace Admin · v1.0</div>
-  </aside>
+const origins = (process.env.WEB_APP_ORIGIN || "http://localhost:3000").split(",").map(x => x.trim()).filter(Boolean);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: /localhost|127\.0\.0\.1/.test(process.env.DATABASE_URL) ? false : { rejectUnauthorized: false },
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000
+});
+app.disable("x-powered-by");
+app.set("trust proxy", 1);
+app.use(express.json({ limit: "1mb" }));
+app.use(cors({
+  origin(origin, cb) { if (!origin || origins.includes(origin)) return cb(null, true); return cb(new Error("Origin not allowed by CORS.")); },
+  methods: ["GET", "POST", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Admin-Secret", "X-Telegram-Bot-Api-Secret-Token"]
+}));
+app.use("/api", rateLimit({ windowMs: 60000, limit: 120, standardHeaders: true, legacyHeaders: false }));
+const adminLimiter = rateLimit({ windowMs: 60000, limit: 30, standardHeaders: true, legacyHeaders: false });
 
-  <main>
-    <header class="top">
-      <div>
-        <div class="eyebrow">Control center</div>
-        <h1 id="pageTitle">Overview</h1>
-        <div class="sub" id="lastUpdated">Not loaded yet</div>
-      </div>
-      <div class="actions">
-        <button id="refreshBtn" class="primary">↻ Refresh</button>
-        <button id="lockBtn" class="ghost">Lock</button>
-      </div>
-    </header>
+const COINS_PER_USD = 10000;
+const WORKER_SHARE = 0.75;
+const PLATFORM_FEE = 0.20; // Internal accounting only; never returned in advertiser/user API responses.
+const SERVICE_FEE = 0.05; // Internal accounting only; never returned in advertiser/user API responses.
+const FAUCET_BASE = 5;
+const FAUCET_COOLDOWN_MS = 5 * 60 * 1000;
+const WITHDRAW_MINIMUM = 2000;
+const WELCOME_COINS = 20;
 
-    <section class="page active" id="page-overview">
-      <div class="notice">Verify real ABA / TON payments in your bank or wallet before approving deposits. This dashboard does not transfer money automatically.</div>
-      <div class="grid">
-        <div class="metric"><div class="label">Pending deposits</div><div class="num" id="mDeposits">—</div><div class="hint">Advertiser wallet funding</div></div>
-        <div class="metric"><div class="label">Pending withdrawals</div><div class="num" id="mWithdrawals">—</div><div class="hint">Worker earnings payout</div></div>
-        <div class="metric"><div class="label">Pending campaigns</div><div class="num" id="mCampaigns">—</div><div class="hint">Awaiting admin decision</div></div>
-        <div class="metric"><div class="label">Task submissions</div><div class="num" id="mSubmissions">—</div><div class="hint">Awaiting review</div></div>
-      </div>
-      <div class="panel">
-        <div class="toolbar"><h2>Needs attention</h2><button class="ghost" onclick="refreshAll()">Refresh queues</button></div>
-        <div id="overviewQueues" class="empty">Unlock the dashboard and refresh to load queues.</div>
-      </div>
-    </section>
-
-    <section class="page" id="page-deposits">
-      <div class="panel">
-        <div class="toolbar">
-          <h2>Advertiser deposit requests</h2>
-          <div class="filters">
-            <select id="depositStatus">
-              <option value="pending">Pending</option>
-              <option value="all">All statuses</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-            </select>
-            <input id="depositSearch" placeholder="Search username / ID">
-          </div>
-        </div>
-        <div id="depositsTable" class="empty">Loading deposits…</div>
-      </div>
-    </section>
-
-    <section class="page" id="page-withdrawals">
-      <div class="panel">
-        <div class="toolbar"><h2>Worker withdrawal requests</h2><input id="withdrawSearch" placeholder="Search Telegram ID / method"></div>
-        <div id="withdrawalsTable" class="empty">Loading withdrawals…</div>
-      </div>
-    </section>
-
-    <section class="page" id="page-campaigns">
-      <div class="panel">
-        <div class="toolbar"><h2>Campaign management</h2><input id="campaignSearch" placeholder="Search title / owner / type"></div>
-        <div id="campaignsTable" class="empty">Loading campaigns…</div>
-      </div>
-    </section>
-
-    <section class="page" id="page-submissions">
-      <div class="panel">
-        <div class="toolbar"><h2>Submitted task proofs</h2><input id="submissionSearch" placeholder="Search campaign / worker"></div>
-        <div id="submissionsTable" class="empty">Loading submissions…</div>
-      </div>
-    </section>
-  </main>
-</div>
-
-<div id="toast" class="toast hidden"></div>
-
-<script>
-const API_URL = "https://khmer-quiz-backend.onrender.com";
-
-let adminSecret = "";
-let dataStore = {
-  deposits: [],
-  withdrawals: [],
-  campaigns: [],
-  submissions: []
+const PLANS = {
+  Free:    { priceCents: 0,    faucetMultiplier: 1,   dailyFaucetLimit: null, referralPercent: 10, referralBonus: 200 },
+  Bronze:  { priceCents: 299,  faucetMultiplier: 1.6, dailyFaucetLimit: 160,  referralPercent: 15, referralBonus: 200 },
+  Silver:  { priceCents: 599,  faucetMultiplier: 2,   dailyFaucetLimit: 200,  referralPercent: 20, referralBonus: 250 },
+  Gold:    { priceCents: 999,  faucetMultiplier: 5,   dailyFaucetLimit: 250,  referralPercent: 25, referralBonus: 300 },
+  VIP:     { priceCents: 1699, faucetMultiplier: 7,   dailyFaucetLimit: 288,  referralPercent: 30, referralBonus: 350 }
 };
 
-const $ = id => document.getElementById(id);
+const PTC = {
+  bronze: { seconds: 5, priceUsd: "0.000300" },
+  silver: { seconds: 10, priceUsd: "0.000500" },
+  gold: { seconds: 20, priceUsd: "0.000800" },
+  platinum: { seconds: 30, priceUsd: "0.001200" },
+  diamond: { seconds: 60, priceUsd: "0.001500" }
+};
+const VIDEO = {
+  short: { seconds: 15, priceUsd: "0.000700" },
+  medium: { seconds: 30, priceUsd: "0.001000" },
+  long: { seconds: 60, priceUsd: "0.001700" },
+  premium: { seconds: 120, priceUsd: "0.002400" }
+};
+const JOB_CATEGORIES = ["Social Media", "Website", "App", "Content Review", "Other"];
+const DIFFICULTIES = ["Easy", "Medium", "Hard"];
+const VERIFY_TYPES = ["link", "text", "screenshot"];
 
-const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({
-  "&":"&amp;",
-  "<":"&lt;",
-  ">":"&gt;",
-  '"':"&quot;",
-  "'":"&#39;"
-}[c]));
+function asyncRoute(fn) { return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next); }
 
-const usdMicros = value => "$" + (Number(value || 0) / 1000000).toFixed(2);
-const dateText = value => value ? new Date(value).toLocaleString() : "—";
+async function verifyTurnstileToken(token, remoteIp) {
+  const secret = String(process.env.TURNSTILE_SECRET_KEY || "");
+  if (!secret || secret.length < 20) {
+    return { configured: false, success: false };
+  }
+  if (typeof token !== "string" || token.length < 10 || token.length > 2048) {
+    return { configured: true, success: false };
+  }
 
-function toast(message, bad = false) {
-  const element = $("toast");
-  element.textContent = message;
-  element.classList.remove("hidden", "bad");
-  if (bad) element.classList.add("bad");
-  setTimeout(() => element.classList.add("hidden"), 4200);
-}
+  const body = new URLSearchParams({ secret, response: token });
+  if (remoteIp) body.set("remoteip", String(remoteIp));
 
-async function api(path, options = {}) {
-  const response = await fetch(API_URL + path, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "X-Admin-Secret": adminSecret,
-      ...(options.headers || {})
-    }
+  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body
   });
-
-  const body = await response.json().catch(() => ({
-    error: "Server returned an unreadable response."
-  }));
-
   if (!response.ok) {
-    throw new Error(body.error || body.message || `Request failed (${response.status})`);
+    console.error("Cloudflare Turnstile verification HTTP error:", response.status);
+    return { configured: true, success: false };
   }
-
-  return body;
+  const result = await response.json();
+  return { configured: true, success: result.success === true };
 }
 
-async function unlock() {
-  const candidate = $("secretInput").value.trim();
-
-  if (!candidate) {
-    $("loginError").textContent = "Enter your admin secret.";
-    $("loginError").classList.remove("hidden");
-    return;
-  }
-
-  adminSecret = candidate;
-  $("loginBtn").disabled = true;
-
-  try {
-    await api("/api/admin/campaigns");
-
-    $("loginScreen").classList.add("hidden");
-    $("app").classList.remove("hidden");
-    $("loginError").classList.add("hidden");
-
-    await refreshAll();
-    toast("Admin dashboard unlocked.");
-  } catch (error) {
-    adminSecret = "";
-    $("loginError").textContent = error.message;
-    $("loginError").classList.remove("hidden");
-  } finally {
-    $("loginBtn").disabled = false;
-  }
+function uuid() { return crypto.randomUUID(); }
+function asInt(v, min = 0, max = 2147483647) { const n = Number(v); return Number.isSafeInteger(n) && n >= min && n <= max ? n : null; }
+function validUrl(value, optional = false) {
+  if (optional && !value) return null;
+  try { const u = new URL(String(value)); return ["http:", "https:"].includes(u.protocol) ? u.toString() : null; } catch { return null; }
+}
+function todayUTC() { return new Date().toISOString().slice(0, 10); }
+function planFor(user) {
+  if (!PLANS[user.membership]) return "Free";
+  if (user.membership !== "Free" && (!user.membership_expiry || new Date(user.membership_expiry) <= new Date())) return "Free";
+  return user.membership;
+}
+function signToken(id) {
+  return jwt.sign({ telegramId: String(id) }, process.env.JWT_SECRET, { expiresIn: "7d", issuer: "khmer-quiz-earn", audience: "khmer-quiz-earn-users" });
+}
+function validateInitData(initData) {
+  if (typeof initData !== "string" || !initData || initData.length > 10000) throw new Error("Missing or invalid Telegram initData.");
+  const params = new URLSearchParams(initData);
+  const hash = params.get("hash");
+  if (!hash || !/^[a-f0-9]{64}$/i.test(hash)) throw new Error("Invalid Telegram hash.");
+  const data = [...params.entries()].filter(([k]) => k !== "hash").sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => `${k}=${v}`).join("\n");
+  const secret = crypto.createHmac("sha256", "WebAppData").update(process.env.BOT_TOKEN).digest();
+  const calculated = crypto.createHmac("sha256", secret).update(data).digest("hex");
+  const a = Buffer.from(hash, "hex"), b = Buffer.from(calculated, "hex");
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) throw new Error("Invalid Telegram signature.");
+  const authDate = Number(params.get("auth_date"));
+  if (!Number.isFinite(authDate) || Math.floor(Date.now() / 1000) - authDate > 3600 || authDate > Math.floor(Date.now() / 1000) + 30) throw new Error("Telegram login expired. Reopen the Mini App.");
+  let user;
+  try { user = JSON.parse(params.get("user") || "null"); } catch { throw new Error("Invalid Telegram user data."); }
+  if (!user || !/^\d+$/.test(String(user.id))) throw new Error("Telegram user is missing.");
+  // start_param is covered by Telegram's initData signature and is safe to use for referral attribution.
+  user.__startParam = params.get("start_param") || "";
+  return user;
 }
 
-function lock() {
-  adminSecret = "";
-  $("secretInput").value = "";
-  $("app").classList.add("hidden");
-  $("loginScreen").classList.remove("hidden");
+const authenticate = asyncRoute(async (req, res, next) => {
+  const header = req.headers.authorization || "";
+  if (!header.startsWith("Bearer ")) return res.status(401).json({ error: "Authentication required." });
+  let decoded;
+  try { decoded = jwt.verify(header.slice(7), process.env.JWT_SECRET, { issuer: "khmer-quiz-earn", audience: "khmer-quiz-earn-users" }); }
+  catch { return res.status(401).json({ error: "Invalid or expired session." }); }
+  if (!/^\d+$/.test(String(decoded.telegramId || ""))) return res.status(401).json({ error: "Invalid session identity." });
+  req.telegramId = String(decoded.telegramId);
+  const u = await pool.query("SELECT 1 FROM users WHERE telegram_id=$1", [req.telegramId]);
+  if (!u.rowCount) return res.status(401).json({ error: "User not found." });
+  next();
+});
+function checkAdmin(req, res) {
+  const a = Buffer.from(String(req.headers["x-admin-secret"] || ""));
+  const b = Buffer.from(process.env.ADMIN_SECRET);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) { res.status(401).json({ error: "Admin access denied." }); return false; }
+  return true;
 }
 
-function showPage(name) {
-  if (name === "deposits") {
-    $("depositSearch").value = "";
-    $("depositsTable").innerHTML = '<div class="empty">Loading advertiser deposits…</div>';
-  }
+// Additive migration: legacy quiz, wallet, payment and withdrawal tables are preserved.
+async function initializeDatabase() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      telegram_id BIGINT PRIMARY KEY, username TEXT, first_name TEXT,
+      coins BIGINT NOT NULL DEFAULT 20, membership TEXT NOT NULL DEFAULT 'Free',
+      membership_expiry TIMESTAMPTZ, referred_by BIGINT,
+      last_faucet TIMESTAMPTZ, faucet_claims INTEGER NOT NULL DEFAULT 0,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS username TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS coins BIGINT NOT NULL DEFAULT 20;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS membership TEXT NOT NULL DEFAULT 'Free';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS membership_expiry TIMESTAMPTZ;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS referred_by BIGINT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS last_faucet TIMESTAMPTZ;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS faucet_claims INTEGER NOT NULL DEFAULT 0;
 
-  document.querySelectorAll(".page").forEach(element => {
-    element.classList.remove("active");
-  });
 
-  $("page-" + name).classList.add("active");
+    CREATE TABLE IF NOT EXISTS transactions (
+      id BIGSERIAL PRIMARY KEY, telegram_id BIGINT NOT NULL REFERENCES users(telegram_id),
+      type TEXT NOT NULL, amount BIGINT NOT NULL, description TEXT,
+      reference TEXT UNIQUE, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS faucet_claims (
+      id BIGSERIAL PRIMARY KEY, telegram_id BIGINT NOT NULL REFERENCES users(telegram_id),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS faucet_claims_daily_idx ON faucet_claims(telegram_id, created_at);
 
-  document.querySelectorAll(".nav button").forEach(element => {
-    element.classList.toggle("active", element.dataset.page === name);
-  });
+    CREATE TABLE IF NOT EXISTS worker_accounts (
+      telegram_id BIGINT PRIMARY KEY REFERENCES users(telegram_id),
+      available_coins NUMERIC(20,2) NOT NULL DEFAULT 0 CHECK (available_coins >= 0),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS worker_ledger (
+      id BIGSERIAL PRIMARY KEY, telegram_id BIGINT NOT NULL REFERENCES users(telegram_id),
+      amount_coins NUMERIC(20,2) NOT NULL, entry_type TEXT NOT NULL,
+      description TEXT NOT NULL, reference TEXT UNIQUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS worker_ledger_user_idx ON worker_ledger(telegram_id, created_at DESC);
 
-  $("pageTitle").textContent = ({
-    overview: "Overview",
-    deposits: "Advertiser deposits",
-    withdrawals: "Worker withdrawals",
-    campaigns: "Campaigns",
-    submissions: "Task submissions"
-  })[name];
-
-  if (name === "deposits") {
-    refreshDeposits();
-  } else if (name !== "overview") {
-    renderAll();
-  }
-}
-
-function pill(status) {
-  return `<span class="pill ${esc(String(status || "").toLowerCase())}">${esc(status || "unknown")}</span>`;
-}
-
-function table(headers, rows) {
-  if (!rows.length) {
-    return '<div class="empty">No records found.</div>';
-  }
-
-  return `
-    <div class="tablewrap">
-      <table>
-        <thead>
-          <tr>${headers.map(header => `<th>${header}</th>`).join("")}</tr>
-        </thead>
-        <tbody>${rows.join("")}</tbody>
-      </table>
-    </div>
-  `;
-}
-
-/* IMPORTANT: Advertiser deposits load independently. */
-async function refreshDeposits() {
-  if (!adminSecret) return;
-
-  const target = $("depositsTable");
-  target.innerHTML = '<div class="empty">Loading advertiser deposits…</div>';
-
-  try {
-    const result = await api(
-      "/api/admin/advertiser-deposits?status=" +
-      encodeURIComponent($("depositStatus").value || "pending")
+    CREATE TABLE IF NOT EXISTS advertiser_accounts (
+      telegram_id BIGINT PRIMARY KEY REFERENCES users(telegram_id),
+      balance_usd_micros BIGINT NOT NULL DEFAULT 0 CHECK (balance_usd_micros >= 0),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS advertiser_ledger (
+      id BIGSERIAL PRIMARY KEY, telegram_id BIGINT NOT NULL REFERENCES users(telegram_id),
+      amount_usd_micros BIGINT NOT NULL, entry_type TEXT NOT NULL,
+      description TEXT NOT NULL, reference TEXT UNIQUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
-    dataStore.deposits = Array.isArray(result.deposits)
-      ? result.deposits
-      : [];
+    CREATE TABLE IF NOT EXISTS advertiser_deposit_requests (
+      id UUID PRIMARY KEY,
+      telegram_id BIGINT NOT NULL REFERENCES users(telegram_id),
+      amount_usd_micros BIGINT NOT NULL CHECK (amount_usd_micros >= 1000000),
+      method TEXT NOT NULL CHECK (method IN ('ABA Bank','USDT - TON Network')),
+      payment_reference TEXT NOT NULL,
+      payment_details TEXT,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')),
+      admin_note TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      reviewed_at TIMESTAMPTZ
+    );
+    CREATE INDEX IF NOT EXISTS advertiser_deposit_requests_user_idx
+      ON advertiser_deposit_requests(telegram_id,created_at DESC);
+    CREATE INDEX IF NOT EXISTS advertiser_deposit_requests_status_idx
+      ON advertiser_deposit_requests(status,created_at ASC);
+    CREATE UNIQUE INDEX IF NOT EXISTS advertiser_deposit_payment_reference_unique
+      ON advertiser_deposit_requests(method,payment_reference);
+    CREATE TABLE IF NOT EXISTS worker_service_orders (
+      id UUID PRIMARY KEY,
+      telegram_id BIGINT NOT NULL REFERENCES users(telegram_id),
+      order_type TEXT NOT NULL CHECK (order_type IN ('phone_topup','game_topup','shopping')),
+      provider TEXT NOT NULL,
+      recipient TEXT NOT NULL,
+      item_details TEXT NOT NULL,
+      quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity BETWEEN 1 AND 99),
+      amount_coins NUMERIC(20,2) NOT NULL CHECK (amount_coins > 0),
+      amount_usd_micros BIGINT NOT NULL CHECK (amount_usd_micros > 0),
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','processing','completed','rejected')),
+      admin_note TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      reviewed_at TIMESTAMPTZ
+    );
+    CREATE INDEX IF NOT EXISTS worker_service_orders_user_idx ON worker_service_orders(telegram_id,created_at DESC);
+    CREATE INDEX IF NOT EXISTS worker_service_orders_status_idx ON worker_service_orders(status,created_at ASC);
 
-    renderDeposits();
-    updateMetrics();
+    CREATE TABLE IF NOT EXISTS marketplace_campaigns (
+      id UUID PRIMARY KEY, owner_telegram_id BIGINT NOT NULL REFERENCES users(telegram_id),
+      campaign_type TEXT NOT NULL CHECK (campaign_type IN ('ptc','video','job','shortlink')),
+      title TEXT NOT NULL, description TEXT, target_url TEXT,
+      pack_code TEXT, duration_seconds INTEGER, category TEXT, difficulty TEXT,
+      expected_minutes INTEGER, verification_type TEXT,
+      worker_reward_coins NUMERIC(20,2) NOT NULL,
+      gross_budget_usd_micros BIGINT NOT NULL CHECK (gross_budget_usd_micros > 0),
+      reserved_budget_usd_micros BIGINT NOT NULL CHECK (reserved_budget_usd_micros >= 0),
+      total_slots INTEGER NOT NULL CHECK (total_slots > 0),
+      daily_limit INTEGER NOT NULL DEFAULT 0, completed_count INTEGER NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','active','paused','completed','cancelled','rejected')),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS marketplace_campaigns_status_idx ON marketplace_campaigns(status, campaign_type, created_at DESC);
+    CREATE INDEX IF NOT EXISTS marketplace_campaigns_owner_idx ON marketplace_campaigns(owner_telegram_id, created_at DESC);
+    CREATE TABLE IF NOT EXISTS task_claims (
+      id UUID PRIMARY KEY, campaign_id UUID NOT NULL REFERENCES marketplace_campaigns(id),
+      worker_telegram_id BIGINT NOT NULL REFERENCES users(telegram_id),
+      status TEXT NOT NULL DEFAULT 'claimed' CHECK (status IN ('claimed','submitted','approved','rejected','expired')),
+      proof_text TEXT, proof_url TEXT, started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      submitted_at TIMESTAMPTZ, reviewed_at TIMESTAMPTZ,
+      UNIQUE(campaign_id, worker_telegram_id)
+    );
+    ALTER TABLE task_claims ADD COLUMN IF NOT EXISTS proof_image_path TEXT;
+    CREATE INDEX IF NOT EXISTS task_claims_worker_idx ON task_claims(worker_telegram_id, started_at DESC);
 
-  } catch (error) {
-    target.innerHTML =
-      '<div class="empty">Could not load deposits: ' +
-      esc(error.message) +
-      '. Check backend deployment and admin access.</div>';
+    CREATE TABLE IF NOT EXISTS marketplace_fee_ledger (
+      id BIGSERIAL PRIMARY KEY, campaign_id UUID NOT NULL REFERENCES marketplace_campaigns(id),
+      gross_usd_micros BIGINT NOT NULL, worker_pool_usd_micros BIGINT NOT NULL,
+      platform_usd_micros BIGINT NOT NULL, service_usd_micros BIGINT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
 
-    toast("Deposit loading failed: " + error.message, true);
-  }
+    CREATE TABLE IF NOT EXISTS marketplace_withdrawals (
+      id UUID PRIMARY KEY, telegram_id BIGINT NOT NULL REFERENCES users(telegram_id),
+      amount_coins NUMERIC(20,2) NOT NULL CHECK (amount_coins >= 2000),
+      method TEXT NOT NULL, payment_details TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','paid','rejected')),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), reviewed_at TIMESTAMPTZ
+    );
+
+    CREATE TABLE IF NOT EXISTS membership_orders (
+      id UUID PRIMARY KEY, telegram_id BIGINT NOT NULL REFERENCES users(telegram_id),
+      plan TEXT NOT NULL, amount_cents INTEGER NOT NULL, method TEXT NOT NULL,
+      reference TEXT, proof TEXT, status TEXT NOT NULL DEFAULT 'pending',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), reviewed_at TIMESTAMPTZ
+    );
+    ALTER TABLE marketplace_campaigns ADD COLUMN IF NOT EXISTS claimed_count INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE task_claims ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
+    ALTER TABLE task_claims DROP CONSTRAINT IF EXISTS task_claims_campaign_id_worker_telegram_id_key;
+    CREATE UNIQUE INDEX IF NOT EXISTS task_claims_one_open_per_worker_campaign
+      ON task_claims(campaign_id,worker_telegram_id) WHERE status IN ('claimed','submitted','approved');
+  `);
 }
 
-/* Other admin sections cannot block the deposit queue. */
-async function refreshAll() {
-  if (!adminSecret) return;
+async function creditWorker(client, telegramId, amount, type, description, reference) {
+  // Keep fractional rewards in NUMERIC, separate from the legacy whole-coin users.coins field.
+  await client.query("INSERT INTO worker_accounts(telegram_id) VALUES($1) ON CONFLICT DO NOTHING", [telegramId]);
+  const r = await client.query("UPDATE worker_accounts SET available_coins=available_coins+$1,updated_at=NOW() WHERE telegram_id=$2 RETURNING available_coins", [amount.toFixed(2), telegramId]);
+  await client.query("INSERT INTO worker_ledger(telegram_id,amount_coins,entry_type,description,reference) VALUES($1,$2,$3,$4,$5)", [telegramId, amount.toFixed(2), type, description, reference]);
+  return r.rows[0].available_coins;
+}
 
-  $("refreshBtn").disabled = true;
+async function expireOldTaskClaims() {
+  // A worker who never submits proof releases the reserved slot after 30 minutes.
+  await pool.query(`WITH expired AS (
+    UPDATE task_claims SET status='expired'
+    WHERE status='claimed' AND started_at < NOW() - INTERVAL '30 minutes'
+    RETURNING campaign_id
+  ), counts AS (
+    SELECT campaign_id,COUNT(*)::int AS n FROM expired GROUP BY campaign_id
+  )
+  UPDATE marketplace_campaigns c SET claimed_count=GREATEST(c.claimed_count-counts.n,0),updated_at=NOW()
+  FROM counts WHERE c.id=counts.campaign_id`);
+}
+
+function usdToCents(usd) { return Math.round(Number(usd) * 100); }
+function getGrossBudgetMicros(workerPoolMicros) { return Math.ceil(workerPoolMicros / WORKER_SHARE); }
+function splitFees(grossMicros) {
+  const worker = Math.floor(grossMicros * 75 / 100);
+  const platform = Math.floor(grossMicros * 20 / 100);
+  const service = grossMicros - worker - platform;
+  return { worker, platform, service };
+}
+
+app.get("/", (req, res) => res.json({ name: "Khmer Earn Marketplace API", status: "online", version: "3.0.0" }));
+app.get("/health", asyncRoute(async (req, res) => { await pool.query("SELECT 1"); res.json({ status: "ok" }); }));
+
+app.post("/api/auth/telegram", asyncRoute(async (req, res) => {
+  let tgUser;
+  try { tgUser = validateInitData(req.body?.initData); }
+  catch (e) { return res.status(401).json({ error: e.message }); }
+  const id = String(tgUser.id);
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const inserted = await client.query(`INSERT INTO users(telegram_id,username,first_name,coins) VALUES($1,$2,$3,$4) ON CONFLICT(telegram_id) DO NOTHING RETURNING telegram_id`, [id, tgUser.username || null, tgUser.first_name || "User", WELCOME_COINS]);
+    await client.query("UPDATE users SET username=$1,first_name=$2 WHERE telegram_id=$3", [tgUser.username || null, tgUser.first_name || "User", id]);
+    await client.query("INSERT INTO advertiser_accounts(telegram_id) VALUES($1) ON CONFLICT DO NOTHING", [id]);
+    await client.query("INSERT INTO worker_accounts(telegram_id) VALUES($1) ON CONFLICT DO NOTHING", [id]);
+    if (inserted.rowCount) {
+      await client.query("INSERT INTO transactions(telegram_id,type,amount,description,reference) VALUES($1,'welcome',$2,'Welcome reward',$3) ON CONFLICT(reference) DO NOTHING", [id, WELCOME_COINS, `welcome:${id}`]);
+
+      // Attribute a referral only once, at the referred user's first registration.
+      const match = String(tgUser.__startParam || "").match(/^ref_(\d{1,20})$/);
+      const referrerId = match ? match[1] : null;
+      if (referrerId && referrerId !== id) {
+        const referrerResult = await client.query("SELECT telegram_id,membership,membership_expiry FROM users WHERE telegram_id=$1 FOR UPDATE", [referrerId]);
+        if (referrerResult.rowCount) {
+          await client.query("UPDATE users SET referred_by=$1 WHERE telegram_id=$2 AND referred_by IS NULL", [referrerId, id]);
+          const referrer = referrerResult.rows[0];
+          const referrerPlan = planFor(referrer);
+          const signupBonus = Number(PLANS[referrerPlan].referralBonus || 0);
+          if (signupBonus > 0) {
+            await creditWorker(client, referrerId, signupBonus, "referral_bonus", "New user referral bonus", `ref-signup:${id}`);
+          }
+        }
+      }
+    }
+    const u = (await client.query("SELECT * FROM users WHERE telegram_id=$1", [id])).rows[0];
+    await client.query("COMMIT");
+    res.json({ success: true, token: signToken(id), user: { telegramId: id, username: u.username, firstName: u.first_name, coins: Number(u.coins), membership: planFor(u) } });
+  } catch (e) { await client.query("ROLLBACK"); throw e; } finally { client.release(); }
+}));
+
+app.get("/api/me", authenticate, asyncRoute(async (req, res) => {
+  const q = await pool.query(`SELECT u.telegram_id,u.username,u.first_name,u.coins,u.membership,u.membership_expiry,u.referred_by, COALESCE(w.available_coins,0) AS worker_earnings, COALESCE(a.balance_usd_micros,0) AS advertiser_balance FROM users u LEFT JOIN worker_accounts w USING(telegram_id) LEFT JOIN advertiser_accounts a USING(telegram_id) WHERE u.telegram_id=$1`, [req.telegramId]);
+  const u = q.rows[0];
+  const p = planFor(u);
+  if (p !== u.membership) await pool.query("UPDATE users SET membership='Free',membership_expiry=NULL WHERE telegram_id=$1", [req.telegramId]);
+  res.json({ user: { telegramId: String(u.telegram_id), username: u.username, firstName: u.first_name, coins: Number(u.coins), membership: p, membershipExpiry: p === "Free" ? null : u.membership_expiry, workerEarnings: Number(u.worker_earnings), advertiserBalanceUsd: (Number(u.advertiser_balance) / 100).toFixed(2), plan: PLANS[p] } });
+}));
+
+// Referral link and account referral statistics for every authenticated user.
+app.get("/api/referrals", authenticate, asyncRoute(async (req, res) => {
+  const stats = await pool.query(`
+    SELECT
+      COUNT(*)::int AS total_invited,
+      COUNT(*) FILTER (WHERE referred.created_at IS NOT NULL)::int AS successful_referrals
+    FROM users referred
+    WHERE referred.referred_by=$1
+  `, [req.telegramId]);
+  const earnings = await pool.query(`
+    SELECT COALESCE(SUM(amount_coins),0)::numeric AS total
+    FROM worker_ledger
+    WHERE telegram_id=$1 AND entry_type IN ('referral_bonus','referral_commission')
+  `, [req.telegramId]);
+  const link = `https://t.me/${TELEGRAM_BOT_USERNAME}?startapp=ref_${req.telegramId}`;
+  res.json({ referral: {
+    link,
+    totalInvited: Number(stats.rows[0]?.total_invited || 0),
+    successfulReferrals: Number(stats.rows[0]?.successful_referrals || 0),
+    earningsCoins: Number(earnings.rows[0]?.total || 0)
+  }});
+}));
+
+// Public plan catalog; subscription checkout requires a separately configured, verified payment flow.
+app.get("/api/plans", (req, res) => res.json({ plans: Object.entries(PLANS).map(([name, p]) => ({ name, ...p, monthlyPriceUsd: (p.priceCents / 100).toFixed(2) })) }));
+app.post("/api/plans/manual-order", authenticate, asyncRoute(async (req, res) => {
+  const plan = String(req.body?.plan || "");
+  const method = String(req.body?.method || "");
+  if (!["Bronze", "Silver", "Gold", "VIP"].includes(plan) || !["ABA Bank", "USDT - TON Network"].includes(method)) return res.status(400).json({ error: "Select a valid plan and payment method." });
+  const reference = String(req.body?.reference || "").trim();
+  const proof = String(req.body?.proof || "").trim();
+  if (reference.length > 200 || proof.length > 1000) return res.status(400).json({ error: "Payment details are too long." });
+  const id = uuid();
+  await pool.query("INSERT INTO membership_orders(id,telegram_id,plan,amount_cents,method,reference,proof) VALUES($1,$2,$3,$4,$5,$6,$7)", [id, req.telegramId, plan, PLANS[plan].priceCents, method, reference || null, proof || null]);
+  res.status(201).json({ success: true, orderId: id, status: "pending", message: "Membership payment submitted for admin review." });
+}));
+// Return the real server-side Faucet status.
+app.get("/api/faucet/status", authenticate, asyncRoute(async (req, res) => {
+  const q = await pool.query(
+    `SELECT u.last_faucet, u.membership, u.membership_expiry,
+      COUNT(fc.id) FILTER (
+        WHERE fc.created_at >=
+          date_trunc('day', NOW() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC'
+      )::int AS claims_today,
+      COALESCE(w.available_coins, 0) AS worker_earnings
+     FROM users u
+     LEFT JOIN faucet_claims fc ON fc.telegram_id = u.telegram_id
+     LEFT JOIN worker_accounts w ON w.telegram_id = u.telegram_id
+     WHERE u.telegram_id = $1
+     GROUP BY u.telegram_id, w.available_coins`,
+    [req.telegramId]
+  );
+
+  const u = q.rows[0];
+  if (!u) return res.status(404).json({ error: "User not found." });
+
+  const planName = planFor(u);
+  const plan = PLANS[planName];
+  const claimsToday = Number(u.claims_today || 0);
+  const remainingMs = u.last_faucet
+    ? Math.max(0, FAUCET_COOLDOWN_MS - (Date.now() - new Date(u.last_faucet).getTime()))
+    : 0;
+
+  res.json({
+    success: true,
+    ready: remainingMs === 0 &&
+      (plan.dailyFaucetLimit === null || claimsToday < plan.dailyFaucetLimit),
+    reward: Math.floor(FAUCET_BASE * plan.faucetMultiplier),
+    cooldownSeconds: 300,
+    remainingMs,
+    nextClaimAt: remainingMs > 0
+      ? new Date(Date.now() + remainingMs).toISOString()
+      : null,
+    claimsToday,
+    dailyLimit: plan.dailyFaucetLimit,
+    membership: planName,
+    workerEarnings: Number(u.worker_earnings)
+  });
+}));
+
+// Faucet limits are enforced by the server using UTC day counts.
+// Faucet claims credit the separate marketplace worker earnings balance.
+app.post("/api/faucet/claim", authenticate, asyncRoute(async (req, res) => {
+  // Verify Turnstile server-side before opening a transaction or awarding coins.
+  const captcha = await verifyTurnstileToken(req.body?.turnstileToken, req.ip);
+  if (!captcha.configured) {
+    return res.status(503).json({
+      success: false,
+      error: "Faucet security verification is not configured. Please contact support."
+    });
+  }
+  if (!captcha.success) {
+    return res.status(403).json({
+      success: false,
+      error: "CAPTCHA verification failed or expired. Please complete the security check again."
+    });
+  }
+
+  const client = await pool.connect();
 
   try {
-    const results = await Promise.allSettled([
-      api("/api/admin/advertiser-deposits?status=" + encodeURIComponent($("depositStatus").value || "pending")),
-      api("/api/admin/worker-withdrawals"),
-      api("/api/admin/campaigns"),
-      api("/api/admin/task-submissions")
-    ]);
+    await client.query("BEGIN");
 
-    if (results[0].status === "fulfilled") {
-      dataStore.deposits = results[0].value.deposits || [];
-    } else {
-      $("depositsTable").innerHTML =
-        '<div class="empty">Deposit error: ' +
-        esc(results[0].reason?.message || "Unknown error") +
-        '</div>';
+    // Lock the user row to prevent simultaneous claims.
+    const q = await client.query(
+      "SELECT * FROM users WHERE telegram_id=$1 FOR UPDATE",
+      [req.telegramId]
+    );
+
+    const u = q.rows[0];
+
+    if (!u) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "User not found." });
     }
 
-    if (results[1].status === "fulfilled") {
-      dataStore.withdrawals = results[1].value.withdrawals || [];
+    const planName = planFor(u);
+    const plan = PLANS[planName];
+
+    const elapsedMs = u.last_faucet
+      ? Date.now() - new Date(u.last_faucet).getTime()
+      : Infinity;
+
+    if (elapsedMs < FAUCET_COOLDOWN_MS) {
+      const remainingMs = FAUCET_COOLDOWN_MS - elapsedMs;
+
+      await client.query("ROLLBACK");
+
+      return res.status(429).json({
+        success: false,
+        error: "Faucet is not ready.",
+        remainingMs,
+        nextClaimInSeconds: Math.ceil(remainingMs / 1000)
+      });
     }
 
-    if (results[2].status === "fulfilled") {
-      dataStore.campaigns = results[2].value.campaigns || [];
+    // Count claims using the UTC calendar day.
+    const count = await client.query(
+      `SELECT COUNT(*)::int AS n
+       FROM faucet_claims
+       WHERE telegram_id=$1
+       AND created_at >=
+         date_trunc('day', NOW() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC'`,
+      [req.telegramId]
+    );
+
+    const dailyCount = Number(count.rows[0].n);
+
+    if (
+      plan.dailyFaucetLimit !== null &&
+      dailyCount >= plan.dailyFaucetLimit
+    ) {
+      await client.query("ROLLBACK");
+
+      return res.status(429).json({
+        success: false,
+        error: "Daily faucet limit reached.",
+        dailyLimit: plan.dailyFaucetLimit,
+        claimsToday: dailyCount
+      });
     }
 
-    if (results[3].status === "fulfilled") {
-      dataStore.submissions = results[3].value.submissions || [];
-    }
+    const reward = Math.floor(
+      FAUCET_BASE * plan.faucetMultiplier
+    );
 
-    $("lastUpdated").textContent = "Last updated " + new Date().toLocaleTimeString();
+    // Record the claim.
+    const claim = await client.query(
+      "INSERT INTO faucet_claims(telegram_id) VALUES($1) RETURNING id,created_at",
+      [req.telegramId]
+    );
 
-    updateMetrics();
-    renderAll();
+    // Update cooldown and lifetime claim count.
+    // IMPORTANT: Do not change users.coins here.
+    await client.query(
+      `UPDATE users
+       SET last_faucet=NOW(),
+           faucet_claims=faucet_claims+1
+       WHERE telegram_id=$1`,
+      [req.telegramId]
+    );
 
-    const failed = results.filter(result => result.status === "rejected");
+    // Credit the separate, withdrawable marketplace worker balance.
+    const workerBalance = await creditWorker(
+      client,
+      req.telegramId,
+      reward,
+      "faucet_reward",
+      "Faucet claim reward",
+      `faucet-worker:${claim.rows[0].id}`
+    );
 
-    if (failed.length) {
-      toast(failed.length + " admin queue(s) failed to load. Check the affected section.", true);
-    }
+    await client.query("COMMIT");
 
+    res.json({
+      success: true,
+      reward,
+      balanceType: "worker_earnings",
+      workerEarnings: Number(workerBalance),
+      claimsToday: dailyCount + 1,
+      dailyLimit: plan.dailyFaucetLimit,
+      nextClaimInSeconds: 300,
+      nextClaimAt: new Date(
+        new Date(claim.rows[0].created_at).getTime() +
+        FAUCET_COOLDOWN_MS
+      ).toISOString()
+    });
+
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
   } finally {
-    $("refreshBtn").disabled = false;
+    client.release();
+  }
+}));
+// Campaign creation. Advertiser wallet must be funded and approved first.
+app.get("/api/advertiser/wallet", authenticate, asyncRoute(async (req, res) => {
+  const q = await pool.query("SELECT balance_usd_micros FROM advertiser_accounts WHERE telegram_id=$1", [req.telegramId]);
+  res.json({ balanceUsd: (Number(q.rows[0]?.balance_usd_micros || 0) / 1000000).toFixed(6) });
+}));
+
+// Transfer approved worker earnings into the advertiser campaign wallet.
+// Conversion: 10,000 worker coins = USD 1.00. No transfer fee.
+app.post("/api/wallet/transfer-to-advertiser", authenticate, asyncRoute(async (req, res) => {
+  const amountCoins = Number(req.body?.amountCoins);
+  if (!Number.isSafeInteger(amountCoins) || amountCoins < 1 || amountCoins > 1000000000) {
+    return res.status(400).json({ error: "Enter a whole number of coins greater than zero." });
+  }
+
+  const amountMicros = amountCoins * 100; // 10,000 coins = 1,000,000 USD micros
+  const reference = `wallet-transfer:${uuid()}`;
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("INSERT INTO worker_accounts(telegram_id) VALUES($1) ON CONFLICT DO NOTHING", [req.telegramId]);
+    await client.query("INSERT INTO advertiser_accounts(telegram_id) VALUES($1) ON CONFLICT DO NOTHING", [req.telegramId]);
+
+    const debit = await client.query(
+      `UPDATE worker_accounts SET available_coins=available_coins-$1,updated_at=NOW()
+       WHERE telegram_id=$2 AND available_coins >= $1 RETURNING available_coins`,
+      [amountCoins.toFixed(2), req.telegramId]
+    );
+    if (!debit.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "Insufficient available worker earnings." });
+    }
+
+    const credit = await client.query(
+      `UPDATE advertiser_accounts SET balance_usd_micros=balance_usd_micros+$1,updated_at=NOW()
+       WHERE telegram_id=$2 RETURNING balance_usd_micros`,
+      [amountMicros, req.telegramId]
+    );
+    await client.query(
+      `INSERT INTO worker_ledger(telegram_id,amount_coins,entry_type,description,reference)
+       VALUES($1,$2,'wallet_transfer_out','Transferred to Advertiser Campaign Wallet (no fee)',$3)`,
+      [req.telegramId, (-amountCoins).toFixed(2), reference]
+    );
+    await client.query(
+      `INSERT INTO advertiser_ledger(telegram_id,amount_usd_micros,entry_type,description,reference)
+       VALUES($1,$2,'worker_wallet_transfer','Transferred from Worker Earnings Wallet (no fee)',$3)`,
+      [req.telegramId, amountMicros, reference]
+    );
+
+    await client.query("COMMIT");
+    res.json({
+      success: true,
+      transferredCoins: amountCoins,
+      creditedUsd: (amountMicros / 1000000).toFixed(2),
+      workerBalance: Number(debit.rows[0].available_coins),
+      advertiserBalanceUsd: (Number(credit.rows[0].balance_usd_micros) / 1000000).toFixed(2),
+      transferFeeUsd: "0.00"
+    });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}));
+
+// Subscribe using the advertiser campaign wallet. The backend deducts funds
+// and activates the membership atomically; each subscription lasts 30 days.
+app.post("/api/plans/subscribe", authenticate, asyncRoute(async (req, res) => {
+  const plan = String(req.body?.plan || "");
+  if (!["Bronze", "Silver", "Gold", "VIP"].includes(plan)) {
+    return res.status(400).json({ error: "Select a valid paid membership plan." });
+  }
+  const amountMicros = PLANS[plan].priceCents * 10000;
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("INSERT INTO advertiser_accounts(telegram_id) VALUES($1) ON CONFLICT DO NOTHING", [req.telegramId]);
+    const account = await client.query(
+      "SELECT balance_usd_micros FROM advertiser_accounts WHERE telegram_id=$1 FOR UPDATE",
+      [req.telegramId]
+    );
+    const balance = Number(account.rows[0]?.balance_usd_micros || 0);
+    if (balance < amountMicros) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: `Insufficient Advertiser Campaign Wallet balance. ${plan} costs $${(PLANS[plan].priceCents / 100).toFixed(2)}.` });
+    }
+
+    const debit = await client.query(
+      `UPDATE advertiser_accounts SET balance_usd_micros=balance_usd_micros-$1,updated_at=NOW()
+       WHERE telegram_id=$2 AND balance_usd_micros >= $1 RETURNING balance_usd_micros`,
+      [amountMicros, req.telegramId]
+    );
+    if (!debit.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "Insufficient Advertiser Campaign Wallet balance." });
+    }
+
+    const current = await client.query(
+      "SELECT membership,membership_expiry FROM users WHERE telegram_id=$1 FOR UPDATE",
+      [req.telegramId]
+    );
+    const user = current.rows[0];
+    const now = new Date();
+    const existingExpiry = user?.membership === plan && user.membership_expiry && new Date(user.membership_expiry) > now
+      ? new Date(user.membership_expiry)
+      : now;
+    const expiry = new Date(existingExpiry.getTime() + 30 * 24 * 60 * 60 * 1000);
+    await client.query(
+      "UPDATE users SET membership=$1,membership_expiry=$2 WHERE telegram_id=$3",
+      [plan, expiry, req.telegramId]
+    );
+    const reference = `membership-wallet:${uuid()}`;
+    await client.query(
+      `INSERT INTO advertiser_ledger(telegram_id,amount_usd_micros,entry_type,description,reference)
+       VALUES($1,$2,'membership_purchase',$3,$4)`,
+      [req.telegramId, -amountMicros, `${plan} membership subscription (30 days)`, reference]
+    );
+    await client.query("COMMIT");
+    res.json({
+      success: true,
+      plan,
+      amountUsd: (amountMicros / 1000000).toFixed(2),
+      membershipExpiry: expiry.toISOString(),
+      advertiserBalanceUsd: (Number(debit.rows[0].balance_usd_micros) / 1000000).toFixed(2),
+      message: `${plan} membership activated for 30 days.`
+    });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}));
+
+app.post("/api/campaigns", authenticate, asyncRoute(async (req, res) => {
+  const b = req.body || {};
+  const type = String(b.type || "").toLowerCase();
+  const title = String(b.title || "").trim();
+  const description = String(b.description || "").trim();
+
+  if (!["ptc", "video", "job", "shortlink"].includes(type) || title.length < 3 || title.length > 120 || description.length > 3000) {
+    return res.status(400).json({ error: "Enter a valid campaign type, title and description." });
+  }
+
+  let targetUrl = validUrl(b.url, type === "job");
+  if ((type !== "job" || b.url) && !targetUrl) {
+    return res.status(400).json({ error: "Enter a valid HTTP or HTTPS URL." });
+  }
+
+  let pack = null, seconds = null, slots, workerReward, workerPoolMicros;
+  let category = null, difficulty = null, expectedMinutes = null, verification = null;
+
+  if (type === "ptc" || type === "video") {
+    pack = String(b.pack || b.package || "").toLowerCase();
+    const config = (type === "ptc" ? PTC : VIDEO)[pack];
+    slots = asInt(b.views ?? b.quantity, 1, 1000000);
+
+    if (!config || !slots) {
+      return res.status(400).json({ error: "Select a valid package and number of views." });
+    }
+
+    seconds = config.seconds;
+    // Use micro-USD to avoid floating-point money calculations.
+    const grossMicrosPerView = Math.round(Number(config.priceUsd) * 1000000);
+    const grossMicros = grossMicrosPerView * slots;
+    const workerMicros = Math.floor(grossMicros * 75 / 100);
+    workerPoolMicros = workerMicros;
+    workerReward = Number((Number(config.priceUsd) * WORKER_SHARE * COINS_PER_USD).toFixed(2));
+    const budgetMicros = grossMicros;
+
+    return createCampaignWithBudget(req, res, {
+      type, title, description, targetUrl, pack, seconds, slots,
+      workerReward, workerPoolMicros, budgetMicros,
+      dailyLimit: asInt(b.dailyLimit || 0, 0, slots) ?? 0,
+      category, difficulty, expectedMinutes, verification
+    });
+  }
+
+  if (type === "job" || type === "shortlink") {
+    slots = asInt(b.slots ?? b.totalSlots, 1, 100000);
+    const reward = Number(b.rewardPerWork ?? b.rewardCoins);
+
+    if (!slots || !Number.isFinite(reward) || reward <= 0 || reward > 10000000 ||
+        !Number.isInteger(Math.round(reward * 100)) ||
+        (type === "job" && !JOB_CATEGORIES.includes(String(b.category))) ||
+        (type === "job" && !DIFFICULTIES.includes(String(b.difficulty))) ||
+        !VERIFY_TYPES.includes(String(b.verificationType))) {
+      return res.status(400).json({ error: "Complete the job/shortlink reward, slots and verification fields correctly." });
+    }
+
+    workerReward = Number(reward.toFixed(2));
+    category = type === "job" ? String(b.category) : "Shortlink";
+    difficulty = type === "job" ? String(b.difficulty) : "Easy";
+
+    expectedMinutes = type === "job"
+      ? (asInt(b.expectedMinutes, 1, 1440) || (() => {
+          const match = String(b.expectedTime || "").match(/\d+/);
+          return match ? asInt(match[0], 1, 1440) : null;
+        })())
+      : null;
+
+    verification = String(b.verificationType);
+
+    if (type === "job" && !expectedMinutes) {
+      return res.status(400).json({ error: "Expected time is required." });
+    }
+
+    const workerPoolCoins = Math.ceil(workerReward * slots * 100) / 100;
+    workerPoolMicros = Math.ceil(workerPoolCoins / COINS_PER_USD * 1000000);
+    const budgetMicros = getGrossBudgetMicros(workerPoolMicros);
+
+    return createCampaignWithBudget(req, res, {
+      type, title, description, targetUrl, pack: null, seconds: null,
+      slots, workerReward, workerPoolMicros, budgetMicros,
+      dailyLimit: asInt(b.dailyLimit || 0, 0, slots) ?? 0,
+      category, difficulty, expectedMinutes, verification
+    });
+  }
+}));
+
+async function createCampaignWithBudget(req, res, c) {
+  if (!Number.isSafeInteger(c.budgetMicros) || c.budgetMicros < 1) {
+    return res.status(400).json({ error: "Campaign budget is too small." });
+  }
+
+  const client = await pool.connect();
+  const id = uuid();
+
+  try {
+    await client.query("BEGIN");
+
+    await client.query(
+      "INSERT INTO advertiser_accounts(telegram_id) VALUES($1) ON CONFLICT DO NOTHING",
+      [req.telegramId]
+    );
+
+    const debit = await client.query(
+      "UPDATE advertiser_accounts SET balance_usd_micros=balance_usd_micros-$1,updated_at=NOW() WHERE telegram_id=$2 AND balance_usd_micros >= $1 RETURNING balance_usd_micros",
+      [c.budgetMicros, req.telegramId]
+    );
+
+    if (!debit.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(409).json({
+        error: "Insufficient advertiser campaign balance. Deposit campaign funds first."
+      });
+    }
+
+    await client.query(
+      `INSERT INTO marketplace_campaigns(
+        id,owner_telegram_id,campaign_type,title,description,target_url,
+        pack_code,duration_seconds,category,difficulty,expected_minutes,
+        verification_type,worker_reward_coins,gross_budget_usd_micros,
+        reserved_budget_usd_micros,total_slots,daily_limit,status
+      ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$14,$15,$16,'pending')`,
+      [
+        id, req.telegramId, c.type, c.title, c.description || null,
+        c.targetUrl, c.pack, c.seconds, c.category, c.difficulty,
+        c.expectedMinutes, c.verification, c.workerReward.toFixed(2),
+        c.budgetMicros, c.slots, c.dailyLimit
+      ]
+    );
+
+    await client.query(
+      "INSERT INTO advertiser_ledger(telegram_id,amount_usd_micros,entry_type,description,reference) VALUES($1,$2,'campaign_reserve',$3,$4)",
+      [req.telegramId, -c.budgetMicros, `Campaign budget reserved: ${c.title}`, `campaign-reserve:${id}`]
+    );
+
+    // Internal fee allocation is stored privately for accounting.
+    const split = splitFees(c.budgetMicros);
+
+    await client.query(
+      "INSERT INTO marketplace_fee_ledger(campaign_id,gross_usd_micros,worker_pool_usd_micros,platform_usd_micros,service_usd_micros) VALUES($1,$2,$3,$4,$5)",
+      [id, c.budgetMicros, split.worker, split.platform, split.service]
+    );
+
+    await client.query("COMMIT");
+
+    res.status(201).json({
+      success: true,
+      campaignId: id,
+      status: "pending",
+      budgetUsd: (c.budgetMicros / 1000000).toFixed(6),
+      quantity: c.slots,
+      message: "Campaign submitted for review."
+    });
+
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
   }
 }
 
-function updateMetrics() {
-  $("mDeposits").textContent =
-    dataStore.deposits.filter(item => item.status === "pending").length;
-
-  $("mWithdrawals").textContent = dataStore.withdrawals.length;
-
-  $("mCampaigns").textContent =
-    dataStore.campaigns.filter(item => item.status === "pending").length;
-
-  $("mSubmissions").textContent = dataStore.submissions.length;
-
-  $("overviewQueues").innerHTML = [
-    ["Advertiser deposits", dataStore.deposits.filter(item => item.status === "pending").length, "deposits"],
-    ["Worker withdrawals", dataStore.withdrawals.length, "withdrawals"],
-    ["Campaigns awaiting approval", dataStore.campaigns.filter(item => item.status === "pending").length, "campaigns"],
-    ["Task submissions awaiting review", dataStore.submissions.length, "submissions"]
-  ].map(([label, count, page]) => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 4px;border-bottom:1px solid #203450">
-      <span>${label}</span>
-      <button onclick="showPage('${page}')">${count} · Open</button>
-    </div>
-  `).join("");
-}
-
-function renderAll() {
-  renderDeposits();
-  renderWithdrawals();
-  renderCampaigns();
-  renderSubmissions();
-}
-
-function renderDeposits() {
-  const query = ($("depositSearch").value || "").toLowerCase();
-
-  const items = dataStore.deposits.filter(item =>
-    (
-      String(item.username || "") + " " +
-      String(item.telegram_id || "") + " " +
-      String(item.payment_reference || "")
-    ).toLowerCase().includes(query)
+app.get("/api/campaigns/my", authenticate, asyncRoute(async (req, res) => {
+  const q = await pool.query(
+    "SELECT id,campaign_type,title,status,gross_budget_usd_micros,total_slots,completed_count,created_at FROM marketplace_campaigns WHERE owner_telegram_id=$1 ORDER BY created_at DESC LIMIT 100",
+    [req.telegramId]
   );
 
-  $("depositsTable").innerHTML = table(
-    ["Advertiser", "Amount", "Method & reference", "Submitted", "Status", "Action"],
-    items.map(item => `
-      <tr>
-        <td>
-          <b>${esc(item.username || item.first_name || "Telegram user")}</b>
-          <small>ID: ${esc(item.telegram_id)}</small>
-        </td>
-        <td><b>${esc(item.amount_usd || usdMicros(item.amount_usd_micros))}</b></td>
-        <td>
-          ${esc(item.method)}
-          <small>Ref: ${esc(item.payment_reference)}</small>
-          <small>${esc(item.payment_details || "")}</small>
-        </td>
-        <td>${dateText(item.created_at)}</td>
-        <td>${pill(item.status)}</td>
-        <td>
-          ${item.status === "pending" ? `
-            <div class="rowbuttons">
-              <button class="success" onclick="reviewDeposit('${esc(item.id)}','approve')">Approve</button>
-              <button class="danger" onclick="reviewDeposit('${esc(item.id)}','reject')">Reject</button>
-            </div>
-          ` : "—"}
-        </td>
-      </tr>
-    `)
+  res.json({
+    campaigns: q.rows.map(x => ({
+      ...x,
+      budgetUsd: (Number(x.gross_budget_usd_micros) / 1000000).toFixed(6)
+    }))
+  });
+}));
+
+app.get("/api/tasks", authenticate, asyncRoute(async (req, res) => {
+  await expireOldTaskClaims();
+
+  const type = String(req.query.type || "").toLowerCase();
+  const valid = ["ptc", "video", "job", "shortlink"];
+
+  if (type && !valid.includes(type)) {
+    return res.status(400).json({ error: "Invalid task category." });
+  }
+
+  const q = await pool.query(`
+    SELECT c.id,c.campaign_type,c.title,c.description,c.target_url,
+      c.pack_code,c.duration_seconds,c.category,c.difficulty,
+      c.expected_minutes,c.verification_type,c.worker_reward_coins,
+      c.total_slots,c.completed_count,c.created_at,
+      GREATEST(c.total_slots-c.completed_count-c.claimed_count,0) AS remaining
+    FROM marketplace_campaigns c
+    WHERE c.status='active'
+      AND c.owner_telegram_id<>$1
+      AND (c.completed_count+c.claimed_count)<c.total_slots
+      AND ($2='' OR c.campaign_type=$2)
+      AND NOT EXISTS(
+        SELECT 1 FROM task_claims t
+        WHERE t.campaign_id=c.id AND t.worker_telegram_id=$1
+          AND t.status IN ('claimed','submitted','approved')
+      )
+    ORDER BY c.created_at DESC
+    LIMIT 100
+  `, [req.telegramId, type]);
+
+  res.json({ tasks: q.rows });
+}));
+
+app.post("/api/tasks/:id/claim", authenticate, asyncRoute(async (req, res) => {
+  await expireOldTaskClaims();
+
+  const id = String(req.params.id || "");
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const c = await client.query(
+      "SELECT * FROM marketplace_campaigns WHERE id=$1 FOR UPDATE",
+      [id]
+    );
+
+    const campaign = c.rows[0];
+
+    if (!campaign || campaign.status !== "active" ||
+        Number(campaign.completed_count) + Number(campaign.claimed_count) >= Number(campaign.total_slots) ||
+        String(campaign.owner_telegram_id) === req.telegramId) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Task is not available." });
+    }
+
+    if (Number(campaign.daily_limit || 0) > 0) {
+      const daily = await client.query(
+        "SELECT COUNT(*)::int AS n FROM task_claims WHERE campaign_id=$1 AND started_at >= date_trunc('day', NOW() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC' AND status IN ('claimed','submitted','approved')",
+        [id]
+      );
+
+      if (daily.rows[0].n >= Number(campaign.daily_limit)) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ error: "This campaign has reached its daily task limit." });
+      }
+    }
+
+    const claimId = uuid();
+
+    await client.query(
+      "INSERT INTO task_claims(id,campaign_id,worker_telegram_id) VALUES($1,$2,$3)",
+      [claimId, id, req.telegramId]
+    );
+
+    await client.query(
+      "UPDATE marketplace_campaigns SET claimed_count=claimed_count+1,updated_at=NOW() WHERE id=$1",
+      [id]
+    );
+
+    await client.query("COMMIT");
+
+    res.status(201).json({
+      success: true,
+      claimId,
+      campaignId: id,
+      status: "claimed",
+      instructions: campaign.description,
+      targetUrl: campaign.target_url,
+      durationSeconds: campaign.duration_seconds,
+      verificationType: campaign.verification_type
+    });
+
+  } catch (e) {
+    await client.query("ROLLBACK");
+    if (e.code === "23505") {
+      return res.status(409).json({ error: "You have already claimed this task." });
+    }
+    throw e;
+  } finally {
+    client.release();
+  }
+}));
+app.post(["/api/tasks/claims/:id/submit", "/api/tasks/:id/submit"], authenticate, screenshotUpload.single("screenshot"), asyncRoute(async (req, res) => {
+  const claimId = String(req.params.id || "");
+  const proofText = String(req.body?.proofText || "").trim();
+  const proofUrl = req.body?.proofUrl ? validUrl(req.body.proofUrl) : null;
+
+  if (proofText.length > 2000 || (req.body?.proofUrl && !proofUrl)) {
+    return res.status(400).json({ error: "Invalid task proof." });
+  }
+
+  const existing = await pool.query(
+    `SELECT t.id,t.campaign_id,c.verification_type
+     FROM task_claims t JOIN marketplace_campaigns c ON c.id=t.campaign_id
+     WHERE t.id=$1 AND t.worker_telegram_id=$2 AND t.status='claimed'`,
+    [claimId, req.telegramId]
   );
-}
+  if (!existing.rowCount) return res.status(404).json({ error: "Active task claim not found." });
 
-function renderWithdrawals() {
-  const query = ($("withdrawSearch").value || "").toLowerCase();
+  const verificationType = String(existing.rows[0].verification_type || "text").toLowerCase();
+  let imagePath = null;
 
-  const items = dataStore.withdrawals.filter(item =>
-    (
-      String(item.telegram_id || "") + " " +
-      String(item.method || "") + " " +
-      String(item.payment_details || "")
-    ).toLowerCase().includes(query)
-  );
-
-  $("withdrawalsTable").innerHTML = table(
-    ["Worker", "Amount", "Payment details", "Requested", "Status / action"],
-    items.map(item => `
-      <tr>
-        <td><b>${esc(item.telegram_id)}</b></td>
-        <td>
-          <b>${Number(item.amount_coins || 0).toLocaleString()} coins</b>
-          <small>${(Number(item.amount_coins || 0) / 10000).toFixed(4)} USD</small>
-        </td>
-        <td>${esc(item.method)}<small>${esc(item.payment_details)}</small></td>
-        <td>${dateText(item.created_at)}</td>
-        <td>
-          ${pill(item.status)}
-          <div class="rowbuttons" style="margin-top:7px">
-            <button class="success" onclick="reviewWithdrawal('${esc(item.id)}','paid')">Mark paid</button>
-            <button class="danger" onclick="reviewWithdrawal('${esc(item.id)}','rejected')">Reject & refund</button>
-          </div>
-        </td>
-      </tr>
-    `)
-  );
-}
-
-function renderCampaigns() {
-  const query = ($("campaignSearch").value || "").toLowerCase();
-
-  const items = dataStore.campaigns.filter(item =>
-    (
-      String(item.title || "") + " " +
-      String(item.owner_telegram_id || "") + " " +
-      String(item.campaign_type || "")
-    ).toLowerCase().includes(query)
-  );
-
-  $("campaignsTable").innerHTML = table(
-    ["Campaign", "Owner", "Budget / reward", "Slots", "Status", "Action"],
-    items.map(item => `
-      <tr>
-        <td>
-          <b>${esc(item.title)}</b>
-          <small>${esc(item.campaign_type)} · ${esc(item.category || "")}</small>
-          <small>${esc(item.description || "")}</small>
-          <small>${item.target_url ? `<a href="${esc(item.target_url)}" target="_blank" rel="noopener">Open target URL</a>` : ""}</small>
-        </td>
-        <td>${esc(item.owner_telegram_id)}</td>
-        <td>
-          ${usdMicros(item.reserved_budget_usd_micros)}
-          <small>Reward: ${esc(item.worker_reward_coins)} coins</small>
-        </td>
-        <td>
-          ${esc(item.completed_count || 0)} / ${esc(item.total_slots || 0)}
-          <small>Claimed: ${esc(item.claimed_count || 0)}</small>
-        </td>
-        <td>${pill(item.status)}</td>
-        <td>
-          <div class="rowbuttons">
-            ${item.status === "pending" ? `
-              <button class="success" onclick="reviewCampaign('${esc(item.id)}','approve')">Approve</button>
-              <button class="danger" onclick="reviewCampaign('${esc(item.id)}','reject')">Reject</button>
-            ` : ""}
-            ${item.status === "active" ? `<button onclick="reviewCampaign('${esc(item.id)}','pause')">Pause</button>` : ""}
-            ${item.status === "paused" ? `<button class="success" onclick="reviewCampaign('${esc(item.id)}','resume')">Resume</button>` : ""}
-          </div>
-        </td>
-      </tr>
-    `)
-  );
-}
-
-function renderSubmissions() {
-  const query = ($("submissionSearch").value || "").toLowerCase();
-
-  const items = dataStore.submissions.filter(item =>
-    (
-      String(item.title || "") + " " +
-      String(item.worker_telegram_id || "") + " " +
-      String(item.campaign_type || "") + " " +
-      String(item.proof_text || "") + " " +
-      String(item.proof_url || "")
-    ).toLowerCase().includes(query)
-  );
-
-  $("submissionsTable").innerHTML = table(
-    ["Campaign", "Worker", "Proof", "Submitted", "Reward", "Action"],
-    items.map(item => `
-      <tr>
-        <td><b>${esc(item.title)}</b><small>${esc(item.campaign_type)}</small></td>
-        <td>${esc(item.worker_telegram_id)}</td>
-        <td>
-          ${esc(item.proof_text || "—")}
-          ${item.proof_url ? `<small><a href="${esc(item.proof_url)}" target="_blank" rel="noopener">Open proof URL</a></small>` : ""}
-        </td>
-        <td>${dateText(item.submitted_at)}</td>
-        <td>${Number(item.worker_reward_coins || 0).toLocaleString()} coins</td>
-        <td>
-          <div class="rowbuttons">
-            <button class="success" onclick="reviewSubmission('${esc(item.id)}','approve')">Approve</button>
-            <button class="danger" onclick="reviewSubmission('${esc(item.id)}','reject')">Reject</button>
-          </div>
-        </td>
-      </tr>
-    `)
-  );
-}
-
-async function reviewDeposit(id, action) {
-  let adminNote = "";
-
-  if (action === "reject") {
-    adminNote = prompt("Reason for rejecting this deposit (optional):");
-    if (adminNote === null) return;
-  } else {
-    if (!confirm("Have you independently confirmed this payment arrived? Approve and credit the advertiser campaign wallet?")) return;
-    adminNote = "Payment independently verified by admin";
+  if (verificationType === "screenshot") {
+    if (!supabase) return res.status(503).json({ error: "Screenshot storage is not configured. Please contact support." });
+    if (!req.file) return res.status(400).json({ error: "Please choose a screenshot image." });
+    const detected = detectScreenshotType(req.file.buffer);
+    if (!detected || detected.mime !== req.file.mimetype) {
+      return res.status(400).json({ error: "The uploaded file is not a valid JPG, PNG or WEBP image." });
+    }
+    imagePath = `${existing.rows[0].campaign_id}/${claimId}/${crypto.randomUUID()}.${detected.ext}`;
+    const { error: uploadError } = await supabase.storage.from(TASK_PROOF_BUCKET).upload(imagePath, req.file.buffer, {
+      contentType: detected.mime,
+      cacheControl: "3600",
+      upsert: false
+    });
+    if (uploadError) {
+      console.error("Screenshot upload failed:", uploadError.message);
+      return res.status(502).json({ error: "Screenshot upload failed. Please try again." });
+    }
+  } else if (req.file) {
+    return res.status(400).json({ error: "This campaign does not accept screenshot uploads." });
+  } else if (verificationType === "text" && !proofText) {
+    return res.status(400).json({ error: "This campaign requires text proof." });
+  } else if (verificationType === "link" && !proofUrl) {
+    return res.status(400).json({ error: "This campaign requires a valid proof URL." });
   }
 
   try {
-    await api(`/api/admin/advertiser-deposits/${encodeURIComponent(id)}/review`, {
-      method: "POST",
-      body: JSON.stringify({ action, adminNote })
-    });
-
-    toast("Deposit " + (action === "approve" ? "approved and wallet credited." : "rejected."));
-    await refreshAll();
-
+    const q = await pool.query(
+      "UPDATE task_claims SET status='submitted',proof_text=$1,proof_url=$2,proof_image_path=$3,submitted_at=NOW() WHERE id=$4 AND worker_telegram_id=$5 AND status='claimed' RETURNING id",
+      [proofText || null, proofUrl, imagePath, claimId, req.telegramId]
+    );
+    if (!q.rowCount) {
+      if (imagePath && supabase) await supabase.storage.from(TASK_PROOF_BUCKET).remove([imagePath]);
+      return res.status(409).json({ error: "This task claim has already been submitted or is no longer active." });
+    }
   } catch (error) {
-    toast(error.message, true);
+    if (imagePath && supabase) await supabase.storage.from(TASK_PROOF_BUCKET).remove([imagePath]);
+    throw error;
   }
-}
 
-async function reviewWithdrawal(id, action) {
-  const message = action === "paid"
-    ? "Confirm you have already sent this payout. Mark it as paid?"
-    : "Reject this withdrawal and return the reserved coins to the worker?";
+  res.json({ success: true, status: "submitted", message: "Proof submitted for advertiser review." });
+}));
 
-  if (!confirm(message)) return;
+app.get("/api/tasks/my-claims", authenticate, asyncRoute(async (req, res) => {
+  const q = await pool.query(
+    "SELECT t.id,t.campaign_id,t.status,t.proof_text,t.proof_url,t.proof_image_path,t.rejection_reason,t.started_at,t.submitted_at,c.title,c.campaign_type,c.verification_type,c.worker_reward_coins FROM task_claims t JOIN marketplace_campaigns c ON c.id=t.campaign_id WHERE t.worker_telegram_id=$1 ORDER BY t.started_at DESC LIMIT 100",
+    [req.telegramId]
+  );
+  const claims = await Promise.all(q.rows.map(async row => ({ ...row, proof_image_url: await signedProofUrl(row.proof_image_path) })));
+  res.json({ claims });
+}));
+
+// Advertiser review center: only the campaign owner can review submissions.
+app.get("/api/advertiser/submissions", authenticate, asyncRoute(async (req, res) => {
+  const status = String(req.query.status || "submitted");
+
+  if (!["submitted", "approved", "rejected", "all"].includes(status)) {
+    return res.status(400).json({ error: "Invalid submission filter." });
+  }
+
+  const q = await pool.query(`
+    SELECT t.id AS claim_id,t.campaign_id,t.worker_telegram_id,t.status,
+      t.proof_text,t.proof_url,t.proof_image_path,t.rejection_reason,t.started_at,
+      t.submitted_at,t.reviewed_at,c.title,c.campaign_type,
+      c.worker_reward_coins,c.duration_seconds,c.verification_type
+    FROM task_claims t
+    JOIN marketplace_campaigns c ON c.id=t.campaign_id
+    WHERE c.owner_telegram_id=$1 AND ($2='all' OR t.status=$2)
+    ORDER BY t.submitted_at DESC NULLS LAST,t.started_at DESC
+    LIMIT 200
+  `, [req.telegramId, status]);
+
+  const submissions = await Promise.all(q.rows.map(async row => ({ ...row, proof_image_url: await signedProofUrl(row.proof_image_path) })));
+  res.json({ submissions });
+}));
+
+app.post("/api/advertiser/submissions/:id/review", authenticate, asyncRoute(async (req, res) => {
+  const action = String(req.body?.action || "");
+  const reason = String(req.body?.reason || "").trim();
+
+  if (!["approve", "reject"].includes(action)) {
+    return res.status(400).json({ error: "Choose approve or reject." });
+  }
+
+  if (action === "reject" && (reason.length < 5 || reason.length > 500)) {
+    return res.status(400).json({ error: "Please provide a rejection reason between 5 and 500 characters." });
+  }
+
+  const client = await pool.connect();
 
   try {
-    await api(`/api/admin/worker-withdrawals/${encodeURIComponent(id)}`, {
-      method: "POST",
-      body: JSON.stringify({ action })
+    await client.query("BEGIN");
+
+    const q = await client.query(`
+      SELECT t.*,c.owner_telegram_id,c.worker_reward_coins,
+        c.id AS cid,c.total_slots,c.completed_count,c.claimed_count
+      FROM task_claims t
+      JOIN marketplace_campaigns c ON c.id=t.campaign_id
+      WHERE t.id=$1
+      FOR UPDATE OF t,c
+    `, [req.params.id]);
+
+    const item = q.rows[0];
+
+    if (!item || String(item.owner_telegram_id) !== req.telegramId) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Submission not found for your campaigns." });
+    }
+
+    if (item.status !== "submitted") {
+      await client.query("ROLLBACK");
+      return res.status(409).json({ error: "This submission has already been reviewed." });
+    }
+
+    if (action === "approve") {
+      const reward = Number(item.worker_reward_coins);
+      const ref = `task-reward:${item.id}`;
+
+      await creditWorker(
+        client,
+        String(item.worker_telegram_id),
+        reward,
+        "task_reward",
+        "Advertiser-approved marketplace task reward",
+        ref
+      );
+
+      await client.query(
+        "UPDATE task_claims SET status='approved',reviewed_at=NOW(),rejection_reason=NULL WHERE id=$1",
+        [item.id]
+      );
+
+      await client.query(
+        "UPDATE marketplace_campaigns SET claimed_count=GREATEST(claimed_count-1,0),completed_count=completed_count+1,updated_at=NOW(),status=CASE WHEN completed_count+1>=total_slots THEN 'completed' ELSE status END WHERE id=$1",
+        [item.cid]
+      );
+
+      const referrer = await client.query(
+        "SELECT referred.referred_by,referrer.membership,referrer.membership_expiry FROM users referred JOIN users referrer ON referrer.telegram_id=referred.referred_by WHERE referred.telegram_id=$1",
+        [item.worker_telegram_id]
+      );
+
+      if (referrer.rows[0]?.referred_by) {
+        const rp = planFor({
+          membership: referrer.rows[0].membership,
+          membership_expiry: referrer.rows[0].membership_expiry
+        });
+
+        const commission = Number(
+          (reward * PLANS[rp].referralPercent / 100).toFixed(2)
+        );
+
+        if (commission > 0) {
+          await creditWorker(
+            client,
+            String(referrer.rows[0].referred_by),
+            commission,
+            "referral_commission",
+            "Referral commission on advertiser-approved task reward",
+            `ref-commission:${item.id}`
+          );
+        }
+      }
+
+    } else {
+      await client.query(
+        "UPDATE task_claims SET status='rejected',reviewed_at=NOW(),rejection_reason=$1 WHERE id=$2",
+        [reason, item.id]
+      );
+
+      await client.query(
+        "UPDATE marketplace_campaigns SET claimed_count=GREATEST(claimed_count-1,0),updated_at=NOW() WHERE id=$1",
+        [item.cid]
+      );
+    }
+
+    await client.query("COMMIT");
+
+    res.json({
+      success: true,
+      claimId: item.id,
+      status: action === "approve" ? "approved" : "rejected",
+      message: action === "approve"
+        ? "Worker reward approved and credited."
+        : "Submission rejected with your reason."
     });
 
-    toast(action === "paid" ? "Withdrawal marked paid." : "Withdrawal rejected; coins refunded.");
-    await refreshAll();
-
-  } catch (error) {
-    toast(error.message, true);
+  } catch (e) {
+    await client.query("ROLLBACK");
+    if (e.code === "23505") {
+      return res.status(409).json({ error: "This reward has already been processed." });
+    }
+    throw e;
+  } finally {
+    client.release();
   }
-}
+}));
 
-async function reviewCampaign(id, action) {
-  const messages = {
-    approve: "Approve this campaign and make it available to eligible workers?",
-    reject: "Reject this campaign and return its reserved campaign budget?",
-    pause: "Pause this campaign?",
-    resume: "Resume this campaign?"
+// Admin campaign review and funding.
+app.get("/api/admin/campaigns", adminLimiter, asyncRoute(async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+
+  const q = await pool.query(
+    "SELECT * FROM marketplace_campaigns WHERE status IN ('pending','active','paused') ORDER BY created_at ASC LIMIT 200"
+  );
+
+  res.json({ campaigns: q.rows });
+}));
+
+app.post("/api/admin/campaigns/:id/review", adminLimiter, asyncRoute(async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+
+  const action = String(req.body?.action || "");
+
+  if (!["approve", "reject", "pause", "resume"].includes(action)) {
+    return res.status(400).json({ error: "Invalid review action." });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const q = await client.query(
+      "SELECT * FROM marketplace_campaigns WHERE id=$1 FOR UPDATE",
+      [req.params.id]
+    );
+
+    const c = q.rows[0];
+
+    if (!c) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Campaign not found." });
+    }
+
+    const status = ({
+      approve: "active",
+      reject: "rejected",
+      pause: "paused",
+      resume: "active"
+    })[action];
+
+    await client.query(
+      "UPDATE marketplace_campaigns SET status=$1,updated_at=NOW() WHERE id=$2",
+      [status, c.id]
+    );
+
+    if (action === "reject") {
+      await client.query(
+        "UPDATE advertiser_accounts SET balance_usd_micros=balance_usd_micros+$1,updated_at=NOW() WHERE telegram_id=$2",
+        [c.reserved_budget_usd_micros, c.owner_telegram_id]
+      );
+
+      await client.query(
+        "INSERT INTO advertiser_ledger(telegram_id,amount_usd_micros,entry_type,description,reference) VALUES($1,$2,'campaign_refund','Rejected campaign budget returned',$3) ON CONFLICT(reference) DO NOTHING",
+        [c.owner_telegram_id, c.reserved_budget_usd_micros, `campaign-refund:${c.id}`]
+      );
+
+      await client.query(
+        "UPDATE marketplace_campaigns SET reserved_budget_usd_micros=0 WHERE id=$1",
+        [c.id]
+      );
+    }
+
+    await client.query("COMMIT");
+    res.json({ success: true, campaignId: c.id, status });
+
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+}));
+
+app.get("/api/admin/task-submissions", adminLimiter, asyncRoute(async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+
+  const q = await pool.query(
+    "SELECT t.*,c.title,c.campaign_type,c.worker_reward_coins,c.owner_telegram_id FROM task_claims t JOIN marketplace_campaigns c ON c.id=t.campaign_id WHERE t.status='submitted' ORDER BY t.submitted_at ASC LIMIT 200"
+  );
+  const submissions = await Promise.all(q.rows.map(async row => ({ ...row, proof_image_url: await signedProofUrl(row.proof_image_path) })));
+  res.json({ submissions });
+}));
+
+app.post("/api/admin/task-submissions/:id/review", adminLimiter, asyncRoute(async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+
+  const action = String(req.body?.action || "");
+
+  if (!["approve", "reject"].includes(action)) {
+    return res.status(400).json({ error: "Choose approve or reject." });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const q = await client.query(
+      "SELECT t.*,c.owner_telegram_id,c.worker_reward_coins,c.id AS cid,c.total_slots,c.completed_count,c.reserved_budget_usd_micros,c.status AS campaign_status FROM task_claims t JOIN marketplace_campaigns c ON c.id=t.campaign_id WHERE t.id=$1 FOR UPDATE OF t,c",
+      [req.params.id]
+    );
+
+    const item = q.rows[0];
+
+    if (!item || item.status !== "submitted") {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Pending task submission not found." });
+    }
+
+    if (action === "approve") {
+      const reward = Number(item.worker_reward_coins);
+      const ref = `task-reward:${item.id}`;
+
+      await creditWorker(
+        client,
+        String(item.worker_telegram_id),
+        reward,
+        "task_reward",
+        "Approved marketplace task reward",
+        ref
+      );
+
+      await client.query(
+        "UPDATE marketplace_campaigns SET claimed_count=GREATEST(claimed_count-1,0),completed_count=completed_count+1,updated_at=NOW(),status=CASE WHEN completed_count+1>=total_slots THEN 'completed' ELSE status END WHERE id=$1",
+        [item.cid]
+      );
+
+      await client.query(
+        "UPDATE task_claims SET status='approved',reviewed_at=NOW() WHERE id=$1",
+        [item.id]
+      );
+
+      // Referral commission is calculated only on approved task rewards.
+      const referrer = await client.query(
+        "SELECT referred.referred_by,referrer.membership,referrer.membership_expiry FROM users referred JOIN users referrer ON referrer.telegram_id=referred.referred_by WHERE referred.telegram_id=$1",
+        [item.worker_telegram_id]
+      );
+
+      if (referrer.rows[0]?.referred_by) {
+        const rp = planFor({
+          membership: referrer.rows[0].membership,
+          membership_expiry: referrer.rows[0].membership_expiry
+        });
+
+        const commission = Number(
+          (reward * PLANS[rp].referralPercent / 100).toFixed(2)
+        );
+
+        if (commission > 0) {
+          await creditWorker(
+            client,
+            String(referrer.rows[0].referred_by),
+            commission,
+            "referral_commission",
+            "Referral commission on verified task reward",
+            `ref-commission:${item.id}`
+          );
+        }
+      }
+
+    } else {
+      await client.query(
+        "UPDATE task_claims SET status='rejected',reviewed_at=NOW(),rejection_reason='Rejected by marketplace administrator' WHERE id=$1",
+        [item.id]
+      );
+
+      await client.query(
+        "UPDATE marketplace_campaigns SET claimed_count=GREATEST(claimed_count-1,0),updated_at=NOW() WHERE id=$1",
+        [item.cid]
+      );
+    }
+
+    await client.query("COMMIT");
+    res.json({
+      success: true,
+      claimId: item.id,
+      status: action === "approve" ? "approved" : "rejected"
+    });
+
+  } catch (e) {
+    await client.query("ROLLBACK");
+    if (e.code === "23505") {
+      return res.status(409).json({ error: "This reward has already been processed." });
+    }
+    throw e;
+  } finally {
+    client.release();
+  }
+}));
+
+// Deposit configuration is public to authenticated users. Payment instructions are
+// supplied through Render environment variables; never hard-code wallet details here.
+app.get("/api/advertiser/deposit-methods", authenticate, (req, res) => {
+  const abaInstructions = String(process.env.ABA_DEPOSIT_INSTRUCTIONS || "").trim();
+  const tonAddress = String(process.env.USDT_TON_DEPOSIT_ADDRESS || "").trim();
+  res.json({
+    methods: [
+      { method: "ABA Bank", enabled: Boolean(abaInstructions), instructions: abaInstructions || null, review: "manual" },
+      { method: "USDT - TON Network", enabled: Boolean(tonAddress), instructions: tonAddress || null, review: "manual" }
+    ],
+    minimumUsd: "1.00",
+    maximumUsd: "10000.00",
+    note: "Submit your payment reference after sending payment. Campaign funds are credited only after administrator verification."
+  });
+});
+
+// User deposit history. This is campaign funding only, never worker earnings.
+app.get("/api/advertiser/deposits", authenticate, asyncRoute(async (req, res) => {
+  const q = await pool.query(
+    `SELECT id, amount_usd_micros, method, payment_reference, status,
+            admin_note, created_at, reviewed_at
+     FROM advertiser_deposit_requests
+     WHERE telegram_id=$1 ORDER BY created_at DESC LIMIT 50`,
+    [req.telegramId]
+  );
+  res.json({ deposits: q.rows.map(d => ({
+    id: d.id,
+    amountUsd: (Number(d.amount_usd_micros) / 1000000).toFixed(2),
+    method: d.method,
+    paymentReference: d.payment_reference,
+    status: d.status,
+    adminNote: d.admin_note,
+    createdAt: d.created_at,
+    reviewedAt: d.reviewed_at
+  })) });
+}));
+
+// Submit a manual advertiser-wallet deposit request. No funds are credited here.
+app.post("/api/advertiser/deposits", authenticate, asyncRoute(async (req, res) => {
+  const rawAmount = String(req.body?.amountUsd ?? "").trim();
+  const method = String(req.body?.method || "");
+  const paymentReference = String(req.body?.paymentReference || "").trim();
+  const paymentDetails = String(req.body?.paymentDetails || "").trim();
+  const amount = Number(rawAmount);
+  const amountMicros = Math.round(amount * 1000000);
+
+  if (!/^\d{1,5}(?:\.\d{1,2})?$/.test(rawAmount) ||
+      !Number.isSafeInteger(amountMicros) || amountMicros < 1000000 || amountMicros > 10000000000 ||
+      !["ABA Bank", "USDT - TON Network"].includes(method) ||
+      paymentReference.length < 4 || paymentReference.length > 200 ||
+      paymentDetails.length > 1000) {
+    return res.status(400).json({ error: "Enter a valid amount (USD 1.00–10,000.00), payment method and transaction reference." });
+  }
+
+  if (method === "ABA Bank" && !String(process.env.ABA_DEPOSIT_INSTRUCTIONS || "").trim()) {
+    return res.status(503).json({ error: "ABA deposits are not configured yet. Please contact support." });
+  }
+  if (method === "USDT - TON Network" && !String(process.env.USDT_TON_DEPOSIT_ADDRESS || "").trim()) {
+    return res.status(503).json({ error: "USDT TON deposits are not configured yet. Please contact support." });
+  }
+
+  const id = uuid();
+  try {
+    await pool.query(
+      `INSERT INTO advertiser_deposit_requests
+       (id,telegram_id,amount_usd_micros,method,payment_reference,payment_details)
+       VALUES($1,$2,$3,$4,$5,$6)`,
+      [id, req.telegramId, amountMicros, method, paymentReference, paymentDetails || null]
+    );
+  } catch (e) {
+    if (e.code === "23505") {
+      return res.status(409).json({ error: "This payment reference has already been submitted." });
+    }
+    throw e;
+  }
+
+  res.status(201).json({
+    success: true,
+    depositId: id,
+    status: "pending",
+    message: "Deposit request submitted. Your campaign wallet will be credited only after payment verification."
+  });
+}));
+
+// Admin queue: verify the real payment in the provider/bank account before approval.
+app.get("/api/admin/advertiser-deposits", adminLimiter, asyncRoute(async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  const status = String(req.query.status || "pending");
+  if (!["pending", "approved", "rejected", "all"].includes(status)) {
+    return res.status(400).json({ error: "Invalid deposit status filter." });
+  }
+  const q = await pool.query(
+    `SELECT d.id,d.telegram_id,d.amount_usd_micros,d.method,d.payment_reference,
+            d.payment_details,d.status,d.admin_note,d.created_at,d.reviewed_at,
+            u.username,u.first_name
+     FROM advertiser_deposit_requests d
+     JOIN users u ON u.telegram_id=d.telegram_id
+     WHERE ($1='all' OR d.status=$1)
+     ORDER BY d.created_at ASC LIMIT 200`,
+    [status]
+  );
+  res.json({ deposits: q.rows.map(d => ({
+    ...d,
+    amount_usd: (Number(d.amount_usd_micros) / 1000000).toFixed(2)
+  })) });
+}));
+
+// Approval credits advertiser campaign wallet exactly once in the same DB transaction.
+app.post("/api/admin/advertiser-deposits/:id/review", adminLimiter, asyncRoute(async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  const action = String(req.body?.action || "");
+  const adminNote = String(req.body?.adminNote || "").trim();
+  if (!["approve", "reject"].includes(action) || adminNote.length > 500) {
+    return res.status(400).json({ error: "Choose approve or reject and keep the admin note under 500 characters." });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const q = await client.query(
+      "SELECT * FROM advertiser_deposit_requests WHERE id=$1 FOR UPDATE",
+      [req.params.id]
+    );
+    const d = q.rows[0];
+    if (!d || d.status !== "pending") {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Pending deposit request not found or already reviewed." });
+    }
+
+    if (action === "approve") {
+      await client.query(
+        "INSERT INTO advertiser_accounts(telegram_id) VALUES($1) ON CONFLICT DO NOTHING",
+        [d.telegram_id]
+      );
+      await client.query(
+        "UPDATE advertiser_accounts SET balance_usd_micros=balance_usd_micros+$1,updated_at=NOW() WHERE telegram_id=$2",
+        [d.amount_usd_micros, d.telegram_id]
+      );
+      await client.query(
+        `INSERT INTO advertiser_ledger
+         (telegram_id,amount_usd_micros,entry_type,description,reference)
+         VALUES($1,$2,'deposit_credit','Admin-approved advertiser campaign wallet deposit',$3)`,
+        [d.telegram_id, d.amount_usd_micros, `advertiser-deposit-request:${d.id}`]
+      );
+    }
+
+    await client.query(
+      "UPDATE advertiser_deposit_requests SET status=$1,admin_note=$2,reviewed_at=NOW() WHERE id=$3",
+      [action === "approve" ? "approved" : "rejected", adminNote || null, d.id]
+    );
+    await client.query("COMMIT");
+    res.json({
+      success: true,
+      depositId: d.id,
+      status: action === "approve" ? "approved" : "rejected",
+      creditedUsd: action === "approve" ? (Number(d.amount_usd_micros) / 1000000).toFixed(2) : "0.00"
+    });
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+}));
+
+// Admin manually credits advertiser campaign wallet only after checking an actual deposit.
+app.post("/api/admin/advertiser-fund", adminLimiter, asyncRoute(async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+
+  const telegramId = String(req.body?.telegramId || "");
+  const amountMicros = asInt(req.body?.amountMicros, 1, 1000000000000);
+  const reference = String(req.body?.reference || "").trim();
+
+  if (!/^\d+$/.test(telegramId) || !amountMicros ||
+      reference.length < 4 || reference.length > 150) {
+    return res.status(400).json({
+      error: "Provide Telegram ID, amountMicros (USD × 1,000,000) and a unique payment reference."
+    });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    await client.query(
+      "INSERT INTO advertiser_accounts(telegram_id) VALUES($1) ON CONFLICT DO NOTHING",
+      [telegramId]
+    );
+
+    await client.query(
+      "UPDATE advertiser_accounts SET balance_usd_micros=balance_usd_micros+$1,updated_at=NOW() WHERE telegram_id=$2",
+      [amountMicros, telegramId]
+    );
+
+    await client.query(
+      "INSERT INTO advertiser_ledger(telegram_id,amount_usd_micros,entry_type,description,reference) VALUES($1,$2,'deposit_credit','Admin-approved campaign wallet deposit',$3)",
+      [telegramId, amountMicros, `advertiser-deposit:${reference}`]
+    );
+
+    await client.query("COMMIT");
+
+    res.json({
+      success: true,
+      telegramId,
+      creditedUsd: (amountMicros / 1000000).toFixed(6)
+    });
+
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+}));
+
+// Worker earnings withdrawal: balance is reserved at request time.
+app.post("/api/worker/withdraw", authenticate, asyncRoute(async (req, res) => {
+  const amount = Number(req.body?.amountCoins);
+  const method = String(req.body?.method || "");
+  const details = String(req.body?.paymentDetails || "").trim();
+
+  if (!Number.isFinite(amount) || amount < WITHDRAW_MINIMUM ||
+      amount > 100000000000 ||
+      !["ABA Bank", "USDT - TON Network"].includes(method) ||
+      details.length < 3 || details.length > 300) {
+    return res.status(400).json({ error: "Enter valid withdrawal details. Minimum is 2,000 coins." });
+  }
+
+  const id = uuid(), client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const debit = await client.query(
+      "UPDATE worker_accounts SET available_coins=available_coins-$1,updated_at=NOW() WHERE telegram_id=$2 AND available_coins >= $1 RETURNING available_coins",
+      [amount.toFixed(2), req.telegramId]
+    );
+
+    if (!debit.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "Insufficient approved worker earnings." });
+    }
+
+    await client.query(
+      "INSERT INTO marketplace_withdrawals(id,telegram_id,amount_coins,method,payment_details) VALUES($1,$2,$3,$4,$5)",
+      [id, req.telegramId, amount.toFixed(2), method, details]
+    );
+
+    await client.query(
+      "INSERT INTO worker_ledger(telegram_id,amount_coins,entry_type,description,reference) VALUES($1,$2,'withdrawal_hold','Worker withdrawal reserved',$3)",
+      [req.telegramId, (-amount).toFixed(2), `worker-withdraw:${id}`]
+    );
+
+    await client.query("COMMIT");
+    res.status(201).json({ success: true, withdrawalId: id, status: "pending" });
+
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+}));
+
+app.get("/api/worker/withdrawals", authenticate, asyncRoute(async (req, res) => {
+  const q = await pool.query(
+    "SELECT id,amount_coins,method,status,created_at FROM marketplace_withdrawals WHERE telegram_id=$1 ORDER BY created_at DESC LIMIT 50",
+    [req.telegramId]
+  );
+
+  res.json({ withdrawals: q.rows });
+}));
+
+// Wallet purchases: service fulfillment is manual. Coins are held on order creation and
+// refunded transactionally if an administrator rejects the request.
+app.post("/api/worker/service-orders", authenticate, asyncRoute(async (req, res) => {
+  const orderType = String(req.body?.orderType || "");
+  const provider = String(req.body?.provider || "").trim().slice(0, 100);
+  const recipient = String(req.body?.recipient || "").trim().slice(0, 700);
+  const itemDetails = String(req.body?.itemDetails || "").trim().slice(0, 700);
+  const quantity = asInt(req.body?.quantity ?? 1, 1, 99);
+  const amountUsd = Number(req.body?.amountUsd);
+  if (!["phone_topup", "game_topup", "shopping"].includes(orderType) || !provider || !recipient || !itemDetails || !quantity ||
+      !Number.isFinite(amountUsd) || amountUsd < 0.01 || amountUsd > 1000 || Math.round(amountUsd * 100) !== amountUsd * 100) {
+    return res.status(400).json({ error: "Please complete all required order details and enter a valid price from $0.01 to $1,000.00." });
+  }
+  if (orderType === "phone_topup" && !/^[+0-9][0-9\s-]{5,22}$/.test(recipient)) {
+    return res.status(400).json({ error: "Enter a valid mobile phone number." });
+  }
+  if (orderType === "game_topup" && recipient.length < 2) return res.status(400).json({ error: "Enter a valid player ID." });
+  if (orderType === "shopping" && recipient.length < 8) return res.status(400).json({ error: "Enter complete delivery details." });
+
+  const amountCoins = Math.round(amountUsd * COINS_PER_USD);
+  const amountMicros = Math.round(amountUsd * 1000000);
+  const id = uuid();
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const debit = await client.query(
+      "UPDATE worker_accounts SET available_coins=available_coins-$1,updated_at=NOW() WHERE telegram_id=$2 AND available_coins >= $1 RETURNING available_coins",
+      [amountCoins.toFixed(2), req.telegramId]
+    );
+    if (!debit.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "Insufficient Worker Earnings Wallet balance." });
+    }
+    await client.query(
+      `INSERT INTO worker_service_orders(id,telegram_id,order_type,provider,recipient,item_details,quantity,amount_coins,amount_usd_micros)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+      [id, req.telegramId, orderType, provider, recipient, itemDetails, quantity, amountCoins.toFixed(2), amountMicros]
+    );
+    await client.query(
+      "INSERT INTO worker_ledger(telegram_id,amount_coins,entry_type,description,reference) VALUES($1,$2,'service_order_hold',$3,$4)",
+      [req.telegramId, (-amountCoins).toFixed(2), `Wallet service order: ${orderType}`, `service-order:${id}`]
+    );
+    await client.query("COMMIT");
+    res.status(201).json({ success: true, orderId: id, status: "pending", amountCoins, message: "Order submitted. Coins deducted and reserved. An administrator will process your order manually." });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally { client.release(); }
+}));
+
+app.get("/api/worker/service-orders", authenticate, asyncRoute(async (req, res) => {
+  const q = await pool.query(
+    `SELECT id,order_type,provider,recipient,item_details,quantity,amount_coins,amount_usd_micros,status,admin_note,created_at,reviewed_at
+     FROM worker_service_orders WHERE telegram_id=$1 ORDER BY created_at DESC LIMIT 100`,
+    [req.telegramId]
+  );
+  res.json({ orders: q.rows });
+}));
+
+app.get("/api/admin/service-orders", adminLimiter, asyncRoute(async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  const status = String(req.query.status || "pending");
+  if (!["pending", "processing", "completed", "rejected", "all"].includes(status)) return res.status(400).json({ error: "Invalid service order status filter." });
+  const q = await pool.query(
+    `SELECT o.*,u.username,u.first_name FROM worker_service_orders o
+     LEFT JOIN users u ON u.telegram_id=o.telegram_id
+     ${status === "all" ? "" : "WHERE o.status=$1"}
+     ORDER BY o.created_at DESC LIMIT 300`,
+    status === "all" ? [] : [status]
+  );
+  res.json({ orders: q.rows });
+}));
+
+app.post("/api/admin/service-orders/:id/review", adminLimiter, asyncRoute(async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  const action = String(req.body?.action || "");
+  const adminNote = String(req.body?.adminNote || "").trim().slice(0, 500);
+  if (!["processing", "completed", "rejected"].includes(action)) return res.status(400).json({ error: "Choose processing, completed or rejected." });
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const q = await client.query("SELECT * FROM worker_service_orders WHERE id=$1 FOR UPDATE", [req.params.id]);
+    const order = q.rows[0];
+    if (!order || !["pending", "processing"].includes(order.status)) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Open service order not found or already completed." });
+    }
+    if (action === "rejected") {
+      await client.query(
+        "UPDATE worker_accounts SET available_coins=available_coins+$1,updated_at=NOW() WHERE telegram_id=$2",
+        [order.amount_coins, order.telegram_id]
+      );
+      await client.query(
+        "INSERT INTO worker_ledger(telegram_id,amount_coins,entry_type,description,reference) VALUES($1,$2,'service_order_refund','Rejected service order refunded',$3)",
+        [order.telegram_id, order.amount_coins, `service-order-refund:${order.id}`]
+      );
+    }
+    await client.query(
+      "UPDATE worker_service_orders SET status=$1,admin_note=$2,reviewed_at=CASE WHEN $1 IN ('completed','rejected') THEN NOW() ELSE reviewed_at END WHERE id=$3",
+      [action, adminNote || null, order.id]
+    );
+    await client.query("COMMIT");
+    res.json({ success: true, orderId: order.id, status: action, refunded: action === "rejected" });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally { client.release(); }
+}));
+
+app.get("/api/admin/worker-withdrawals", adminLimiter, asyncRoute(async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+
+  const q = await pool.query(
+    "SELECT * FROM marketplace_withdrawals WHERE status='pending' ORDER BY created_at ASC LIMIT 200"
+  );
+
+  res.json({ withdrawals: q.rows });
+}));
+
+app.post("/api/admin/worker-withdrawals/:id", adminLimiter, asyncRoute(async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+
+  const action = String(req.body?.action || "");
+
+  if (!["paid", "rejected"].includes(action)) {
+    return res.status(400).json({ error: "Choose paid or rejected." });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const q = await client.query(
+      "SELECT * FROM marketplace_withdrawals WHERE id=$1 FOR UPDATE",
+      [req.params.id]
+    );
+
+    const w = q.rows[0];
+
+    if (!w || w.status !== "pending") {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Pending withdrawal not found." });
+    }
+
+    if (action === "rejected") {
+      await client.query(
+        "UPDATE worker_accounts SET available_coins=available_coins+$1,updated_at=NOW() WHERE telegram_id=$2",
+        [w.amount_coins, w.telegram_id]
+      );
+
+      await client.query(
+        "INSERT INTO worker_ledger(telegram_id,amount_coins,entry_type,description,reference) VALUES($1,$2,'withdrawal_refund','Rejected withdrawal refunded',$3)",
+        [w.telegram_id, w.amount_coins, `worker-refund:${w.id}`]
+      );
+    }
+
+    await client.query(
+      "UPDATE marketplace_withdrawals SET status=$1,reviewed_at=NOW() WHERE id=$2",
+      [action, w.id]
+    );
+
+    await client.query("COMMIT");
+    res.json({ success: true, id: w.id, status: action });
+
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+}));
+
+// Admin manual membership approval. Payment must be checked outside this API first.
+app.get("/api/admin/membership-orders", adminLimiter, asyncRoute(async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+
+  const q = await pool.query(
+    "SELECT * FROM membership_orders WHERE status='pending' ORDER BY created_at ASC LIMIT 200"
+  );
+
+  res.json({ orders: q.rows });
+}));
+
+app.post("/api/admin/membership-orders/:id", adminLimiter, asyncRoute(async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+
+  const action = String(req.body?.action || "");
+
+  if (!["approve", "reject"].includes(action)) {
+    return res.status(400).json({ error: "Choose approve or reject." });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const q = await client.query(
+      "SELECT * FROM membership_orders WHERE id=$1 FOR UPDATE",
+      [req.params.id]
+    );
+
+    const o = q.rows[0];
+
+    if (!o || o.status !== "pending") {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Pending membership order not found." });
+    }
+
+    if (action === "approve") {
+      await client.query(
+        "UPDATE users SET membership=$1,membership_expiry=CASE WHEN membership=$1 AND membership_expiry>NOW() THEN membership_expiry+INTERVAL '30 days' ELSE NOW()+INTERVAL '30 days' END WHERE telegram_id=$2",
+        [o.plan, o.telegram_id]
+      );
+    }
+
+    await client.query(
+      "UPDATE membership_orders SET status=$1,reviewed_at=NOW() WHERE id=$2",
+      [action === "approve" ? "approved" : "rejected", o.id]
+    );
+
+    await client.query("COMMIT");
+
+    res.json({
+      success: true,
+      orderId: o.id,
+      status: action === "approve" ? "approved" : "rejected"
+    });
+
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+}));
+
+// API error handler: do not expose internal database details to users.
+app.use((err, req, res, next) => {
+  console.error("API error:", err);
+
+  if (res.headersSent) return next(err);
+
+  if (err.message === "Origin not allowed by CORS.") {
+    return res.status(403).json({ error: "Origin not allowed." });
+  }
+
+  if (err.code === "LIMIT_FILE_SIZE") return res.status(413).json({ error: "Screenshot must be 5 MB or smaller." });
+  if (err.message === "Only JPG, PNG or WEBP screenshots are accepted.") return res.status(400).json({ error: err.message });
+  if (err.code === "23505") {
+    return res.status(409).json({ error: "This request has already been processed." });
+  }
+
+  res.status(500).json({ error: "Internal server error." });
+});
+
+async function startServer() {
+  await initializeDatabase();
+
+  if (!process.env.TURNSTILE_SECRET_KEY || process.env.TURNSTILE_SECRET_KEY.length < 20) {
+    console.warn("Faucet claims are disabled until TURNSTILE_SECRET_KEY is configured in the server environment.");
+  }
+
+  const server = app.listen(PORT, () => {
+    console.log(`Khmer Earn Marketplace API v3.0.0 running on port ${PORT}`);
+  });
+
+  const shutdown = signal => {
+    console.log(`${signal} received; shutting down.`);
+
+    server.close(async () => {
+      await pool.end();
+      process.exit(0);
+    });
+
+    setTimeout(() => process.exit(1), 10000).unref();
   };
 
-  if (!confirm(messages[action])) return;
-
-  try {
-    await api(`/api/admin/campaigns/${encodeURIComponent(id)}/review`, {
-      method: "POST",
-      body: JSON.stringify({ action })
-    });
-
-    toast("Campaign updated: " + action);
-    await refreshAll();
-
-  } catch (error) {
-    toast(error.message, true);
-  }
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
 }
 
-async function reviewSubmission(id, action) {
-  if (!confirm(
-    action === "approve"
-      ? "Approve this proof and credit the worker's earnings?"
-      : "Reject this proof?"
-  )) return;
-
-  try {
-    await api(`/api/admin/task-submissions/${encodeURIComponent(id)}/review`, {
-      method: "POST",
-      body: JSON.stringify({ action })
-    });
-
-    toast(action === "approve" ? "Proof approved and worker credited." : "Proof rejected.");
-    await refreshAll();
-
-  } catch (error) {
-    toast(error.message, true);
-  }
-}
-
-/* Event listeners */
-$("loginBtn").addEventListener("click", unlock);
-
-$("secretInput").addEventListener("keydown", event => {
-  if (event.key === "Enter") unlock();
+startServer().catch(error => {
+  console.error("Startup failed:", error);
+  process.exit(1);
 });
-
-$("refreshBtn").addEventListener("click", refreshAll);
-$("lockBtn").addEventListener("click", lock);
-
-document.querySelectorAll(".nav button").forEach(button => {
-  button.addEventListener("click", () => showPage(button.dataset.page));
-});
-
-$("depositStatus").addEventListener("change", refreshDeposits);
-$("depositSearch").addEventListener("input", renderDeposits);
-$("withdrawSearch").addEventListener("input", renderWithdrawals);
-$("campaignSearch").addEventListener("input", renderCampaigns);
-$("submissionSearch").addEventListener("input", renderSubmissions);
-
-</script>
-</body>
-</html>
