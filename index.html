@@ -404,6 +404,9 @@ a{color:var(--blue);overflow-wrap:anywhere}
    <button class="selected" onclick="walletTab('withdraw',this)">Withdraw</button>
    <button onclick="walletTab('deposit',this)">Deposit</button>
    <button onclick="walletTab('exchange',this)">Exchange</button>
+   <button onclick="walletTab('phoneTopup',this)">Phone Top Up</button>
+   <button onclick="walletTab('gameTopup',this)">Game Top Up</button>
+   <button onclick="walletTab('shopping',this)">Shopping</button>
   </div>
 
   <div id="walletWithdraw" class="subpage active">
@@ -452,6 +455,50 @@ a{color:var(--blue);overflow-wrap:anywhere}
    <div class="feature"><span>Transfer fee</span><strong>$0.00</strong></div>
    <div id="transferMessage" class="notice">Transfers are instant after server confirmation.</div>
    <button id="transferButton" class="full" onclick="transferToCampaignWallet()">Transfer to Campaign Wallet</button>
+  </div>
+
+  <div id="walletPhoneTopup" class="subpage">
+   <h3>📱 Phone Top Up</h3>
+   <p class="muted">Request mobile credit for Cambodia. The administrator will process your top-up manually.</p>
+   <label>Mobile operator</label>
+   <select id="phoneProvider"><option>Smart</option><option>Cellcard</option><option>Metfone</option><option>Seatel</option><option>Other</option></select>
+   <label>Phone number</label><input id="phoneRecipient" inputmode="tel" maxlength="24" placeholder="e.g. 012345678">
+   <label>Top-up amount (USD)</label><select id="phoneAmount" onchange="previewServiceCoins('phone')"><option value="0.50">$0.50</option><option value="1.00" selected>$1.00</option><option value="2.00">$2.00</option><option value="5.00">$5.00</option><option value="10.00">$10.00</option><option value="20.00">$20.00</option></select>
+   <label>Additional note (optional)</label><input id="phoneDetails" maxlength="250" placeholder="Any special instructions">
+   <div class="feature"><span>Cost</span><strong id="phoneCost">10,000 coins</strong></div>
+   <div id="phoneMessage" class="notice">Your coins are deducted when you submit. If the order is rejected, they are refunded.</div>
+   <button id="phoneSubmit" class="full" onclick="submitServiceOrder('phone')">Submit Phone Top Up</button>
+  </div>
+
+  <div id="walletGameTopup" class="subpage">
+   <h3>🎮 Game Top Up</h3>
+   <p class="muted">Request game credits or items. Enter the correct player details; admin will fulfill the order manually.</p>
+   <label>Game / platform</label><select id="gameProvider"><option>Mobile Legends: Bang Bang</option><option>Free Fire</option><option>PUBG Mobile</option><option>Honor of Kings</option><option>Roblox</option><option>Other</option></select>
+   <label>Player ID / UID</label><input id="gameRecipient" maxlength="80" placeholder="Enter your Player ID">
+   <label>Server ID (if applicable)</label><input id="gameServer" maxlength="40" placeholder="Enter server ID or leave blank">
+   <label>Package / item requested</label><input id="gamePackage" maxlength="180" placeholder="e.g. 86 Diamonds">
+   <label>Price (USD)</label><input id="gameAmount" type="number" min="0.01" max="1000" step="0.01" value="1.00" oninput="previewServiceCoins('game')">
+   <div class="feature"><span>Cost</span><strong id="gameCost">10,000 coins</strong></div>
+   <div id="gameMessage" class="notice">Check your Player ID carefully. Coins are refunded if admin rejects the order.</div>
+   <button id="gameSubmit" class="full" onclick="submitServiceOrder('game')">Submit Game Top Up</button>
+  </div>
+
+  <div id="walletShopping" class="subpage">
+   <h3>🛍️ Shopping</h3>
+   <p class="muted">Request a product purchase. An administrator will verify the price and arrange delivery manually.</p>
+   <label>Product name</label><input id="shopProduct" maxlength="180" placeholder="Enter product name">
+   <label>Product link (optional)</label><input id="shopLink" type="url" maxlength="500" placeholder="https://...">
+   <label>Quantity</label><input id="shopQuantity" type="number" min="1" max="99" step="1" value="1">
+   <label>Delivery address / contact details</label><textarea id="shopAddress" maxlength="700" placeholder="Recipient name, phone number and delivery address"></textarea>
+   <label>Estimated total price (USD)</label><input id="shopAmount" type="number" min="0.01" max="1000" step="0.01" value="1.00" oninput="previewServiceCoins('shop')">
+   <div class="feature"><span>Cost</span><strong id="shopCost">10,000 coins</strong></div>
+   <div id="shopMessage" class="notice">Admin will verify product availability and price. Rejected orders are refunded.</div>
+   <button id="shopSubmit" class="full" onclick="submitServiceOrder('shop')">Submit Shopping Order</button>
+  </div>
+
+  <div class="card">
+   <div class="row"><h3>My Service Orders</h3><button class="dark" onclick="loadServiceOrders()">Refresh</button></div>
+   <div id="serviceOrderHistory"><div class="empty">Your phone, game and shopping orders will appear here.</div></div>
   </div>
  </div>
 
@@ -1902,6 +1949,7 @@ function go(id, button) {
     loadProfile().catch(error => console.error(error));
     loadAdvertiserData();
     loadWalletTransactions();
+    loadServiceOrders();
   }
  if (id === "faucet" && authToken) {
   loadFaucetStatus();
@@ -2043,7 +2091,73 @@ async function loadDepositHistory() {
 }
 
 async function loadWalletTransactions() {
-  await Promise.all([loadWithdrawalHistory(), loadDepositMethods(), loadDepositHistory()]);
+  await Promise.all([loadWithdrawalHistory(), loadDepositMethods(), loadDepositHistory(), loadServiceOrders()]);
+}
+
+function previewServiceCoins(kind) {
+  const inputId = kind === "phone" ? "phoneAmount" : kind === "game" ? "gameAmount" : "shopAmount";
+  const outputId = kind === "phone" ? "phoneCost" : kind === "game" ? "gameCost" : "shopCost";
+  const usd = Number($(inputId)?.value || 0);
+  $(outputId).textContent = Number.isFinite(usd) && usd > 0 ? formatCoins(Math.round(usd * 10000)) + " coins" : "Enter a valid amount";
+}
+
+async function submitServiceOrder(kind) {
+  const config = {
+    phone: {button:"phoneSubmit", message:"phoneMessage", amount:"phoneAmount", provider:"phoneProvider", recipient:"phoneRecipient", details:"phoneDetails"},
+    game: {button:"gameSubmit", message:"gameMessage", amount:"gameAmount", provider:"gameProvider", recipient:"gameRecipient", details:"gamePackage"},
+    shop: {button:"shopSubmit", message:"shopMessage", amount:"shopAmount", provider:null, recipient:"shopAddress", details:"shopProduct"}
+  }[kind];
+  const button = $(config.button);
+  const amountUsd = Number($(config.amount).value);
+  if (!Number.isFinite(amountUsd) || amountUsd < 0.01 || amountUsd > 1000 || Math.round(amountUsd * 100) !== amountUsd * 100) {
+    showMessage(config.message, "Enter a valid price between $0.01 and $1,000.00.", "error"); return;
+  }
+  let provider = config.provider ? $(config.provider).value : "Shopping";
+  let recipient = $(config.recipient).value.trim();
+  let itemDetails = $(config.details).value.trim();
+  let quantity = 1;
+  if (kind === "phone") {
+    if (!/^[+0-9][0-9\s-]{5,22}$/.test(recipient)) { showMessage(config.message, "Enter a valid phone number.", "error"); return; }
+    itemDetails = itemDetails || "Mobile credit top-up";
+  } else if (kind === "game") {
+    if (recipient.length < 2 || itemDetails.length < 2) { showMessage(config.message, "Enter your Player ID and requested package.", "error"); return; }
+    const serverId = $("gameServer").value.trim();
+    if (serverId) itemDetails += " · Server: " + serverId;
+  } else {
+    const product = $("shopProduct").value.trim();
+    const link = $("shopLink").value.trim();
+    quantity = Number($("shopQuantity").value);
+    if (product.length < 2 || recipient.length < 8 || !Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
+      showMessage(config.message, "Enter the product, a complete delivery address, and quantity from 1 to 99.", "error"); return;
+    }
+    if (link && !/^https?:\/\//i.test(link)) { showMessage(config.message, "Product link must start with http:// or https://.", "error"); return; }
+    itemDetails = product + (link ? " · Link: " + link : "");
+  }
+  const cost = Math.round(amountUsd * 10000);
+  if (!confirm(`Submit this ${kind === "phone" ? "phone top-up" : kind === "game" ? "game top-up" : "shopping"} order for ${formatCoins(cost)} coins ($${amountUsd.toFixed(2)})?`)) return;
+  button.disabled = true; button.textContent = "Submitting...";
+  try {
+    const data = await apiRequest("/api/worker/service-orders", {method:"POST", body:JSON.stringify({orderType:kind === "phone" ? "phone_topup" : kind === "game" ? "game_topup" : "shopping", provider, recipient, itemDetails, quantity, amountUsd})});
+    showMessage(config.message, data.message || "Order submitted. Admin will process it manually.", "success");
+    if (kind === "phone") { $("phoneRecipient").value = ""; $("phoneDetails").value = ""; }
+    if (kind === "game") { $("gameRecipient").value = ""; $("gameServer").value = ""; $("gamePackage").value = ""; }
+    if (kind === "shop") { $("shopProduct").value = ""; $("shopLink").value = ""; $("shopAddress").value = ""; }
+    await Promise.all([loadProfile(), loadServiceOrders()]);
+  } catch (error) { showMessage(config.message, error.message, "error"); }
+  finally { button.disabled = false; button.textContent = kind === "phone" ? "Submit Phone Top Up" : kind === "game" ? "Submit Game Top Up" : "Submit Shopping Order"; }
+}
+
+async function loadServiceOrders() {
+  const box = $("serviceOrderHistory");
+  if (!box) return;
+  box.innerHTML = '<div class="empty">Loading service orders...</div>';
+  try {
+    const data = await apiRequest("/api/worker/service-orders");
+    const rows = extractArray(data, ["orders"]);
+    if (!rows.length) { box.innerHTML = '<div class="empty">No service orders yet.</div>'; return; }
+    const names = {phone_topup:"Phone Top Up",game_topup:"Game Top Up",shopping:"Shopping"};
+    box.innerHTML = rows.map(o => `<div class="proof-box"><div class="row"><strong>${escapeHTML(names[o.order_type] || o.order_type)}</strong><span class="status">${escapeHTML(String(o.status || "pending").toUpperCase())}</span></div><p class="muted">${escapeHTML(o.provider || "")} · ${escapeHTML(o.recipient || "")}</p><p>${escapeHTML(o.item_details || "")}</p><div class="feature"><span>Paid from wallet</span><strong>${formatCoins(o.amount_coins)} coins</strong></div><p class="fine">${o.created_at ? escapeHTML(new Date(o.created_at).toLocaleString()) : ""}</p>${o.admin_note ? `<p class="muted">Admin note: ${escapeHTML(o.admin_note)}</p>` : ""}</div>`).join("");
+  } catch (error) { box.innerHTML = `<div class="notice error">${escapeHTML(error.message)}</div>`; }
 }
 
 function walletTab(id, button) {
