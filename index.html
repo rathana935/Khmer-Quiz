@@ -6,7 +6,6 @@
 <meta name="theme-color" content="#0b1120">
 <title>Khmer Earn Marketplace</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoaded&render=explicit" async defer></script>
 
 <style>
@@ -239,14 +238,6 @@ a{color:var(--blue);overflow-wrap:anywhere}
    Faucet rewards go to your Worker Earnings Wallet.
    Advertiser campaign funds and your old legacy coin balance are separate.
   </div>
- </div>
-
- <div class="card">
-  <h3>🎬 Watch an Ad & Earn</h3>
-  <p class="muted">Watch a complete sponsored video to receive 10 coins in your Worker Earnings Wallet. Skipping or failing to load an ad gives no reward.</p>
-  <div class="stat">Reward per completed video<strong>10 coins</strong></div>
-  <button id="adsgramWatchBtn" class="gold full" onclick="watchAdsgramAd()">▶ Watch Ad · Earn 10 Coins</button>
-  <div id="adsgramMessage" class="notice" aria-live="polite">Your reward is credited after AdsGram confirms the completed view.</div>
  </div>
 
 </section>
@@ -610,8 +601,6 @@ let faucetDailyLimit = null;
 let turnstileToken = null;
 let turnstileWidgetId = null;
 const TURNSTILE_SITE_KEY = "0x4AAAAAAGHRHCnCICOPF_YC";
-let adsgramBusy = false;
-let adsgramController = null;
 
 if (tg) {
   tg.ready();
@@ -1134,84 +1123,6 @@ async function claimFaucet() {
     updateFaucetClaimButton();
   }
 }
-// ============================================
-// ADSGRAM REWARDED VIDEO
-// ============================================
-
-const ADSGRAM_BLOCK_ID = "60494";
-const ADSGRAM_REWARD_COINS = 10;
-
-function getAdsgramController() {
-  if (!window.Adsgram || typeof window.Adsgram.init !== "function") {
-    throw new Error("AdsGram SDK is not ready. Please refresh the Mini App and try again.");
-  }
-  if (!adsgramController) {
-    adsgramController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
-  }
-  return adsgramController;
-}
-
-function wait(milliseconds) {
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
-}
-
-async function waitForAdsgramServerReward(startedAt) {
-  // The SDK completion is not treated as proof of payment. Wait for the
-  // separate AdsGram Reward URL callback to credit the wallet on the server.
-  for (let attempt = 0; attempt < 12; attempt++) {
-    const status = await apiRequest(
-      "/api/adsgram/reward-status?since=" + encodeURIComponent(String(startedAt))
-    );
-    if (status.rewarded) return status;
-    await wait(1500);
-  }
-  return null;
-}
-
-async function watchAdsgramAd() {
-  if (adsgramBusy) return;
-  if (!authToken || !tg?.initData) {
-    showMessage("adsgramMessage", "Open the Mini App inside Telegram and sign in before watching an ad.", "error");
-    return;
-  }
-
-  const button = $("adsgramWatchBtn");
-  adsgramBusy = true;
-  button.disabled = true;
-  button.textContent = "Loading Ad...";
-  showMessage("adsgramMessage", "Loading a sponsored video. Please do not close the Mini App.", "notice");
-
-  try {
-    const controller = getAdsgramController();
-    const startedAt = Date.now();
-    button.textContent = "Watching Ad...";
-
-    const result = await controller.show();
-    if (result?.done === false || result?.error === true) {
-      throw new Error("The ad was not completed. No coins were awarded.");
-    }
-
-    button.textContent = "Verifying Reward...";
-    showMessage("adsgramMessage", "Ad completed. Waiting for AdsGram's server confirmation...", "notice");
-
-    const reward = await waitForAdsgramServerReward(startedAt);
-    if (!reward) {
-      throw new Error("AdsGram completed the video, but the server has not received its reward confirmation yet. Please wait a moment and refresh your balance. Do not watch another ad until this one is checked.");
-    }
-
-    await loadProfile();
-    showMessage("adsgramMessage", "Success! AdsGram confirmed your view and credited " + formatCoins(reward.rewardCoins || ADSGRAM_REWARD_COINS) + " coins to your Worker Earnings Wallet.", "success");
-    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
-  } catch (error) {
-    console.error("AdsGram reward error:", error);
-    showMessage("adsgramMessage", error.message || "The ad could not be completed. No reward was issued.", "error");
-  } finally {
-    adsgramBusy = false;
-    button.disabled = false;
-    button.textContent = "▶ Watch Ad · Earn 10 Coins";
-  }
-}
-
 // ============================================
 // TASK LIST
 // ============================================
