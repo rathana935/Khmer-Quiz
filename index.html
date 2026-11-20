@@ -1,14 +1,14 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b1120">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="#0b1120" name="theme-color"/>
 <title>Khmer Earn Marketplace</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoaded&render=explicit" async defer></script>
-
+<script async="" defer="" src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoaded&amp;render=explicit"></script>
 <style>
 :root{--bg:#0b1120;--panel:#151f32;--panel2:#202e45;--text:#f5f7ff;--muted:#9ba9c0;--gold:#f6c453;--blue:#61a9ff;--green:#37d69a;--red:#f16b6b;--border:#293953}
 *{box-sizing:border-box}
@@ -90,573 +90,492 @@ a{color:var(--blue);overflow-wrap:anywhere}
 .operator-provider-value{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 @media(max-width:380px){.operator-grid{gap:7px}.operator-option{min-height:82px;padding:8px 5px!important}.operator-logo{min-width:104px}.operator-logo b{font-size:17px}}
 @media(max-width:380px){header strong{font-size:13px}.grid{gap:6px}.stat{padding:10px}.stat strong{font-size:17px}nav button{font-size:9px}}
+
+.game-catalog-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 16px}
+.game-catalog-card{margin:0!important;min-width:0;min-height:124px;padding:12px 8px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;background:#101a2b!important;color:var(--text)!important;border:1px solid var(--border)!important;border-radius:13px!important;text-align:center}
+.game-catalog-card.selected{border:2px solid var(--gold)!important;background:#26334a!important;box-shadow:0 0 0 1px rgba(246,196,83,.12)}
+.game-catalog-card strong{font-size:12px;line-height:1.25}.game-catalog-card small{font-size:11px;color:var(--muted)}
+.game-art{width:64px;height:64px;border-radius:12px;display:block;overflow:hidden;background:#0b1423;box-shadow:0 4px 14px #0005;flex:0 0 auto}.game-art img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+
+.game-provider-value{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+@media(max-width:380px){.game-catalog-grid{gap:7px}.game-catalog-card{min-height:112px;padding:9px 5px!important}.game-art{width:56px;height:56px}}
 </style>
 </head>
-
 <body>
-
 <header>
- <strong>🇰🇭 Khmer Earn Marketplace</strong>
- <span class="balance">🪙 <span id="coinBalance">0</span></span>
+<strong>🇰🇭 Khmer Earn Marketplace</strong>
+<span class="balance">🪙 <span id="coinBalance">0</span></span>
 </header>
-
 <main>
-
 <!-- HOME -->
-<section id="home" class="page active">
-
- <div class="banner">
-  <small>SPONSORED PLACEMENT · HOME</small>
-  <strong>Your Advertisement Here</strong>
-  <p>Promote your website, app or service to marketplace users.</p>
-  <button class="dark" onclick="go('advertise')">Advertise with us</button>
- </div>
-
- <h2>Welcome to Khmer Earn Marketplace</h2>
-
- <div class="grid">
-  <div class="stat">Worker balance<strong id="homeCoins">0 coins</strong></div>
-  <div class="stat">Membership<strong id="homePlan">Free</strong></div>
-  <div class="stat">Available tasks<strong id="homeTaskCount">Loading...</strong></div>
-  <div class="stat">Account mode<strong>Worker + Advertiser</strong></div>
- </div>
-
- <div class="card">
-  <div class="row">
-   <h3>Earn by completing tasks</h3>
-   <span class="pill">Worker</span>
-  </div>
-  <p class="muted">Choose an available task, follow its instructions and submit valid completion. Rewards are credited only after approval.</p>
-  <button class="full" onclick="go('tasks')">Browse Available Tasks</button>
- </div>
-
- <div class="card">
-  <div class="row">
-   <h3>Promote your business</h3>
-   <span class="pill">Advertiser</span>
-  </div>
-  <p class="muted">Create PTC, video, shortlink or micro-job campaigns and track their progress.</p>
-  <button class="full gold" onclick="go('advertise')">Create an Advertising Campaign</button>
- </div>
-
- <div class="card">
-  <h3>🚰 Faucet</h3>
-  <p class="muted">Faucet rewards are separate from marketplace task earnings and must be verified by the backend.</p>
-  <button class="dark" onclick="go('faucet')">Open Faucet</button>
- </div>
-
+<section class="page active" id="home">
+<div class="banner">
+<small>SPONSORED PLACEMENT · HOME</small>
+<strong>Your Advertisement Here</strong>
+<p>Promote your website, app or service to marketplace users.</p>
+<button class="dark" onclick="go('advertise')">Advertise with us</button>
+</div>
+<h2>Welcome to Khmer Earn Marketplace</h2>
+<div class="grid">
+<div class="stat">Worker balance<strong id="homeCoins">0 coins</strong></div>
+<div class="stat">Membership<strong id="homePlan">Free</strong></div>
+<div class="stat">Available tasks<strong id="homeTaskCount">Loading...</strong></div>
+<div class="stat">Account mode<strong>Worker + Advertiser</strong></div>
+</div>
+<div class="card">
+<div class="row">
+<h3>Earn by completing tasks</h3>
+<span class="pill">Worker</span>
+</div>
+<p class="muted">Choose an available task, follow its instructions and submit valid completion. Rewards are credited only after approval.</p>
+<button class="full" onclick="go('tasks')">Browse Available Tasks</button>
+</div>
+<div class="card">
+<div class="row">
+<h3>Promote your business</h3>
+<span class="pill">Advertiser</span>
+</div>
+<p class="muted">Create PTC, video, shortlink or micro-job campaigns and track their progress.</p>
+<button class="full gold" onclick="go('advertise')">Create an Advertising Campaign</button>
+</div>
+<div class="card">
+<h3>🚰 Faucet</h3>
+<p class="muted">Faucet rewards are separate from marketplace task earnings and must be verified by the backend.</p>
+<button class="dark" onclick="go('faucet')">Open Faucet</button>
+</div>
 </section>
-
 <!-- TASKS -->
-<section id="tasks" class="page">
-
- <h2>Available Tasks</h2>
- <p class="muted">Choose a task and submit the required proof after completing it.</p>
-
- <div class="tabs" id="taskTabs">
-  <button class="selected" onclick="taskTab('all',this)">All Tasks</button>
-  <button onclick="taskTab('ptc',this)">PTC</button>
-  <button onclick="taskTab('video',this)">Videos</button>
-  <button onclick="taskTab('job',this)">Jobs</button>
-  <button onclick="taskTab('shortlink',this)">Shortlinks</button>
- </div>
-
- <div id="taskList">
-  <div class="empty">Loading available tasks...</div>
- </div>
-
- <div class="card">
-  <h3>My Task Submissions</h3>
-  <p class="muted">Check the status of your claimed tasks and submitted proof.</p>
-  <button class="dark full" onclick="loadMyClaims()">Refresh My Submissions</button>
-  <div id="myClaimsList"><div class="empty">Loading your submissions...</div></div>
- </div>
-
+<section class="page" id="tasks">
+<h2>Available Tasks</h2>
+<p class="muted">Choose a task and submit the required proof after completing it.</p>
+<div class="tabs" id="taskTabs">
+<button class="selected" onclick="taskTab('all',this)">All Tasks</button>
+<button onclick="taskTab('ptc',this)">PTC</button>
+<button onclick="taskTab('video',this)">Videos</button>
+<button onclick="taskTab('job',this)">Jobs</button>
+<button onclick="taskTab('shortlink',this)">Shortlinks</button>
+</div>
+<div id="taskList">
+<div class="empty">Loading available tasks...</div>
+</div>
+<div class="card">
+<h3>My Task Submissions</h3>
+<p class="muted">Check the status of your claimed tasks and submitted proof.</p>
+<button class="dark full" onclick="loadMyClaims()">Refresh My Submissions</button>
+<div id="myClaimsList"><div class="empty">Loading your submissions...</div></div>
+</div>
 </section>
-
 <!-- FAUCET -->
-<section id="faucet" class="page">
-
- <div class="banner">
-  <small>SPONSORED PLACEMENT · FAUCET</small>
-  <strong>Your Faucet Advertisement</strong>
-  <p>Sponsored content can appear here.</p>
- </div>
-
- <h2>🚰 Faucet</h2>
-
- <div class="card">
-  <h3>Worker Faucet Rewards</h3>
-  <p class="muted">
+<section class="page" id="faucet">
+<div class="banner">
+<small>SPONSORED PLACEMENT · FAUCET</small>
+<strong>Your Faucet Advertisement</strong>
+<p>Sponsored content can appear here.</p>
+</div>
+<h2>🚰 Faucet</h2>
+<div class="card">
+<h3>Worker Faucet Rewards</h3>
+<p class="muted">
    Claim coins every five minutes. Successful rewards are credited
    directly to your marketplace Worker Earnings Wallet.
   </p>
-
-  <div class="grid">
-   <div class="stat">
+<div class="grid">
+<div class="stat">
     Reward per claim
     <strong id="faucetReward">Loading...</strong>
-   </div>
-
-   <div class="stat">
+</div>
+<div class="stat">
     Worker balance
     <strong id="faucetBalance">0 coins</strong>
-   </div>
-
-   <div class="stat">
+</div>
+<div class="stat">
     Claims today
     <strong id="faucetClaimsToday">0</strong>
-   </div>
-
-   <div class="stat">
+</div>
+<div class="stat">
     Daily limit
     <strong id="faucetDailyLimit">Loading...</strong>
-   </div>
-  </div>
-
-  <div class="notice" id="faucetStatus">
+</div>
+</div>
+<div class="notice" id="faucetStatus">
    Checking Faucet availability...
   </div>
-
-  <div class="card">
-   <div style="text-align:center;padding:10px">
-    <div class="muted">Next claim available in</div>
-    <div id="faucetCountdown"
-         style="font-size:30px;font-weight:bold;color:var(--gold);margin:12px 0">
+<div class="card">
+<div style="text-align:center;padding:10px">
+<div class="muted">Next claim available in</div>
+<div id="faucetCountdown" style="font-size:30px;font-weight:bold;color:var(--gold);margin:12px 0">
      --:--
     </div>
-   </div>
-
-   <div class="notice" style="margin:12px 0 8px">
+</div>
+<div class="notice" style="margin:12px 0 8px">
     Complete the security check below before claiming your Faucet reward.
    </div>
-   <div id="faucetTurnstile" style="display:flex;justify-content:center;min-height:66px;margin:10px 0"></div>
-
-   <button
-    id="faucetClaimBtn"
-    class="green full"
-    onclick="claimFaucet()"
-    disabled>
+<div id="faucetTurnstile" style="display:flex;justify-content:center;min-height:66px;margin:10px 0"></div>
+<button class="green full" disabled="" id="faucetClaimBtn" onclick="claimFaucet()">
     Loading Faucet...
    </button>
-
-   <button
-    class="dark full"
-    onclick="loadFaucetStatus()">
+<button class="dark full" onclick="loadFaucetStatus()">
     Refresh Faucet Status
    </button>
-
-   <div id="faucetMessage"></div>
-  </div>
-
-  <div class="notice">
+<div id="faucetMessage"></div>
+</div>
+<div class="notice">
    Faucet rewards go to your Worker Earnings Wallet.
    Advertiser campaign funds and your old legacy coin balance are separate.
   </div>
- </div>
-
+</div>
 </section>
-
 <!-- ADVERTISE -->
-<section id="advertise" class="page">
-
- <h2>Advertiser Center</h2>
- <p class="muted">Create campaigns and review submissions from workers. Campaign funds are separate from worker earnings.</p>
-
- <div class="grid">
-  <div class="stat">Campaign wallet<strong id="advertiserWallet">$0.00</strong></div>
-  <div class="stat">My campaigns<strong id="myCampaignCount">0</strong></div>
-  <div class="stat">Pending submissions<strong id="pendingSubmissionCount">0</strong></div>
-  <div class="stat">Campaign status<strong id="advertiserStatus">Loading...</strong></div>
- </div>
-
- <div class="card">
-  <h3>Create a Campaign</h3>
-
-  <label for="campaignType">Campaign type</label>
-  <select id="campaignType" onchange="campaignFields()">
-   <option value="ptc">PTC Website Visit</option>
-   <option value="video">Video View</option>
-   <option value="job">Micro Job</option>
-   <option value="shortlink">Shortlink</option>
-  </select>
-
-  <label for="campaignTitle">Campaign title</label>
-  <input id="campaignTitle" type="text" maxlength="100" placeholder="Enter campaign title">
-
-  <div id="ptcFields">
-   <label>PTC package</label>
-   <select id="ptcPackage">
-    <option value="bronze">Bronze — 5 seconds</option>
-    <option value="silver">Silver — 10 seconds</option>
-    <option value="gold">Gold — 20 seconds</option>
-    <option value="platinum">Platinum — 30 seconds</option>
-    <option value="diamond">Diamond — 60 seconds</option>
-   </select>
-   <label>Website URL</label>
-   <input id="ptcUrl" type="url" placeholder="https://example.com">
-  </div>
-
-  <div id="videoFields" class="hidden">
-   <label>Video package</label>
-   <select id="videoPackage">
-    <option value="short">Short — 15 seconds</option>
-    <option value="medium">Medium — 30 seconds</option>
-    <option value="long">Long — 60 seconds</option>
-    <option value="premium">Premium — 120 seconds</option>
-   </select>
-   <label>Video URL</label>
-   <input id="videoUrl" type="url" placeholder="https://example.com/video">
-  </div>
-
-  <div id="jobFields" class="hidden">
-   <label>Job category</label>
-   <select id="jobCategory">
-    <option>Social Media</option>
-    <option>Website</option>
-    <option>App</option>
-    <option>Content Review</option>
-    <option>Other</option>
-   </select>
-
-   <label>Difficulty</label>
-   <select id="jobDifficulty">
-    <option>Easy</option>
-    <option>Medium</option>
-    <option>Hard</option>
-   </select>
-
-   <label>Expected time</label>
-   <input id="jobTime" type="text" placeholder="e.g. 5 minutes">
-
-   <label>Job description and instructions</label>
-   <textarea id="jobDescription" placeholder="Explain what workers must do"></textarea>
-
-   <label>Job URL (optional)</label>
-   <input id="jobUrl" type="url" placeholder="https://example.com">
-
-   <label>Verification type</label>
-   <select id="jobVerification">
-    <option value="link">Link / URL</option>
-    <option value="text">Text</option>
-    <option value="screenshot">Screenshot</option>
-   </select>
-
-   <label>Reward per completed job (coins)</label>
-   <input id="jobReward" type="number" min="1" step="0.01" placeholder="Enter worker reward">
-
-   <label>Total job slots</label>
-   <input id="jobSlots" type="number" min="1" step="1" placeholder="Number of workers">
-  </div>
-
-  <div id="shortlinkFields" class="hidden">
-   <label>Shortlink provider</label>
-   <input id="shortlinkProvider" type="text" maxlength="80" placeholder="Enter provider name">
-
-   <label>Shortlink destination URL</label>
-   <input id="shortlinkUrl" type="url" placeholder="https://example.com">
-
-   <label>Reward per completed shortlink (coins)</label>
-   <input id="shortlinkReward" type="number" min="1" step="0.01" placeholder="Enter reward per completion">
-
-   <label>Total shortlink slots</label>
-   <input id="shortlinkSlots" type="number" min="1" step="1" placeholder="Number of completions">
-  </div>
-
-  <label>Campaign quantity</label>
-  <input id="campaignQuantity" type="number" min="1" step="1" value="100">
-
-  <label>Daily limit (0 = unlimited)</label>
-  <input id="campaignDaily" type="number" min="0" step="1" value="0">
-
-  <label>Campaign budget (USD)</label>
-  <input id="campaignBudget" type="number" min="0.01" step="0.01" placeholder="e.g. 10.00">
-
-  <button class="gold full" onclick="previewCampaign()">Preview Campaign Details</button>
-  <p id="campaignPreview" class="muted" aria-live="polite"></p>
-
-  <button id="createCampaignBtn" class="full" onclick="createCampaign()">Submit Campaign for Admin Review</button>
-  <div id="campaignMessage"></div>
-
-  <div class="notice">Campaigns may require administrator approval and verified campaign funding before workers can see them. The backend validates the budget and campaign settings.</div>
- </div>
-
- <div class="card">
-  <h3>My Campaigns</h3>
-  <button class="dark full" onclick="loadAdvertiserData()">Refresh Campaigns</button>
-  <div id="myCampaignsList"><div class="empty">Loading your campaigns...</div></div>
- </div>
-
- <div class="card">
-  <h3>Worker Submissions</h3>
-  <p class="muted">Review proof submitted for your campaigns. Approving a valid submission triggers the worker reward through the backend.</p>
-
-  <div class="tabs" id="submissionTabs">
-   <button class="selected" onclick="submissionTab('submitted',this)">Pending</button>
-   <button onclick="submissionTab('approved',this)">Approved</button>
-   <button onclick="submissionTab('rejected',this)">Rejected</button>
-   <button onclick="submissionTab('all',this)">All</button>
-  </div>
-
-  <button class="dark full" onclick="loadSubmissions()">Refresh Submissions</button>
-  <div id="submissionsList"><div class="empty">Loading submissions...</div></div>
- </div>
-
+<section class="page" id="advertise">
+<h2>Advertiser Center</h2>
+<p class="muted">Create campaigns and review submissions from workers. Campaign funds are separate from worker earnings.</p>
+<div class="grid">
+<div class="stat">Campaign wallet<strong id="advertiserWallet">$0.00</strong></div>
+<div class="stat">My campaigns<strong id="myCampaignCount">0</strong></div>
+<div class="stat">Pending submissions<strong id="pendingSubmissionCount">0</strong></div>
+<div class="stat">Campaign status<strong id="advertiserStatus">Loading...</strong></div>
+</div>
+<div class="card">
+<h3>Create a Campaign</h3>
+<label for="campaignType">Campaign type</label>
+<select id="campaignType" onchange="campaignFields()">
+<option value="ptc">PTC Website Visit</option>
+<option value="video">Video View</option>
+<option value="job">Micro Job</option>
+<option value="shortlink">Shortlink</option>
+</select>
+<label for="campaignTitle">Campaign title</label>
+<input id="campaignTitle" maxlength="100" placeholder="Enter campaign title" type="text"/>
+<div id="ptcFields">
+<label>PTC package</label>
+<select id="ptcPackage">
+<option value="bronze">Bronze — 5 seconds</option>
+<option value="silver">Silver — 10 seconds</option>
+<option value="gold">Gold — 20 seconds</option>
+<option value="platinum">Platinum — 30 seconds</option>
+<option value="diamond">Diamond — 60 seconds</option>
+</select>
+<label>Website URL</label>
+<input id="ptcUrl" placeholder="https://example.com" type="url"/>
+</div>
+<div class="hidden" id="videoFields">
+<label>Video package</label>
+<select id="videoPackage">
+<option value="short">Short — 15 seconds</option>
+<option value="medium">Medium — 30 seconds</option>
+<option value="long">Long — 60 seconds</option>
+<option value="premium">Premium — 120 seconds</option>
+</select>
+<label>Video URL</label>
+<input id="videoUrl" placeholder="https://example.com/video" type="url"/>
+</div>
+<div class="hidden" id="jobFields">
+<label>Job category</label>
+<select id="jobCategory">
+<option>Social Media</option>
+<option>Website</option>
+<option>App</option>
+<option>Content Review</option>
+<option>Other</option>
+</select>
+<label>Difficulty</label>
+<select id="jobDifficulty">
+<option>Easy</option>
+<option>Medium</option>
+<option>Hard</option>
+</select>
+<label>Expected time</label>
+<input id="jobTime" placeholder="e.g. 5 minutes" type="text"/>
+<label>Job description and instructions</label>
+<textarea id="jobDescription" placeholder="Explain what workers must do"></textarea>
+<label>Job URL (optional)</label>
+<input id="jobUrl" placeholder="https://example.com" type="url"/>
+<label>Verification type</label>
+<select id="jobVerification">
+<option value="link">Link / URL</option>
+<option value="text">Text</option>
+<option value="screenshot">Screenshot</option>
+</select>
+<label>Reward per completed job (coins)</label>
+<input id="jobReward" min="1" placeholder="Enter worker reward" step="0.01" type="number"/>
+<label>Total job slots</label>
+<input id="jobSlots" min="1" placeholder="Number of workers" step="1" type="number"/>
+</div>
+<div class="hidden" id="shortlinkFields">
+<label>Shortlink provider</label>
+<input id="shortlinkProvider" maxlength="80" placeholder="Enter provider name" type="text"/>
+<label>Shortlink destination URL</label>
+<input id="shortlinkUrl" placeholder="https://example.com" type="url"/>
+<label>Reward per completed shortlink (coins)</label>
+<input id="shortlinkReward" min="1" placeholder="Enter reward per completion" step="0.01" type="number"/>
+<label>Total shortlink slots</label>
+<input id="shortlinkSlots" min="1" placeholder="Number of completions" step="1" type="number"/>
+</div>
+<label>Campaign quantity</label>
+<input id="campaignQuantity" min="1" step="1" type="number" value="100"/>
+<label>Daily limit (0 = unlimited)</label>
+<input id="campaignDaily" min="0" step="1" type="number" value="0"/>
+<label>Campaign budget (USD)</label>
+<input id="campaignBudget" min="0.01" placeholder="e.g. 10.00" step="0.01" type="number"/>
+<button class="gold full" onclick="previewCampaign()">Preview Campaign Details</button>
+<p aria-live="polite" class="muted" id="campaignPreview"></p>
+<button class="full" id="createCampaignBtn" onclick="createCampaign()">Submit Campaign for Admin Review</button>
+<div id="campaignMessage"></div>
+<div class="notice">Campaigns may require administrator approval and verified campaign funding before workers can see them. The backend validates the budget and campaign settings.</div>
+</div>
+<div class="card">
+<h3>My Campaigns</h3>
+<button class="dark full" onclick="loadAdvertiserData()">Refresh Campaigns</button>
+<div id="myCampaignsList"><div class="empty">Loading your campaigns...</div></div>
+</div>
+<div class="card">
+<h3>Worker Submissions</h3>
+<p class="muted">Review proof submitted for your campaigns. Approving a valid submission triggers the worker reward through the backend.</p>
+<div class="tabs" id="submissionTabs">
+<button class="selected" onclick="submissionTab('submitted',this)">Pending</button>
+<button onclick="submissionTab('approved',this)">Approved</button>
+<button onclick="submissionTab('rejected',this)">Rejected</button>
+<button onclick="submissionTab('all',this)">All</button>
+</div>
+<button class="dark full" onclick="loadSubmissions()">Refresh Submissions</button>
+<div id="submissionsList"><div class="empty">Loading submissions...</div></div>
+</div>
 </section>
-
 <!-- WALLET -->
-<section id="wallet" class="page">
-
- <h2>💰 Wallet</h2>
-
- <div class="card">
-  <h3>Worker Earnings Wallet</h3>
-  <div class="price"><span id="walletCoins">0</span> Coins</div>
-  <p class="muted">10,000 coins = $1.00 · Minimum withdrawal: 2,000 coins ($0.20)</p>
-  <div class="notice">Only approved worker earnings are shown here. Advertiser campaign funds are kept separate.</div>
-
-  <div class="tabs">
-   <button class="selected" onclick="walletTab('withdraw',this)">Withdraw</button>
-   <button onclick="walletTab('deposit',this)">Deposit</button>
-   <button onclick="walletTab('exchange',this)">Exchange</button>
-   <button onclick="walletTab('phoneTopup',this)">Phone Top Up</button>
-   <button onclick="walletTab('gameTopup',this)">Game Top Up</button>
-   <button onclick="walletTab('shopping',this)">Shopping</button>
-  </div>
-
-  <div id="walletWithdraw" class="subpage active">
-   <p class="muted">Withdraw approved worker earnings. Minimum 2,000 coins. Requests are reviewed by an administrator.</p>
-   <label>Withdrawal amount (coins)</label>
-   <input id="withdrawAmount" type="number" min="2000" step="1" placeholder="Minimum 2,000 coins">
-   <label>Payment method</label>
-   <select id="withdrawMethod">
-    <option value="ABA Bank">ABA Bank</option>
-    <option value="USDT - TON Network">USDT · TON Network</option>
-   </select>
-   <label>Payment details</label>
-   <textarea id="withdrawDetails" maxlength="300" placeholder="ABA account name and number, or USDT TON wallet address"></textarea>
-   <div id="withdrawMessage" class="notice">Your coins are reserved when the request is submitted. Rejected requests are refunded.</div>
-   <button id="withdrawSubmitBtn" class="full" onclick="submitWithdrawal()">Submit Withdrawal Request</button>
-   <div class="row"><h3>Withdrawal History</h3><button class="dark" onclick="loadWithdrawalHistory()">Refresh</button></div>
-   <div id="withdrawHistory"><div class="empty">Loading withdrawal history...</div></div>
-  </div>
-
-  <div id="walletDeposit" class="subpage">
-   <p class="muted">Add funds to your Advertiser Campaign Wallet only. Deposits are manually checked; funds are not credited until approved.</p>
-   <label>Deposit amount (USD)</label>
-   <input id="depositAmount" type="number" min="1" max="10000" step="0.01" placeholder="e.g. 5.00">
-   <label>Payment method</label>
-   <select id="depositMethod" onchange="showDepositInstructions()">
-    <option value="ABA Bank">ABA Bank · Manual review</option>
-    <option value="USDT - TON Network">USDT · TON · Manual review</option>
-   </select>
-   <div id="depositInstructions" class="notice">Loading available payment instructions...</div>
-   <label>Payment transaction reference</label>
-   <input id="depositReference" maxlength="200" placeholder="ABA transaction reference or USDT TON transaction hash">
-   <label>Additional payment details (optional)</label>
-   <textarea id="depositDetails" maxlength="1000" placeholder="Sender name, transfer time, or other useful details"></textarea>
-   <div id="depositMessage" class="notice">Minimum deposit: $1.00. Submit only after you have sent the payment.</div>
-   <button id="depositSubmitBtn" class="full" onclick="submitDeposit()">Submit Deposit for Review</button>
-   <div class="row"><h3>Deposit History</h3><button class="dark" onclick="loadDepositHistory()">Refresh</button></div>
-   <div id="depositHistory"><div class="empty">Loading deposit history...</div></div>
-  </div>
-
-  <div id="walletExchange" class="subpage">
-   <p class="muted">Transfer approved worker earnings into your Advertiser Campaign Wallet. No transfer fee.</p>
-   <p class="muted">Conversion: 10,000 coins = $1.00</p>
-   <label>Coins to transfer</label>
-   <input id="transferCoins" type="number" min="1" step="1" inputmode="numeric" placeholder="Enter whole coins" oninput="previewWalletTransfer()">
-   <div class="feature"><span>Campaign wallet receives</span><strong id="transferPreview">$0.00</strong></div>
-   <div class="feature"><span>Transfer fee</span><strong>$0.00</strong></div>
-   <div id="transferMessage" class="notice">Transfers are instant after server confirmation.</div>
-   <button id="transferButton" class="full" onclick="transferToCampaignWallet()">Transfer to Campaign Wallet</button>
-  </div>
-
-  <div id="walletPhoneTopup" class="subpage">
-   <h3>📱 Phone Top Up</h3>
-   <p class="muted">Request mobile credit for Cambodia. The administrator will process your top-up manually.</p>
-   <label>Choose mobile operator</label>
-   <div class="operator-grid" id="phoneOperatorGrid" role="group" aria-label="Choose mobile operator">
-    <button type="button" class="operator-option selected" data-provider="Smart" onclick="selectPhoneProvider('Smart',this)" aria-pressed="true">
-     <span class="operator-logo smart-logo"><span class="smart-mark"><i></i><i></i><i></i></span><b>Smart</b></span><span class="operator-name">Smart</span>
-    </button>
-    <button type="button" class="operator-option" data-provider="Cellcard" onclick="selectPhoneProvider('Cellcard',this)" aria-pressed="false">
-     <span class="operator-logo cellcard-logo"><span class="cellcard-mark">)))</span><b>cellcard</b></span><span class="operator-name">Cellcard</span>
-    </button>
-    <button type="button" class="operator-option" data-provider="Metfone" onclick="selectPhoneProvider('Metfone',this)" aria-pressed="false">
-     <span class="operator-logo metfone-logo"><span class="metfone-mark"></span><b>metfone</b></span><span class="operator-name">Metfone</span>
-    </button>
-    <button type="button" class="operator-option" data-provider="Seatel" onclick="selectPhoneProvider('Seatel',this)" aria-pressed="false">
-     <span class="operator-logo seatel-logo"><span class="seatel-mark">◉</span><b><span>sea</span><em>tel</em></b></span><span class="operator-name">Seatel</span>
-    </button>
-    <button type="button" class="operator-option" data-provider="Other" onclick="selectPhoneProvider('Other',this)" aria-pressed="false">
-     <span class="operator-logo other-logo">＋</span><span class="operator-name">Other</span>
-    </button>
-   </div>
-   <select id="phoneProvider" class="operator-provider-value" aria-hidden="true" tabindex="-1"><option>Smart</option><option>Cellcard</option><option>Metfone</option><option>Seatel</option><option>Other</option></select>
-   <label>Top-up type</label>
-   <select id="phoneTopupType" onchange="togglePhoneTopupType()"><option value="pinless" selected>PINless — direct mobile credit</option><option value="pin">PIN — recharge voucher code</option></select>
-   <div id="phoneNumberGroup"><label>Phone number (PINless only)</label><input id="phoneRecipient" inputmode="tel" maxlength="24" placeholder="e.g. 012345678"></div>
-   <div id="phonePinInfo" class="notice hidden">PIN voucher: no phone number is required. After admin processing, your recharge PIN will appear in your order history with a copy button.</div>
-   <label>Top-up amount / voucher denomination (USD)</label><select id="phoneAmount" onchange="previewServiceCoins('phone')"><option value="0.50">$0.50</option><option value="1.00" selected>$1.00</option><option value="2.00">$2.00</option><option value="5.00">$5.00</option><option value="10.00">$10.00</option><option value="20.00">$20.00</option></select>
-   <label>Additional note (optional)</label><input id="phoneDetails" maxlength="250" placeholder="Any special instructions">
-   <div class="feature"><span>Cost</span><strong id="phoneCost">10,000 coins</strong></div>
-   <div id="phoneMessage" class="notice">Your coins are deducted when you submit. PIN codes are delivered inside the app after admin processing. Rejected orders are refunded.</div>
-   <button id="phoneSubmit" class="full" onclick="submitServiceOrder('phone')">Submit Phone Top Up</button>
-  </div>
-
-  <div id="walletGameTopup" class="subpage">
-   <h3>🎮 Game Top Up</h3>
-   <p class="muted">Request game credits or items. Enter the correct player details; admin will fulfill the order manually.</p>
-   <label>Game / platform</label><select id="gameProvider"><option>Mobile Legends: Bang Bang</option><option>Free Fire</option><option>PUBG Mobile</option><option>Honor of Kings</option><option>Roblox</option><option>Other</option></select>
-   <label>Player ID / UID</label><input id="gameRecipient" maxlength="80" placeholder="Enter your Player ID">
-   <label>Server ID (if applicable)</label><input id="gameServer" maxlength="40" placeholder="Enter server ID or leave blank">
-   <label>Package / item requested</label><input id="gamePackage" maxlength="180" placeholder="e.g. 86 Diamonds">
-   <label>Price (USD)</label><input id="gameAmount" type="number" min="0.01" max="1000" step="0.01" value="1.00" oninput="previewServiceCoins('game')">
-   <div class="feature"><span>Cost</span><strong id="gameCost">10,000 coins</strong></div>
-   <div id="gameMessage" class="notice">Check your Player ID carefully. Coins are refunded if admin rejects the order.</div>
-   <button id="gameSubmit" class="full" onclick="submitServiceOrder('game')">Submit Game Top Up</button>
-  </div>
-
-  <div id="walletShopping" class="subpage">
-   <h3>🛍️ Shopping</h3>
-   <p class="muted">Request a product purchase. An administrator will verify the price and arrange delivery manually.</p>
-   <label>Product name</label><input id="shopProduct" maxlength="180" placeholder="Enter product name">
-   <label>Product link (optional)</label><input id="shopLink" type="url" maxlength="500" placeholder="https://...">
-   <label>Quantity</label><input id="shopQuantity" type="number" min="1" max="99" step="1" value="1">
-   <label>Delivery address / contact details</label><textarea id="shopAddress" maxlength="700" placeholder="Recipient name, phone number and delivery address"></textarea>
-   <label>Estimated total price (USD)</label><input id="shopAmount" type="number" min="0.01" max="1000" step="0.01" value="1.00" oninput="previewServiceCoins('shop')">
-   <div class="feature"><span>Cost</span><strong id="shopCost">10,000 coins</strong></div>
-   <div id="shopMessage" class="notice">Admin will verify product availability and price. Rejected orders are refunded.</div>
-   <button id="shopSubmit" class="full" onclick="submitServiceOrder('shop')">Submit Shopping Order</button>
-  </div>
-
-  <div class="card">
-   <div class="row"><h3>My Service Orders</h3><button class="dark" onclick="loadServiceOrders()">Refresh</button></div>
-   <div id="serviceOrderHistory"><div class="empty">Your phone, game and shopping orders will appear here.</div></div>
-  </div>
- </div>
-
- <div class="card">
-  <h3>Advertiser Campaign Wallet</h3>
-  <div class="price" id="walletAdvertiser">$0.00</div>
-  <p class="muted">Use this balance to fund campaigns and subscribe to membership plans. Worker earnings remain separate unless you transfer them here. No transfer fee.</p>
-  <button class="dark full" onclick="walletTab('exchange',document.querySelector('#wallet .tabs button:nth-child(3)'))">Transfer Worker Earnings</button>
-  <button class="dark full" onclick="go('advertise')">Manage Campaign Budget</button>
- </div>
-
+<section class="page" id="wallet">
+<h2>💰 Wallet</h2>
+<div class="card">
+<h3>Worker Earnings Wallet</h3>
+<div class="price"><span id="walletCoins">0</span> Coins</div>
+<p class="muted">10,000 coins = $1.00 · Minimum withdrawal: 2,000 coins ($0.20)</p>
+<div class="notice">Only approved worker earnings are shown here. Advertiser campaign funds are kept separate.</div>
+<div class="tabs">
+<button class="selected" onclick="walletTab('withdraw',this)">Withdraw</button>
+<button onclick="walletTab('deposit',this)">Deposit</button>
+<button onclick="walletTab('exchange',this)">Exchange</button>
+<button onclick="walletTab('phoneTopup',this)">Phone Top Up</button>
+<button onclick="walletTab('gameTopup',this)">Game Top Up</button>
+<button onclick="walletTab('shopping',this)">Shopping</button>
+</div>
+<div class="subpage active" id="walletWithdraw">
+<p class="muted">Withdraw approved worker earnings. Minimum 2,000 coins. Requests are reviewed by an administrator.</p>
+<label>Withdrawal amount (coins)</label>
+<input id="withdrawAmount" min="2000" placeholder="Minimum 2,000 coins" step="1" type="number"/>
+<label>Payment method</label>
+<select id="withdrawMethod">
+<option value="ABA Bank">ABA Bank</option>
+<option value="USDT - TON Network">USDT · TON Network</option>
+</select>
+<label>Payment details</label>
+<textarea id="withdrawDetails" maxlength="300" placeholder="ABA account name and number, or USDT TON wallet address"></textarea>
+<div class="notice" id="withdrawMessage">Your coins are reserved when the request is submitted. Rejected requests are refunded.</div>
+<button class="full" id="withdrawSubmitBtn" onclick="submitWithdrawal()">Submit Withdrawal Request</button>
+<div class="row"><h3>Withdrawal History</h3><button class="dark" onclick="loadWithdrawalHistory()">Refresh</button></div>
+<div id="withdrawHistory"><div class="empty">Loading withdrawal history...</div></div>
+</div>
+<div class="subpage" id="walletDeposit">
+<p class="muted">Add funds to your Advertiser Campaign Wallet only. Deposits are manually checked; funds are not credited until approved.</p>
+<label>Deposit amount (USD)</label>
+<input id="depositAmount" max="10000" min="1" placeholder="e.g. 5.00" step="0.01" type="number"/>
+<label>Payment method</label>
+<select id="depositMethod" onchange="showDepositInstructions()">
+<option value="ABA Bank">ABA Bank · Manual review</option>
+<option value="USDT - TON Network">USDT · TON · Manual review</option>
+</select>
+<div class="notice" id="depositInstructions">Loading available payment instructions...</div>
+<label>Payment transaction reference</label>
+<input id="depositReference" maxlength="200" placeholder="ABA transaction reference or USDT TON transaction hash"/>
+<label>Additional payment details (optional)</label>
+<textarea id="depositDetails" maxlength="1000" placeholder="Sender name, transfer time, or other useful details"></textarea>
+<div class="notice" id="depositMessage">Minimum deposit: $1.00. Submit only after you have sent the payment.</div>
+<button class="full" id="depositSubmitBtn" onclick="submitDeposit()">Submit Deposit for Review</button>
+<div class="row"><h3>Deposit History</h3><button class="dark" onclick="loadDepositHistory()">Refresh</button></div>
+<div id="depositHistory"><div class="empty">Loading deposit history...</div></div>
+</div>
+<div class="subpage" id="walletExchange">
+<p class="muted">Transfer approved worker earnings into your Advertiser Campaign Wallet. No transfer fee.</p>
+<p class="muted">Conversion: 10,000 coins = $1.00</p>
+<label>Coins to transfer</label>
+<input id="transferCoins" inputmode="numeric" min="1" oninput="previewWalletTransfer()" placeholder="Enter whole coins" step="1" type="number"/>
+<div class="feature"><span>Campaign wallet receives</span><strong id="transferPreview">$0.00</strong></div>
+<div class="feature"><span>Transfer fee</span><strong>$0.00</strong></div>
+<div class="notice" id="transferMessage">Transfers are instant after server confirmation.</div>
+<button class="full" id="transferButton" onclick="transferToCampaignWallet()">Transfer to Campaign Wallet</button>
+</div>
+<div class="subpage" id="walletPhoneTopup">
+<h3>📱 Phone Top Up</h3>
+<p class="muted">Request mobile credit for Cambodia. The administrator will process your top-up manually.</p>
+<label>Choose mobile operator</label>
+<div aria-label="Choose mobile operator" class="operator-grid" id="phoneOperatorGrid" role="group">
+<button aria-pressed="true" class="operator-option selected" data-provider="Smart" onclick="selectPhoneProvider('Smart',this)" type="button">
+<span class="operator-logo smart-logo"><span class="smart-mark"><i></i><i></i><i></i></span><b>Smart</b></span><span class="operator-name">Smart</span>
+</button>
+<button aria-pressed="false" class="operator-option" data-provider="Cellcard" onclick="selectPhoneProvider('Cellcard',this)" type="button">
+<span class="operator-logo cellcard-logo"><span class="cellcard-mark">)))</span><b>cellcard</b></span><span class="operator-name">Cellcard</span>
+</button>
+<button aria-pressed="false" class="operator-option" data-provider="Metfone" onclick="selectPhoneProvider('Metfone',this)" type="button">
+<span class="operator-logo metfone-logo"><span class="metfone-mark"></span><b>metfone</b></span><span class="operator-name">Metfone</span>
+</button>
+<button aria-pressed="false" class="operator-option" data-provider="Seatel" onclick="selectPhoneProvider('Seatel',this)" type="button">
+<span class="operator-logo seatel-logo"><span class="seatel-mark">◉</span><b><span>sea</span><em>tel</em></b></span><span class="operator-name">Seatel</span>
+</button>
+<button aria-pressed="false" class="operator-option" data-provider="Other" onclick="selectPhoneProvider('Other',this)" type="button">
+<span class="operator-logo other-logo">＋</span><span class="operator-name">Other</span>
+</button>
+</div>
+<select aria-hidden="true" class="operator-provider-value" id="phoneProvider" tabindex="-1"><option>Smart</option><option>Cellcard</option><option>Metfone</option><option>Seatel</option><option>Other</option></select>
+<label>Top-up type</label>
+<select id="phoneTopupType" onchange="togglePhoneTopupType()"><option selected="" value="pinless">PINless — direct mobile credit</option><option value="pin">PIN — recharge voucher code</option></select>
+<div id="phoneNumberGroup"><label>Phone number (PINless only)</label><input id="phoneRecipient" inputmode="tel" maxlength="24" placeholder="e.g. 012345678"/></div>
+<div class="notice hidden" id="phonePinInfo">PIN voucher: no phone number is required. After admin processing, your recharge PIN will appear in your order history with a copy button.</div>
+<label>Top-up amount / voucher denomination (USD)</label><select id="phoneAmount" onchange="previewServiceCoins('phone')"><option value="0.50">$0.50</option><option selected="" value="1.00">$1.00</option><option value="2.00">$2.00</option><option value="5.00">$5.00</option><option value="10.00">$10.00</option><option value="20.00">$20.00</option></select>
+<label>Additional note (optional)</label><input id="phoneDetails" maxlength="250" placeholder="Any special instructions"/>
+<div class="feature"><span>Cost</span><strong id="phoneCost">10,000 coins</strong></div>
+<div class="notice" id="phoneMessage">Your coins are deducted when you submit. PIN codes are delivered inside the app after admin processing. Rejected orders are refunded.</div>
+<button class="full" id="phoneSubmit" onclick="submitServiceOrder('phone')">Submit Phone Top Up</button>
+</div>
+<div class="subpage" id="walletGameTopup">
+<h3>🎮 Game Top Up</h3>
+<p class="muted">Choose a game, enter your player details and request a package. Orders are fulfilled manually by the administrator.</p>
+<div aria-label="Choose a game" class="game-catalog-grid" id="gameCatalogGrid" role="group">
+<button aria-pressed="true" class="game-catalog-card selected" data-game="Mobile Legends KH" onclick="selectGameProvider('Mobile Legends KH',this)" type="button"><span class="game-art ml-art"><img alt="Mobile Legends: Bang Bang official game logo" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="https://thegamecaveegypt.com/cdn/shop/products/mobile-legends-logo_530x%402x.png?v=1664107056"/></span><strong>Mobile Legends KH</strong><small>Diamonds</small></button>
+<button aria-pressed="false" class="game-catalog-card" data-game="Magic Chess GoGo" onclick="selectGameProvider('Magic Chess GoGo',this)" type="button"><span class="game-art mc-art"><img alt="Magic Chess Go Go game logo" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="https://assets.zonalogo.com/gaming/magicchessgogo.com/logo-1776816953538-971.png"/></span><strong>Magic Chess GoGo</strong><small>Diamonds</small></button>
+<button aria-pressed="false" class="game-catalog-card" data-game="Free Fire" onclick="selectGameProvider('Free Fire',this)" type="button"><span class="game-art ff-art"><img alt="Garena Free Fire official game logo" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="https://www.citypng.com/public/uploads/preview/official-free-fire-battlegrounds-logo-701751694791335un11hpdefy.png"/></span><strong>Free Fire</strong><small>Diamonds</small></button>
+<button aria-pressed="false" class="game-catalog-card" data-game="PUBG" onclick="selectGameProvider('PUBG',this)" type="button"><span class="game-art pubg-art"><img alt="PUBG Mobile game logo" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="https://www.citypng.com/public/uploads/preview/hd-player-unknown-pubg-battlegrounds-mobile-logo-701751694790566xijfg37aos.png?v=2026010616"/></span><strong>PUBG</strong><small>UC</small></button>
+<button aria-pressed="false" class="game-catalog-card" data-game="Honor of Kings" onclick="selectGameProvider('Honor of Kings',this)" type="button"><span class="game-art hok-art"><img alt="Honor of Kings official game logo" decoding="async" loading="lazy" referrerpolicy="no-referrer" src="https://sg-hok.playerinfinite.com/cms/nrft/doc/parse/a48f1fb3-0745-4d47-abc8-c39716fef728_html_edf668f68f87736b-710x729-ori_s_80_50_ori_q_80.webp"/></span><strong>Honor of Kings</strong><small>Tokens</small></button>
+</div>
+<select aria-label="Selected game" class="game-provider-value" id="gameProvider"><option selected="">Mobile Legends KH</option><option>Magic Chess GoGo</option><option>Free Fire</option><option>PUBG</option><option>Honor of Kings</option></select>
+<div class="feature"><span>Selected game</span><strong id="gameSelectedName">Mobile Legends KH</strong></div>
+<label>Player ID / UID</label><input id="gameRecipient" maxlength="80" placeholder="Enter your Player ID / UID"/>
+<label>Zone ID / Server ID (if applicable)</label><input id="gameServer" maxlength="40" placeholder="Enter Zone ID or Server ID, if required"/>
+<label>Top-up package</label><input id="gamePackage" maxlength="180" placeholder="e.g. 86 Diamonds"/>
+<label>Price (USD)</label><input id="gameAmount" max="1000" min="0.01" oninput="previewServiceCoins('game')" step="0.01" type="number" value="1.00"/>
+<div class="feature"><span>Cost (10,000 coins = $1.00)</span><strong id="gameCost">10,000 coins</strong></div>
+<div class="notice" id="gameMessage">Double-check your Player ID and package. Coins are reserved when you submit. Rejected orders are refunded.</div>
+<button class="full" id="gameSubmit" onclick="submitServiceOrder('game')">Submit Game Top Up</button>
+</div>
+<div class="subpage" id="walletShopping">
+<h3>🛍️ Shopping</h3>
+<p class="muted">Request a product purchase. An administrator will verify the price and arrange delivery manually.</p>
+<label>Product name</label><input id="shopProduct" maxlength="180" placeholder="Enter product name"/>
+<label>Product link (optional)</label><input id="shopLink" maxlength="500" placeholder="https://..." type="url"/>
+<label>Quantity</label><input id="shopQuantity" max="99" min="1" step="1" type="number" value="1"/>
+<label>Delivery address / contact details</label><textarea id="shopAddress" maxlength="700" placeholder="Recipient name, phone number and delivery address"></textarea>
+<label>Estimated total price (USD)</label><input id="shopAmount" max="1000" min="0.01" oninput="previewServiceCoins('shop')" step="0.01" type="number" value="1.00"/>
+<div class="feature"><span>Cost</span><strong id="shopCost">10,000 coins</strong></div>
+<div class="notice" id="shopMessage">Admin will verify product availability and price. Rejected orders are refunded.</div>
+<button class="full" id="shopSubmit" onclick="submitServiceOrder('shop')">Submit Shopping Order</button>
+</div>
+<div class="card">
+<div class="row"><h3>My Service Orders</h3><button class="dark" onclick="loadServiceOrders()">Refresh</button></div>
+<div id="serviceOrderHistory"><div class="empty">Your phone, game and shopping orders will appear here.</div></div>
+</div>
+</div>
+<div class="card">
+<h3>Advertiser Campaign Wallet</h3>
+<div class="price" id="walletAdvertiser">$0.00</div>
+<p class="muted">Use this balance to fund campaigns and subscribe to membership plans. Worker earnings remain separate unless you transfer them here. No transfer fee.</p>
+<button class="dark full" onclick="walletTab('exchange',document.querySelector('#wallet .tabs button:nth-child(3)'))">Transfer Worker Earnings</button>
+<button class="dark full" onclick="go('advertise')">Manage Campaign Budget</button>
+</div>
 </section>
-
 <!-- PLANS -->
-<section id="plans" class="page">
- <h2>👑 Membership Plans</h2>
- <p class="muted">Subscribe directly using your Advertiser Campaign Wallet. Each paid plan lasts 30 days.</p>
- <div class="card"><div class="feature"><span>Advertiser Campaign Wallet balance</span><strong id="plansWalletBalance">$0.00</strong></div><p class="muted">Add funds or transfer worker earnings in the Wallet section. No transfer fee.</p></div>
-
- <div class="card">
-  <span class="tag">FREE</span><h3>🆓 Free</h3><div class="price">Forever</div>
-  <ul>
-   <li>Faucet multiplier ×1</li>
-   <li>Daily Faucet Limit: Not specified</li>
-   <li>Referral commission 10%</li>
-   <li>Referral bonus 200 coins</li>
-  </ul>
-  <button class="full" disabled>Free Plan</button>
- </div>
-
- <div class="card">
-  <span class="tag">BRONZE</span><h3>🥉 Bronze</h3><div class="price">$2.99 / month</div>
-  <ul><li>Faucet multiplier ×1.6</li><li>160 daily claims</li><li>15% referral commission</li><li>200 coin referral bonus</li></ul>
-  <button class="full" onclick="subscribeWithWallet('Bronze')">Subscribe Bronze with Campaign Wallet</button>
- </div>
-
- <div class="card">
-  <span class="tag">SILVER</span><h3>🥈 Silver</h3><div class="price">$5.99 / month</div>
-  <ul><li>Faucet multiplier ×2</li><li>200 daily claims</li><li>20% referral commission</li><li>250 coin referral bonus</li></ul>
-  <button class="full" onclick="subscribeWithWallet('Silver')">Subscribe Silver with Campaign Wallet</button>
- </div>
-
- <div class="card">
-  <span class="tag">GOLD</span><h3>🥇 Gold</h3><div class="price">$9.99 / month</div>
-  <ul><li>Faucet multiplier ×5</li><li>250 daily claims</li><li>25% referral commission</li><li>300 coin referral bonus</li></ul>
-  <button class="full" onclick="subscribeWithWallet('Gold')">Subscribe Gold with Campaign Wallet</button>
- </div>
-
- <div class="card">
-  <span class="tag">VIP</span><h3>💎 VIP</h3><div class="price">$16.99 / month</div>
-  <ul><li>Faucet multiplier ×7</li><li>288 daily claims</li><li>30% referral commission</li><li>350 coin referral bonus</li></ul>
-  <button class="full" onclick="subscribeWithWallet('VIP')">Subscribe VIP with Campaign Wallet</button>
- </div>
+<section class="page" id="plans">
+<h2>👑 Membership Plans</h2>
+<p class="muted">Subscribe directly using your Advertiser Campaign Wallet. Each paid plan lasts 30 days.</p>
+<div class="card"><div class="feature"><span>Advertiser Campaign Wallet balance</span><strong id="plansWalletBalance">$0.00</strong></div><p class="muted">Add funds or transfer worker earnings in the Wallet section. No transfer fee.</p></div>
+<div class="card">
+<span class="tag">FREE</span><h3>🆓 Free</h3><div class="price">Forever</div>
+<ul>
+<li>Faucet multiplier ×1</li>
+<li>Daily Faucet Limit: Not specified</li>
+<li>Referral commission 10%</li>
+<li>Referral bonus 200 coins</li>
+</ul>
+<button class="full" disabled="">Free Plan</button>
+</div>
+<div class="card">
+<span class="tag">BRONZE</span><h3>🥉 Bronze</h3><div class="price">$2.99 / month</div>
+<ul><li>Faucet multiplier ×1.6</li><li>160 daily claims</li><li>15% referral commission</li><li>200 coin referral bonus</li></ul>
+<button class="full" onclick="subscribeWithWallet('Bronze')">Subscribe Bronze with Campaign Wallet</button>
+</div>
+<div class="card">
+<span class="tag">SILVER</span><h3>🥈 Silver</h3><div class="price">$5.99 / month</div>
+<ul><li>Faucet multiplier ×2</li><li>200 daily claims</li><li>20% referral commission</li><li>250 coin referral bonus</li></ul>
+<button class="full" onclick="subscribeWithWallet('Silver')">Subscribe Silver with Campaign Wallet</button>
+</div>
+<div class="card">
+<span class="tag">GOLD</span><h3>🥇 Gold</h3><div class="price">$9.99 / month</div>
+<ul><li>Faucet multiplier ×5</li><li>250 daily claims</li><li>25% referral commission</li><li>300 coin referral bonus</li></ul>
+<button class="full" onclick="subscribeWithWallet('Gold')">Subscribe Gold with Campaign Wallet</button>
+</div>
+<div class="card">
+<span class="tag">VIP</span><h3>💎 VIP</h3><div class="price">$16.99 / month</div>
+<ul><li>Faucet multiplier ×7</li><li>288 daily claims</li><li>30% referral commission</li><li>350 coin referral bonus</li></ul>
+<button class="full" onclick="subscribeWithWallet('VIP')">Subscribe VIP with Campaign Wallet</button>
+</div>
 </section>
-
 <!-- INVITE -->
-<section id="invite" class="page">
- <h2>👥 Invite Friends</h2>
- <div class="card">
-  <h3>Your Personal Referral Link</h3>
-  <p class="muted">Share this link with friends. When a new user opens the Mini App through your link and registers, they will be connected to your account.</p>
-  <div class="feature" style="display:block">
-   <label for="referralLink" class="muted">Your referral link</label>
-   <input id="referralLink" type="text" readonly value="Loading your referral link..." style="width:100%;margin-top:8px;box-sizing:border-box" />
-  </div>
-  <button class="dark full" id="copyReferralButton" onclick="copyReferralLink()">📋 Copy Referral Link</button>
-  <div class="feature"><span>Invited users</span><strong id="referralInvited">0</strong></div>
-  <div class="feature"><span>Successful referrals</span><strong id="referralSuccessful">0</strong></div>
-  <div class="feature"><span>Referral earnings</span><strong id="referralEarnings">0 coins</strong></div>
- </div>
- <div class="card">
-  <h3>Referral Program</h3>
-  <p class="muted">Referral commissions are credited to your Worker wallet when your referred users complete eligible tasks and their rewards are approved.</p>
-  <div class="feature"><span>Free commission</span><strong>10%</strong></div>
-  <div class="feature"><span>Free referral bonus</span><strong>200 coins</strong></div>
-  <p class="muted">Bronze 15% · Silver 20% · Gold 25% · VIP 30%.</p>
- </div>
+<section class="page" id="invite">
+<h2>👥 Invite Friends</h2>
+<div class="card">
+<h3>Your Personal Referral Link</h3>
+<p class="muted">Share this link with friends. When a new user opens the Mini App through your link and registers, they will be connected to your account.</p>
+<div class="feature" style="display:block">
+<label class="muted" for="referralLink">Your referral link</label>
+<input id="referralLink" readonly="" style="width:100%;margin-top:8px;box-sizing:border-box" type="text" value="Loading your referral link...">
+</input></div>
+<button class="dark full" id="copyReferralButton" onclick="copyReferralLink()">📋 Copy Referral Link</button>
+<div class="feature"><span>Invited users</span><strong id="referralInvited">0</strong></div>
+<div class="feature"><span>Successful referrals</span><strong id="referralSuccessful">0</strong></div>
+<div class="feature"><span>Referral earnings</span><strong id="referralEarnings">0 coins</strong></div>
+</div>
+<div class="card">
+<h3>Referral Program</h3>
+<p class="muted">Referral commissions are credited to your Worker wallet when your referred users complete eligible tasks and their rewards are approved.</p>
+<div class="feature"><span>Free commission</span><strong>10%</strong></div>
+<div class="feature"><span>Free referral bonus</span><strong>200 coins</strong></div>
+<p class="muted">Bronze 15% · Silver 20% · Gold 25% · VIP 30%.</p>
+</div>
 </section>
-
 <!-- PROFILE -->
-<section id="profile" class="page">
- <h2>Profile & Account Mode</h2>
-
- <div class="card">
-  <h3>One Telegram Account · Two Roles</h3>
-  <p class="muted">Use the same Telegram account to complete tasks as a Worker and create campaigns as an Advertiser.</p>
-  <div class="tabs">
-   <button class="selected" onclick="setRole('worker',this)">Worker Mode</button>
-   <button onclick="setRole('advertiser',this)">Advertiser Mode</button>
-  </div>
-  <p id="roleDescription" class="muted">Worker mode: browse tasks, submit proof and view approved earnings.</p>
- </div>
-
- <div class="card">
-  <h3>Account Information</h3>
-  <div class="profile-identity">
-   <div id="profileAvatar" class="profile-avatar" aria-label="Telegram profile photo">👤</div>
-   <div class="profile-identity-details">
-    <strong id="profileName">Loading...</strong>
-    <span id="profileUsername">Username not set</span>
-   </div>
-  </div>
-  <div class="feature"><span>Telegram ID</span><strong id="profileTelegramId">Loading...</strong></div>
-  <div class="feature"><span>Current plan</span><strong id="profilePlan">Free</strong></div>
-  <div class="feature"><span>Account roles</span><strong>Worker + Advertiser</strong></div>
-  <div class="feature"><span>Authentication</span><strong id="authStatus">Checking...</strong></div>
- </div>
-
- <button class="dark full" onclick="go('plans')">View Membership Plans</button>
- <button class="dark full" onclick="go('invite')">Invite Friends</button>
+<section class="page" id="profile">
+<h2>Profile &amp; Account Mode</h2>
+<div class="card">
+<h3>One Telegram Account · Two Roles</h3>
+<p class="muted">Use the same Telegram account to complete tasks as a Worker and create campaigns as an Advertiser.</p>
+<div class="tabs">
+<button class="selected" onclick="setRole('worker',this)">Worker Mode</button>
+<button onclick="setRole('advertiser',this)">Advertiser Mode</button>
+</div>
+<p class="muted" id="roleDescription">Worker mode: browse tasks, submit proof and view approved earnings.</p>
+</div>
+<div class="card">
+<h3>Account Information</h3>
+<div class="profile-identity">
+<div aria-label="Telegram profile photo" class="profile-avatar" id="profileAvatar">👤</div>
+<div class="profile-identity-details">
+<strong id="profileName">Loading...</strong>
+<span id="profileUsername">Username not set</span>
+</div>
+</div>
+<div class="feature"><span>Telegram ID</span><strong id="profileTelegramId">Loading...</strong></div>
+<div class="feature"><span>Current plan</span><strong id="profilePlan">Free</strong></div>
+<div class="feature"><span>Account roles</span><strong>Worker + Advertiser</strong></div>
+<div class="feature"><span>Authentication</span><strong id="authStatus">Checking...</strong></div>
+</div>
+<button class="dark full" onclick="go('plans')">View Membership Plans</button>
+<button class="dark full" onclick="go('invite')">Invite Friends</button>
 </section>
-
 </main>
-
 <nav>
- <button class="active" onclick="go('home',this)"><span>🏠</span>Home</button>
- <button onclick="go('tasks',this)"><span>📋</span>Tasks</button>
- <button onclick="go('wallet',this)"><span>💰</span>Wallet</button>
- <button onclick="go('faucet',this)"><span>🚰</span>Faucet</button>
- <button onclick="go('advertise',this)"><span>📢</span>Advertise</button>
- <button onclick="go('profile',this)"><span>👤</span>Profile</button>
+<button class="active" onclick="go('home',this)"><span>🏠</span>Home</button>
+<button onclick="go('tasks',this)"><span>📋</span>Tasks</button>
+<button onclick="go('wallet',this)"><span>💰</span>Wallet</button>
+<button onclick="go('faucet',this)"><span>🚰</span>Faucet</button>
+<button onclick="go('advertise',this)"><span>📢</span>Advertise</button>
+<button onclick="go('profile',this)"><span>👤</span>Profile</button>
 </nav>
-
 <script>
 // ============================================
 // CONFIGURATION
@@ -2170,6 +2089,29 @@ function selectPhoneProvider(provider, button) {
     item.classList.toggle("selected", active);
     item.setAttribute("aria-pressed", active ? "true" : "false");
   });
+}
+
+function selectGameProvider(provider, button) {
+  const select = $("gameProvider");
+  if (!select) return;
+  select.value = provider;
+  $("gameSelectedName").textContent = provider;
+  document.querySelectorAll("#gameCatalogGrid .game-catalog-card").forEach((item) => {
+    const active = item.dataset.game === provider;
+    item.classList.toggle("selected", active);
+    item.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+  const packageInput = $("gamePackage");
+  if (packageInput) {
+    const examples = {
+      "Mobile Legends KH": "e.g. 86 Diamonds",
+      "Magic Chess GoGo": "e.g. Diamond package",
+      "Free Fire": "e.g. 100 Diamonds",
+      "PUBG": "e.g. 60 UC",
+      "Honor of Kings": "e.g. Tokens package"
+    };
+    packageInput.placeholder = examples[provider] || "Enter package name";
+  }
 }
 
 function togglePhoneTopupType() {
