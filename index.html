@@ -91,6 +91,10 @@ a{color:var(--blue);overflow-wrap:anywhere}
 @media(max-width:380px){.operator-grid{gap:7px}.operator-option{min-height:82px;padding:8px 5px!important}.operator-logo{min-width:104px}.operator-logo b{font-size:17px}}
 @media(max-width:380px){header strong{font-size:13px}.grid{gap:6px}.stat{padding:10px}.stat strong{font-size:17px}nav button{font-size:9px}}
 
+
+.ml-account-fields{margin:12px 0}.ml-id-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:end}.ml-id-row>div{min-width:0}.ml-id-row label{display:block}.ml-check-btn{min-height:42px;padding:0 15px!important;margin:0!important;background:#d9a83d!important;color:#152033!important;font-weight:800!important;border-radius:9px!important}.ml-package-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:9px 0 14px}.ml-package-option{display:flex;align-items:center;justify-content:space-between;gap:7px;min-width:0;min-height:54px;padding:10px!important;margin:0!important;background:#101a2b!important;border:1px solid var(--border)!important;border-radius:10px!important;color:var(--text)!important;text-align:left}.ml-package-option strong{font-size:12px;line-height:1.25}.ml-package-option b{font-size:12px;color:#f4c45c;white-space:nowrap}.ml-package-option.selected{border:2px solid var(--gold)!important;background:#26334a!important}.hidden{display:none!important}
+@media(max-width:420px){.ml-id-row{grid-template-columns:1fr 1fr}.ml-check-btn{grid-column:1/-1;width:100%}.ml-package-grid{gap:7px}.ml-package-option{padding:9px 7px!important}.ml-package-option strong,.ml-package-option b{font-size:11px}}
+
 .game-catalog-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 16px}
 .game-catalog-card{margin:0!important;min-width:0;min-height:124px;padding:12px 8px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;background:#101a2b!important;color:var(--text)!important;border:1px solid var(--border)!important;border-radius:13px!important;text-align:center}
 .game-catalog-card.selected{border:2px solid var(--gold)!important;background:#26334a!important;box-shadow:0 0 0 1px rgba(246,196,83,.12)}
@@ -446,9 +450,37 @@ a{color:var(--blue);overflow-wrap:anywhere}
 </div>
 <select aria-label="Selected game" class="game-provider-value" id="gameProvider"><option selected="">Mobile Legends KH</option><option>Magic Chess GoGo</option><option>Free Fire</option><option>PUBG</option><option>Honor of Kings</option></select>
 <div class="feature"><span>Selected game</span><strong id="gameSelectedName">Mobile Legends KH</strong></div>
-<label>Player ID / UID</label><input id="gameRecipient" maxlength="80" placeholder="Enter your Player ID / UID"/>
-<label>Zone ID / Server ID (if applicable)</label><input id="gameServer" maxlength="40" placeholder="Enter Zone ID or Server ID, if required"/>
-<label>Top-up package</label><input id="gamePackage" maxlength="180" placeholder="e.g. 86 Diamonds"/>
+<div class="ml-account-fields" id="mlAccountFields">
+  <div class="ml-id-row">
+    <div><label for="gameRecipient">User ID:</label><input id="gameRecipient" inputmode="numeric" maxlength="30" placeholder="Enter User ID"/></div>
+    <div><label for="gameServer">Server ID:</label><input id="gameServer" inputmode="numeric" maxlength="20" placeholder="Enter Server ID"/></div>
+    <button class="ml-check-btn" id="mlCheckButton" onclick="checkMobileLegendsId()" type="button">Check</button>
+  </div>
+  <div class="notice hidden" id="mlCheckMessage" role="status"></div>
+</div>
+<div id="genericGameAccountFields">
+  <label>Player ID / UID</label><input id="gameRecipientFallback" maxlength="80" placeholder="Enter your Player ID / UID"/>
+  <label>Zone ID / Server ID (if applicable)</label><input id="gameServerFallback" maxlength="40" placeholder="Enter Zone ID or Server ID, if required"/>
+</div>
+<label>Package:</label>
+<div class="ml-package-grid" id="mlPackageGrid" aria-label="Mobile Legends packages">
+  <button type="button" class="ml-package-option" data-package="Weekly passX1" data-price="1.70" onclick="selectMobileLegendsPackage(this)"><strong>Weekly passX1</strong><b>$1.70</b></button>
+  <button type="button" class="ml-package-option" data-package="Weekly passX3" data-price="5.10" onclick="selectMobileLegendsPackage(this)"><strong>Weekly passX3</strong><b>$5.10</b></button>
+  <button type="button" class="ml-package-option" data-package="50 + 50 Diamonds" data-price="0.96" onclick="selectMobileLegendsPackage(this)"><strong>50 + 50</strong><b>$0.96</b></button>
+  <button type="button" class="ml-package-option" data-package="150 + 150 Diamonds" data-price="2.70" onclick="selectMobileLegendsPackage(this)"><strong>150 + 150</strong><b>$2.70</b></button>
+  <button type="button" class="ml-package-option" data-package="250 + 250 Diamonds" data-price="2.70" onclick="selectMobileLegendsPackage(this)"><strong>250 + 250</strong><b>$2.70</b></button>
+  <button type="button" class="ml-package-option" data-package="500 + 500 Diamonds" data-price="8.50" onclick="selectMobileLegendsPackage(this)"><strong>500 + 500</strong><b>$8.50</b></button>
+  <button type="button" class="ml-package-option" data-package="14 Diamonds" data-price="0.35" onclick="selectMobileLegendsPackage(this)"><strong>14 Diamonds</strong><b>$0.35</b></button>
+  <button type="button" class="ml-package-option" data-package="55 Diamonds" data-price="0.97" onclick="selectMobileLegendsPackage(this)"><strong>55 Diamonds</strong><b>$0.97</b></button>
+  <button type="button" class="ml-package-option" data-package="86 Diamonds" data-price="1.45" onclick="selectMobileLegendsPackage(this)"><strong>86 Diamonds</strong><b>$1.45</b></button>
+  <button type="button" class="ml-package-option" data-package="110 Diamonds" data-price="1.95" onclick="selectMobileLegendsPackage(this)"><strong>110 Diamonds</strong><b>$1.95</b></button>
+  <button type="button" class="ml-package-option" data-package="165 Diamonds" data-price="2.75" onclick="selectMobileLegendsPackage(this)"><strong>165 Diamonds</strong><b>$2.75</b></button>
+  <button type="button" class="ml-package-option" data-package="275 Diamonds" data-price="4.35" onclick="selectMobileLegendsPackage(this)"><strong>275 Diamonds</strong><b>$4.35</b></button>
+  <button type="button" class="ml-package-option" data-package="343 Diamonds" data-price="5.35" onclick="selectMobileLegendsPackage(this)"><strong>343 Diamonds</strong><b>$5.35</b></button>
+  <button type="button" class="ml-package-option" data-package="429 Diamonds" data-price="6.60" onclick="selectMobileLegendsPackage(this)"><strong>429 Diamonds</strong><b>$6.60</b></button>
+</div>
+<div id="genericGamePackageFields" class="hidden"><label>Top-up package</label><input id="gamePackageFallback" maxlength="180" placeholder="Enter package name"/></div>
+<input id="gamePackage" maxlength="180" type="hidden" value=""/>
 <label>Price (USD)</label><input id="gameAmount" max="1000" min="0.01" oninput="previewServiceCoins('game')" step="0.01" type="number" value="1.00"/>
 <div class="feature"><span>Cost (10,000 coins = $1.00)</span><strong id="gameCost">10,000 coins</strong></div>
 <div class="notice" id="gameMessage">Double-check your Player ID and package. Coins are reserved when you submit. Rejected orders are refunded.</div>
@@ -2101,17 +2133,46 @@ function selectGameProvider(provider, button) {
     item.classList.toggle("selected", active);
     item.setAttribute("aria-pressed", active ? "true" : "false");
   });
-  const packageInput = $("gamePackage");
-  if (packageInput) {
-    const examples = {
-      "Mobile Legends KH": "e.g. 86 Diamonds",
-      "Magic Chess GoGo": "e.g. Diamond package",
-      "Free Fire": "e.g. 100 Diamonds",
-      "PUBG": "e.g. 60 UC",
-      "Honor of Kings": "e.g. Tokens package"
-    };
-    packageInput.placeholder = examples[provider] || "Enter package name";
+  const isML = provider === "Mobile Legends KH";
+  $("mlAccountFields")?.classList.toggle("hidden", !isML);
+  $("genericGameAccountFields")?.classList.toggle("hidden", isML);
+  $("mlPackageGrid")?.classList.toggle("hidden", !isML);
+  $("genericGamePackageFields")?.classList.toggle("hidden", isML);
+  if (!isML) {
+    $("gameRecipient").value = $("gameRecipientFallback").value;
+    $("gameServer").value = $("gameServerFallback").value;
+    $("gamePackage").value = $("gamePackageFallback").value;
+    document.querySelectorAll("#mlPackageGrid .ml-package-option").forEach((el) => el.classList.remove("selected"));
+    const examples = {"Magic Chess GoGo":"e.g. Diamond package","Free Fire":"e.g. 100 Diamonds","PUBG":"e.g. 60 UC","Honor of Kings":"e.g. Tokens package"};
+    $("gamePackageFallback").placeholder = examples[provider] || "Enter package name";
+  } else {
+    $("gameRecipient").value = "";
+    $("gameServer").value = "";
+    $("gamePackage").value = "";
   }
+  $("gameAmount").value = "1.00";
+  previewServiceCoins("game");
+}
+
+function selectMobileLegendsPackage(button) {
+  if (!button) return;
+  document.querySelectorAll("#mlPackageGrid .ml-package-option").forEach((item) => item.classList.toggle("selected", item === button));
+  $("gamePackage").value = button.dataset.package || "";
+  $("gameAmount").value = Number(button.dataset.price || 0).toFixed(2);
+  previewServiceCoins("game");
+}
+
+function checkMobileLegendsId() {
+  const userId = $("gameRecipient").value.trim();
+  const serverId = $("gameServer").value.trim();
+  const message = $("mlCheckMessage");
+  message.classList.remove("hidden", "error");
+  if (!/^\d{4,20}$/.test(userId) || !/^\d{1,10}$/.test(serverId)) {
+    message.classList.add("error");
+    message.textContent = "Please enter a valid numeric User ID and Server ID.";
+    return;
+  }
+  message.textContent = "ID format looks valid. Live account-name verification is not connected yet; please confirm the ID in Mobile Legends before ordering.";
 }
 
 function togglePhoneTopupType() {
@@ -2143,9 +2204,17 @@ async function submitServiceOrder(kind) {
     if (phoneTopupType === "pin") recipient = "PIN voucher";
     itemDetails = (phoneTopupType === "pin" ? "PIN voucher" : "PINless direct top-up") + (itemDetails ? " · " + itemDetails : "");
   } else if (kind === "game") {
-    if (recipient.length < 2 || itemDetails.length < 2) { showMessage(config.message, "Enter your Player ID and requested package.", "error"); return; }
+    if (provider !== "Mobile Legends KH") {
+      recipient = $("gameRecipientFallback").value.trim();
+      itemDetails = $("gamePackageFallback").value.trim();
+      const otherServer = $("gameServerFallback").value.trim();
+      if (otherServer) itemDetails += " · Server: " + otherServer;
+    }
+    if (recipient.length < 2 || itemDetails.length < 2) { showMessage(config.message, "Enter your Player ID and select a package.", "error"); return; }
     const serverId = $("gameServer").value.trim();
-    if (serverId) itemDetails += " · Server: " + serverId;
+    if (provider === "Mobile Legends KH" && (!/^\d{4,20}$/.test(recipient) || !/^\d{1,10}$/.test(serverId))) { showMessage(config.message, "Enter a valid numeric Mobile Legends User ID and Server ID, then press Check.", "error"); return; }
+    if (provider === "Mobile Legends KH" && !$("gamePackage").value) { showMessage(config.message, "Please select a Mobile Legends package.", "error"); return; }
+    if (serverId && provider === "Mobile Legends KH") itemDetails += " · Server ID: " + serverId;
   } else {
     const product = $("shopProduct").value.trim();
     const link = $("shopLink").value.trim();
@@ -2163,7 +2232,7 @@ async function submitServiceOrder(kind) {
     const data = await apiRequest("/api/worker/service-orders", {method:"POST", body:JSON.stringify({orderType:kind === "phone" ? "phone_topup" : kind === "game" ? "game_topup" : "shopping", provider, recipient, itemDetails, quantity, amountUsd, phoneTopupType})});
     showMessage(config.message, data.message || "Order submitted. Admin will process it manually.", "success");
     if (kind === "phone") { $("phoneRecipient").value = ""; $("phoneDetails").value = ""; $("phoneTopupType").value = "pinless"; togglePhoneTopupType(); }
-    if (kind === "game") { $("gameRecipient").value = ""; $("gameServer").value = ""; $("gamePackage").value = ""; }
+    if (kind === "game") { $("gameRecipient").value = ""; $("gameServer").value = ""; $("gameRecipientFallback").value = ""; $("gameServerFallback").value = ""; $("gamePackageFallback").value = ""; $("gamePackage").value = ""; document.querySelectorAll("#mlPackageGrid .ml-package-option").forEach((el) => el.classList.remove("selected")); $("mlCheckMessage")?.classList.add("hidden"); }
     if (kind === "shop") { $("shopProduct").value = ""; $("shopLink").value = ""; $("shopAddress").value = ""; }
     await Promise.all([loadProfile(), loadServiceOrders()]);
   } catch (error) { showMessage(config.message, error.message, "error"); }
@@ -2325,6 +2394,7 @@ authenticateTelegram().then(authenticated => {
   }
 });
 
+selectGameProvider("Mobile Legends KH", document.querySelector("#gameCatalogGrid .game-catalog-card[data-game=\"Mobile Legends KH\"]"));
 </script>
 </body>
 </html>
