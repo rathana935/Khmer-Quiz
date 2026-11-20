@@ -74,6 +74,20 @@ nav span{display:block;font-size:18px;margin-bottom:3px}
 .proof-box{background:#0d1728;border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:10px}
 .proof-box label{margin-top:5px}
 a{color:var(--blue);overflow-wrap:anywhere}
+
+.operator-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:7px 0 12px}
+.operator-option{margin:0!important;padding:11px 9px!important;min-height:88px;background:#101a2b!important;color:var(--text)!important;border:1px solid var(--border)!important;border-radius:12px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;transition:border-color .15s,background .15s}
+.operator-option.selected{border:2px solid var(--gold)!important;background:#26334a!important;box-shadow:0 0 0 1px rgba(246,196,83,.12)}
+.operator-logo{height:37px;min-width:116px;display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;border-radius:8px;padding:4px 9px;color:#172033;line-height:1}
+.operator-logo b{font-size:19px;letter-spacing:-.8px}
+.smart-logo b{color:#079447;font-size:22px}.smart-mark{width:24px;height:24px;position:relative;display:inline-block;transform:rotate(45deg)}.smart-mark i{position:absolute;width:11px;height:11px;background:#f5a623;border-radius:1px}.smart-mark i:nth-child(1){left:0;top:0}.smart-mark i:nth-child(2){right:0;top:0;background:#ed3d78}.smart-mark i:nth-child(3){left:7px;bottom:0;background:#8b3c9c}
+.cellcard-logo{color:#ef941c}.cellcard-logo b{font-weight:500;font-size:20px;letter-spacing:-1.2px}.cellcard-mark{font-size:19px;font-weight:bold;letter-spacing:-7px;transform:rotate(-45deg);margin-right:7px}
+.metfone-logo{color:#167b76}.metfone-logo b{font-size:20px;font-weight:600}.metfone-mark{width:20px;height:20px;border-radius:50%;background:#f28a35;display:inline-block;position:relative}.metfone-mark:after{content:"";position:absolute;width:14px;height:5px;background:#fff;left:3px;top:8px;border-radius:100%;transform:rotate(-35deg)}
+.seatel-logo{color:#319bd1}.seatel-mark{font-size:27px;line-height:1;color:#319bd1}.seatel-logo b{font-size:20px;letter-spacing:-1px}.seatel-logo em{font-style:normal;color:#df4b91}
+.other-logo{width:42px;min-width:42px;height:37px;padding:0;font-size:28px;color:#c9d7ed;background:#263b61}
+.operator-name{font-size:12px;color:#dbe5f5;font-weight:700}
+.operator-provider-value{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+@media(max-width:380px){.operator-grid{gap:7px}.operator-option{min-height:82px;padding:8px 5px!important}.operator-logo{min-width:104px}.operator-logo b{font-size:17px}}
 @media(max-width:380px){header strong{font-size:13px}.grid{gap:6px}.stat{padding:10px}.stat strong{font-size:17px}nav button{font-size:9px}}
 </style>
 </head>
@@ -460,8 +474,25 @@ a{color:var(--blue);overflow-wrap:anywhere}
   <div id="walletPhoneTopup" class="subpage">
    <h3>📱 Phone Top Up</h3>
    <p class="muted">Request mobile credit for Cambodia. The administrator will process your top-up manually.</p>
-   <label>Mobile operator</label>
-   <select id="phoneProvider"><option>Smart</option><option>Cellcard</option><option>Metfone</option><option>Seatel</option><option>Other</option></select>
+   <label>Choose mobile operator</label>
+   <div class="operator-grid" id="phoneOperatorGrid" role="group" aria-label="Choose mobile operator">
+    <button type="button" class="operator-option selected" data-provider="Smart" onclick="selectPhoneProvider('Smart',this)" aria-pressed="true">
+     <span class="operator-logo smart-logo"><span class="smart-mark"><i></i><i></i><i></i></span><b>Smart</b></span><span class="operator-name">Smart</span>
+    </button>
+    <button type="button" class="operator-option" data-provider="Cellcard" onclick="selectPhoneProvider('Cellcard',this)" aria-pressed="false">
+     <span class="operator-logo cellcard-logo"><span class="cellcard-mark">)))</span><b>cellcard</b></span><span class="operator-name">Cellcard</span>
+    </button>
+    <button type="button" class="operator-option" data-provider="Metfone" onclick="selectPhoneProvider('Metfone',this)" aria-pressed="false">
+     <span class="operator-logo metfone-logo"><span class="metfone-mark"></span><b>metfone</b></span><span class="operator-name">Metfone</span>
+    </button>
+    <button type="button" class="operator-option" data-provider="Seatel" onclick="selectPhoneProvider('Seatel',this)" aria-pressed="false">
+     <span class="operator-logo seatel-logo"><span class="seatel-mark">◉</span><b><span>sea</span><em>tel</em></b></span><span class="operator-name">Seatel</span>
+    </button>
+    <button type="button" class="operator-option" data-provider="Other" onclick="selectPhoneProvider('Other',this)" aria-pressed="false">
+     <span class="operator-logo other-logo">＋</span><span class="operator-name">Other</span>
+    </button>
+   </div>
+   <select id="phoneProvider" class="operator-provider-value" aria-hidden="true" tabindex="-1"><option>Smart</option><option>Cellcard</option><option>Metfone</option><option>Seatel</option><option>Other</option></select>
    <label>Top-up type</label>
    <select id="phoneTopupType" onchange="togglePhoneTopupType()"><option value="pinless" selected>PINless — direct mobile credit</option><option value="pin">PIN — recharge voucher code</option></select>
    <div id="phoneNumberGroup"><label>Phone number (PINless only)</label><input id="phoneRecipient" inputmode="tel" maxlength="24" placeholder="e.g. 012345678"></div>
@@ -2120,6 +2151,17 @@ function previewServiceCoins(kind) {
   const outputId = kind === "phone" ? "phoneCost" : kind === "game" ? "gameCost" : "shopCost";
   const usd = Number($(inputId)?.value || 0);
   $(outputId).textContent = Number.isFinite(usd) && usd > 0 ? formatCoins(Math.round(usd * 10000)) + " coins" : "Enter a valid amount";
+}
+
+function selectPhoneProvider(provider, button) {
+  const select = $("phoneProvider");
+  if (!select) return;
+  select.value = provider;
+  document.querySelectorAll("#phoneOperatorGrid .operator-option").forEach((item) => {
+    const active = item.dataset.provider === provider;
+    item.classList.toggle("selected", active);
+    item.setAttribute("aria-pressed", active ? "true" : "false");
+  });
 }
 
 function togglePhoneTopupType() {
