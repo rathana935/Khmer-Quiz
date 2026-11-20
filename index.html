@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0b1120">
 <title>Khmer Earn Marketplace</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoaded&render=explicit" async defer></script>
 
 <style>
@@ -662,7 +663,12 @@ a{color:var(--blue);overflow-wrap:anywhere}
 // ============================================
 
 const API_URL = "https://khmer-quiz-backend.onrender.com";
+const ADSGRAM_INTERSTITIAL_BLOCK_ID = "int-60936";
+const ADSGRAM_INTERSTITIAL_COOLDOWN_MS = 5 * 60 * 1000;
+const ADSGRAM_LAST_SHOWN_KEY = "kem_adsgram_interstitial_last_shown";
 const tg = window.Telegram?.WebApp;
+let adsgramInterstitialController = null;
+let adsgramInterstitialBusy = false;
 
 let authToken = null;
 let currentUser = null;
@@ -1477,6 +1483,7 @@ async function submitTaskProof(claimId, verification) {
       if (!response.ok || data.success === false) throw new Error(getErrorMessage(data, `Upload failed (${response.status})`));
       alert(data.message || "Screenshot submitted for advertiser review.");
       await loadMyClaims();
+      await maybeShowAdsgramInterstitial("screenshot-proof-submitted");
       return;
     }
 
@@ -1498,6 +1505,7 @@ async function submitTaskProof(claimId, verification) {
     );
     alert(data.message || "Your proof has been submitted for review.");
     await loadMyClaims();
+    await maybeShowAdsgramInterstitial("task-proof-submitted");
   } catch (error) {
     alert(error.message);
   }
@@ -2292,6 +2300,49 @@ async function copyReferralLink() {
     field.focus();
     field.select();
     showMessage("connectionNotice", "Please copy the selected referral link manually.", "notice");
+  }
+}
+
+// ============================================
+// ADSGRAM NON-REWARDED INTERSTITIAL ADS
+// Triggered only after successful task-proof submission,
+// with a five-minute cooldown. No wallet or coin rewards.
+// ============================================
+
+async function maybeShowAdsgramInterstitial(reason) {
+  if (adsgramInterstitialBusy) return false;
+  if (!tg || !tg.initData) return false;
+  if (!window.Adsgram || typeof window.Adsgram.init !== "function") {
+    console.warn("AdsGram SDK is not available; continuing without an ad.");
+    return false;
+  }
+
+  let lastShown = 0;
+  try {
+    lastShown = Number(localStorage.getItem(ADSGRAM_LAST_SHOWN_KEY) || 0);
+  } catch (_) {}
+  if (Date.now() - lastShown < ADSGRAM_INTERSTITIAL_COOLDOWN_MS) return false;
+
+  adsgramInterstitialBusy = true;
+  // Record the attempt before showing, so repeated submissions do not
+  // trigger repeated requests when AdsGram has no available ad.
+  try { localStorage.setItem(ADSGRAM_LAST_SHOWN_KEY, String(Date.now())); } catch (_) {}
+
+  try {
+    if (!adsgramInterstitialController) {
+      adsgramInterstitialController = window.Adsgram.init({
+        blockId: ADSGRAM_INTERSTITIAL_BLOCK_ID,
+        debug: false
+      });
+    }
+    await adsgramInterstitialController.show();
+    return true;
+  } catch (error) {
+    // No ad or playback error must never interrupt the user's task flow.
+    console.warn("AdsGram interstitial was not shown:", error);
+    return false;
+  } finally {
+    adsgramInterstitialBusy = false;
   }
 }
 
