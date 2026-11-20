@@ -462,11 +462,14 @@ a{color:var(--blue);overflow-wrap:anywhere}
    <p class="muted">Request mobile credit for Cambodia. The administrator will process your top-up manually.</p>
    <label>Mobile operator</label>
    <select id="phoneProvider"><option>Smart</option><option>Cellcard</option><option>Metfone</option><option>Seatel</option><option>Other</option></select>
-   <label>Phone number</label><input id="phoneRecipient" inputmode="tel" maxlength="24" placeholder="e.g. 012345678">
-   <label>Top-up amount (USD)</label><select id="phoneAmount" onchange="previewServiceCoins('phone')"><option value="0.50">$0.50</option><option value="1.00" selected>$1.00</option><option value="2.00">$2.00</option><option value="5.00">$5.00</option><option value="10.00">$10.00</option><option value="20.00">$20.00</option></select>
+   <label>Top-up type</label>
+   <select id="phoneTopupType" onchange="togglePhoneTopupType()"><option value="pinless" selected>PINless — direct mobile credit</option><option value="pin">PIN — recharge voucher code</option></select>
+   <div id="phoneNumberGroup"><label>Phone number (PINless only)</label><input id="phoneRecipient" inputmode="tel" maxlength="24" placeholder="e.g. 012345678"></div>
+   <div id="phonePinInfo" class="notice hidden">PIN voucher: no phone number is required. After admin processing, your recharge PIN will appear in your order history with a copy button.</div>
+   <label>Top-up amount / voucher denomination (USD)</label><select id="phoneAmount" onchange="previewServiceCoins('phone')"><option value="0.50">$0.50</option><option value="1.00" selected>$1.00</option><option value="2.00">$2.00</option><option value="5.00">$5.00</option><option value="10.00">$10.00</option><option value="20.00">$20.00</option></select>
    <label>Additional note (optional)</label><input id="phoneDetails" maxlength="250" placeholder="Any special instructions">
    <div class="feature"><span>Cost</span><strong id="phoneCost">10,000 coins</strong></div>
-   <div id="phoneMessage" class="notice">Your coins are deducted when you submit. If the order is rejected, they are refunded.</div>
+   <div id="phoneMessage" class="notice">Your coins are deducted when you submit. PIN codes are delivered inside the app after admin processing. Rejected orders are refunded.</div>
    <button id="phoneSubmit" class="full" onclick="submitServiceOrder('phone')">Submit Phone Top Up</button>
   </div>
 
@@ -2101,6 +2104,13 @@ function previewServiceCoins(kind) {
   $(outputId).textContent = Number.isFinite(usd) && usd > 0 ? formatCoins(Math.round(usd * 10000)) + " coins" : "Enter a valid amount";
 }
 
+function togglePhoneTopupType() {
+  const isPin = $("phoneTopupType")?.value === "pin";
+  $("phoneNumberGroup")?.classList.toggle("hidden", isPin);
+  $("phonePinInfo")?.classList.toggle("hidden", !isPin);
+  if (isPin && $("phoneRecipient")) $("phoneRecipient").value = "";
+}
+
 async function submitServiceOrder(kind) {
   const config = {
     phone: {button:"phoneSubmit", message:"phoneMessage", amount:"phoneAmount", provider:"phoneProvider", recipient:"phoneRecipient", details:"phoneDetails"},
@@ -2116,9 +2126,12 @@ async function submitServiceOrder(kind) {
   let recipient = $(config.recipient).value.trim();
   let itemDetails = $(config.details).value.trim();
   let quantity = 1;
+  let phoneTopupType = null;
   if (kind === "phone") {
-    if (!/^[+0-9][0-9\s-]{5,22}$/.test(recipient)) { showMessage(config.message, "Enter a valid phone number.", "error"); return; }
-    itemDetails = itemDetails || "Mobile credit top-up";
+    phoneTopupType = $("phoneTopupType").value;
+    if (phoneTopupType === "pinless" && !/^[+0-9][0-9\s-]{5,22}$/.test(recipient)) { showMessage(config.message, "Enter a valid phone number for PINless top-up.", "error"); return; }
+    if (phoneTopupType === "pin") recipient = "PIN voucher";
+    itemDetails = (phoneTopupType === "pin" ? "PIN voucher" : "PINless direct top-up") + (itemDetails ? " · " + itemDetails : "");
   } else if (kind === "game") {
     if (recipient.length < 2 || itemDetails.length < 2) { showMessage(config.message, "Enter your Player ID and requested package.", "error"); return; }
     const serverId = $("gameServer").value.trim();
@@ -2137,9 +2150,9 @@ async function submitServiceOrder(kind) {
   if (!confirm(`Submit this ${kind === "phone" ? "phone top-up" : kind === "game" ? "game top-up" : "shopping"} order for ${formatCoins(cost)} coins ($${amountUsd.toFixed(2)})?`)) return;
   button.disabled = true; button.textContent = "Submitting...";
   try {
-    const data = await apiRequest("/api/worker/service-orders", {method:"POST", body:JSON.stringify({orderType:kind === "phone" ? "phone_topup" : kind === "game" ? "game_topup" : "shopping", provider, recipient, itemDetails, quantity, amountUsd})});
+    const data = await apiRequest("/api/worker/service-orders", {method:"POST", body:JSON.stringify({orderType:kind === "phone" ? "phone_topup" : kind === "game" ? "game_topup" : "shopping", provider, recipient, itemDetails, quantity, amountUsd, phoneTopupType})});
     showMessage(config.message, data.message || "Order submitted. Admin will process it manually.", "success");
-    if (kind === "phone") { $("phoneRecipient").value = ""; $("phoneDetails").value = ""; }
+    if (kind === "phone") { $("phoneRecipient").value = ""; $("phoneDetails").value = ""; $("phoneTopupType").value = "pinless"; togglePhoneTopupType(); }
     if (kind === "game") { $("gameRecipient").value = ""; $("gameServer").value = ""; $("gamePackage").value = ""; }
     if (kind === "shop") { $("shopProduct").value = ""; $("shopLink").value = ""; $("shopAddress").value = ""; }
     await Promise.all([loadProfile(), loadServiceOrders()]);
@@ -2156,7 +2169,7 @@ async function loadServiceOrders() {
     const rows = extractArray(data, ["orders"]);
     if (!rows.length) { box.innerHTML = '<div class="empty">No service orders yet.</div>'; return; }
     const names = {phone_topup:"Phone Top Up",game_topup:"Game Top Up",shopping:"Shopping"};
-    box.innerHTML = rows.map(o => `<div class="proof-box"><div class="row"><strong>${escapeHTML(names[o.order_type] || o.order_type)}</strong><span class="status">${escapeHTML(String(o.status || "pending").toUpperCase())}</span></div><p class="muted">${escapeHTML(o.provider || "")} · ${escapeHTML(o.recipient || "")}</p><p>${escapeHTML(o.item_details || "")}</p><div class="feature"><span>Paid from wallet</span><strong>${formatCoins(o.amount_coins)} coins</strong></div><p class="fine">${o.created_at ? escapeHTML(new Date(o.created_at).toLocaleString()) : ""}</p>${o.admin_note ? `<p class="muted">Admin note: ${escapeHTML(o.admin_note)}</p>` : ""}</div>`).join("");
+    box.innerHTML = rows.map(o => `<div class="proof-box"><div class="row"><strong>${escapeHTML(names[o.order_type] || o.order_type)}</strong><span class="status">${escapeHTML(String(o.status || "pending").toUpperCase())}</span></div><p class="muted">${escapeHTML(o.provider || "")} · ${escapeHTML(o.recipient || "")}</p><p>${escapeHTML(o.item_details || "")}</p><div class="feature"><span>Paid from wallet</span><strong>${formatCoins(o.amount_coins)} coins</strong></div><p class="fine">${o.created_at ? escapeHTML(new Date(o.created_at).toLocaleString()) : ""}</p>${o.phone_topup_type ? `<p class="muted">Top-up type: ${escapeHTML(o.phone_topup_type.toUpperCase())}</p>` : ""}${o.delivery_pin ? `<div class="notice success"><strong>Your recharge PIN</strong><p id="voucher-${escapeHTML(o.id)}" style="word-break:break-all;font-size:17px;font-weight:bold">${escapeHTML(o.delivery_pin)}</p><button class="dark" onclick="navigator.clipboard.writeText(document.getElementById('voucher-${escapeHTML(o.id)}').textContent).then(()=>showMessage('phoneMessage','Recharge PIN copied.','success')).catch(()=>showMessage('phoneMessage','Please select and copy the PIN manually.','error'))">Copy PIN</button></div>` : ""}${o.admin_note ? `<p class="muted">Admin note: ${escapeHTML(o.admin_note)}</p>` : ""}</div>`).join("");
   } catch (error) { box.innerHTML = `<div class="notice error">${escapeHTML(error.message)}</div>`; }
 }
 
@@ -2262,3 +2275,4 @@ authenticateTelegram().then(authenticated => {
 </script>
 </body>
 </html>
+⋮⋮⋮⋮
