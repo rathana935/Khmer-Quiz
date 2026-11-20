@@ -186,14 +186,21 @@ function renderServiceOrders(){
  const q=($("serviceOrderSearch")?.value||"").toLowerCase();
  const labels={phone_topup:"Phone Top Up",game_topup:"Game Top Up",shopping:"Shopping"};
  const items=dataStore.serviceOrders.filter(x=>(String(x.username||"")+" "+String(x.telegram_id||"")+" "+String(x.provider||"")+" "+String(x.recipient||"")+" "+String(x.item_details||"")).toLowerCase().includes(q));
- $("serviceOrdersTable").innerHTML=table(["Order / user","Details","Wallet charge","Created","Status / action"],items.map(x=>`<tr><td><b>${esc(labels[x.order_type]||x.order_type)}</b><small>${esc(x.username||"Telegram user")} · ID ${esc(x.telegram_id)}</small></td><td><b>${esc(x.provider)}</b><small>Recipient: ${esc(x.recipient)}</small><small>${esc(x.item_details)}</small><small>Quantity: ${esc(x.quantity)}</small></td><td><b>${Number(x.amount_coins||0).toLocaleString()} coins</b><small>${usdMicros(x.amount_usd_micros)}</small></td><td>${dateText(x.created_at)}</td><td>${pill(x.status)}${["pending","processing"].includes(x.status)?`<div class="rowbuttons" style="margin-top:7px">${x.status==="pending"?`<button onclick="reviewServiceOrder('${esc(x.id)}','processing')">Start processing</button>`:""}<button class="success" onclick="reviewServiceOrder('${esc(x.id)}','completed')">Mark completed</button><button class="danger" onclick="reviewServiceOrder('${esc(x.id)}','rejected')">Reject & refund</button></div>`:""}${x.admin_note?`<small>Note: ${esc(x.admin_note)}</small>`:""}</td></tr>`));
+ $("serviceOrdersTable").innerHTML=table(["Order / user","Details","Wallet charge","Created","Status / action"],items.map(x=>`<tr><td><b>${esc(labels[x.order_type]||x.order_type)}</b><small>${esc(x.username||"Telegram user")} · ID ${esc(x.telegram_id)}</small></td><td><b>${esc(x.provider)}</b><small>Recipient: ${esc(x.recipient)}</small><small>${esc(x.item_details)}</small><small>Quantity: ${esc(x.quantity)}</small>${x.phone_topup_type?`<small>Top-up type: ${esc(x.phone_topup_type.toUpperCase())}</small>`:""}</td><td><b>${Number(x.amount_coins||0).toLocaleString()} coins</b><small>${usdMicros(x.amount_usd_micros)}</small></td><td>${dateText(x.created_at)}</td><td>${pill(x.status)}${["pending","processing"].includes(x.status)?`<div class="rowbuttons" style="margin-top:7px">${x.status==="pending"?`<button onclick="reviewServiceOrder('${esc(x.id)}','processing')">Start processing</button>`:""}<button class="success" onclick="reviewServiceOrder('${esc(x.id)}','completed')">Mark completed</button><button class="danger" onclick="reviewServiceOrder('${esc(x.id)}','rejected')">Reject & refund</button></div>`:""}${x.admin_note?`<small>Note: ${esc(x.admin_note)}</small>`:""}</td></tr>`));
 }
 async function reviewServiceOrder(id,action){
  let adminNote="";
  if(action==="rejected"){adminNote=prompt("Reason for rejecting this order (coins will be refunded):")??null;if(adminNote===null)return}
- if(action==="completed"&&!confirm("Confirm the mobile top-up / game credit / shopping delivery has been completed?"))return;
+ let deliveryPin="";
+ const order=dataStore.serviceOrders.find(x=>x.id===id);
+ if(action==="completed"&&order?.order_type==="phone_topup"&&order?.phone_topup_type==="pin"){
+   deliveryPin=prompt("Enter the recharge voucher PIN/code to deliver privately to the user:")??null;
+   if(deliveryPin===null)return;
+   if(!deliveryPin.trim()){toast("A PIN code is required before completing this order.",true);return;}
+ }
+ if(action==="completed"&&!confirm("Confirm the mobile top-up / voucher / game credit / shopping delivery has been completed?"))return;
  if(action==="processing"&&!confirm("Start manually processing this order?"))return;
- try{await api(`/api/admin/service-orders/${encodeURIComponent(id)}/review`,{method:"POST",body:JSON.stringify({action,adminNote})});toast(action==="rejected"?"Order rejected and coins refunded.":action==="completed"?"Order marked completed.":"Order moved to processing.");await refreshAll()}catch(e){toast(e.message,true)}
+ try{await api(`/api/admin/service-orders/${encodeURIComponent(id)}/review`,{method:"POST",body:JSON.stringify({action,adminNote,deliveryPin})});toast(action==="rejected"?"Order rejected and coins refunded.":action==="completed"?"Order marked completed.":"Order moved to processing.");await refreshAll()}catch(e){toast(e.message,true)}
 }
 function renderCampaigns(){
  const q=($("campaignSearch")?.value||"").toLowerCase();
@@ -231,3 +238,4 @@ document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",(
 </script>
 </body>
 </html>
+⋮⋮⋮⋮
