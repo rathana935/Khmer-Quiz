@@ -92,7 +92,7 @@ a{color:var(--blue);overflow-wrap:anywhere}
 @media(max-width:380px){header strong{font-size:13px}.grid{gap:6px}.stat{padding:10px}.stat strong{font-size:17px}nav button{font-size:9px}}
 
 
-.ml-account-fields{margin:12px 0}.ml-id-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:end}.ml-id-row>div{min-width:0}.ml-id-row label{display:block}.ml-check-btn{min-height:42px;padding:0 15px!important;margin:0!important;background:#d9a83d!important;color:#152033!important;font-weight:800!important;border-radius:9px!important}.ml-id-confirm{display:flex!important;align-items:flex-start;gap:9px;margin:12px 0;padding:10px;background:#101a2b;border:1px solid var(--border);border-radius:9px;font-size:12px;line-height:1.45}.ml-id-confirm input{width:auto!important;min-width:17px;margin:2px 0 0!important;accent-color:#d9a83d}.ml-package-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:9px 0 14px}.ml-package-option{display:flex;align-items:center;justify-content:space-between;gap:7px;min-width:0;min-height:54px;padding:10px!important;margin:0!important;background:#101a2b!important;border:1px solid var(--border)!important;border-radius:10px!important;color:var(--text)!important;text-align:left}.ml-package-label{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}.ml-package-option strong{font-size:12px;line-height:1.25}.ml-package-option small{font-size:9px;line-height:1.1;color:#f6c453;font-weight:800;letter-spacing:.15px}.ml-package-option b{font-size:12px;color:#f4c45c;white-space:nowrap}.ml-package-option.selected{border:2px solid var(--gold)!important;background:#26334a!important}.hidden{display:none!important}
+.ml-account-fields{margin:12px 0}.ml-id-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:end}.ml-id-row>div{min-width:0}.ml-id-row label{display:block}.ml-check-btn{min-height:42px;padding:0 15px!important;margin:0!important;background:#d9a83d!important;color:#152033!important;font-weight:800!important;border-radius:9px!important}.ml-package-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:9px 0 14px}.ml-package-option{display:flex;align-items:center;justify-content:space-between;gap:7px;min-width:0;min-height:54px;padding:10px!important;margin:0!important;background:#101a2b!important;border:1px solid var(--border)!important;border-radius:10px!important;color:var(--text)!important;text-align:left}.ml-package-label{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}.ml-package-option strong{font-size:12px;line-height:1.25}.ml-package-option small{font-size:9px;line-height:1.1;color:#f6c453;font-weight:800;letter-spacing:.15px}.ml-package-option b{font-size:12px;color:#f4c45c;white-space:nowrap}.ml-package-option.selected{border:2px solid var(--gold)!important;background:#26334a!important}.hidden{display:none!important}
 @media(max-width:420px){.ml-id-row{grid-template-columns:1fr 1fr}.ml-check-btn{grid-column:1/-1;width:100%}.ml-package-grid{gap:7px}.ml-package-option{padding:9px 7px!important}.ml-package-option strong,.ml-package-option b{font-size:11px}}
 
 .game-catalog-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 16px}
@@ -454,14 +454,13 @@ a{color:var(--blue);overflow-wrap:anywhere}
   <div class="ml-id-row">
     <div><label for="gameRecipient">User ID:</label><input id="gameRecipient" inputmode="numeric" maxlength="30" placeholder="Enter User ID"/></div>
     <div><label for="gameServer">Server ID:</label><input id="gameServer" inputmode="numeric" maxlength="20" placeholder="Enter Server ID"/></div>
-    <button class="ml-check-btn" id="mlCheckButton" onclick="checkMobileLegendsId()" type="button">Validate ID</button>
+    <button class="ml-check-btn" id="mlCheckButton" onclick="checkMobileLegendsId()" type="button">Check</button>
   </div>
-  <div class="notice" id="mlCheckMessage" role="status">Enter both IDs and select Validate ID. This checks only the ID format; your Mobile Legends account name is not verified.</div>
-  <label class="ml-id-confirm"><input type="checkbox" id="mlIdConfirm"/> I confirm that my User ID and Server ID are correct. I understand that the account name has not been verified.</label>
+  <div class="notice hidden" id="mlCheckMessage" role="status"></div>
 </div>
 <div id="genericGameAccountFields">
-  <label>Player ID / UID</label><input id="gameRecipientFallback" maxlength="80" placeholder="Enter your Player ID / UID"/>
-  <label>Zone ID / Server ID (if applicable)</label><input id="gameServerFallback" maxlength="40" placeholder="Enter Zone ID or Server ID, if required"/>
+  <label id="gameRecipientFallbackLabel" for="gameRecipientFallback">Player ID / UID</label><input id="gameRecipientFallback" maxlength="80" placeholder="Enter your Player ID / UID"/>
+  <label id="gameServerFallbackLabel" for="gameServerFallback">Zone ID / Server ID (if applicable)</label><input id="gameServerFallback" maxlength="40" placeholder="Enter Zone ID or Server ID, if required"/>
 </div>
 <label>Package:</label>
 <div class="ml-package-grid" id="mlPackageGrid" aria-label="Mobile Legends packages">
@@ -479,6 +478,19 @@ a{color:var(--blue);overflow-wrap:anywhere}
   <button type="button" class="ml-package-option" data-package="275 Diamonds" data-price="4.35" onclick="selectMobileLegendsPackage(this)"><span class="ml-package-label"><strong>💎 275 Diamonds</strong></span><b>$4.35</b></button>
   <button type="button" class="ml-package-option" data-package="343 Diamonds" data-price="5.35" onclick="selectMobileLegendsPackage(this)"><span class="ml-package-label"><strong>💎 343 Diamonds</strong></span><b>$5.35</b></button>
   <button type="button" class="ml-package-option" data-package="429 Diamonds" data-price="6.60" onclick="selectMobileLegendsPackage(this)"><span class="ml-package-label"><strong>💎 429 Diamonds</strong></span><b>$6.60</b></button>
+</div>
+<div class="ml-package-grid hidden" id="magicChessPackageGrid" aria-label="Magic Chess GoGo packages">
+  <button type="button" class="ml-package-option" data-package="Weekly Pass X1" data-price="2.02" onclick="selectMagicChessPackage(this)"><span class="ml-package-label"><strong>💎 Weekly Pass X1</strong></span><b>$2.02</b></button>
+  <button type="button" class="ml-package-option" data-package="55 Diamonds" data-price="0.97" onclick="selectMagicChessPackage(this)"><span class="ml-package-label"><strong>💎 55 Diamonds</strong></span><b>$0.97</b></button>
+  <button type="button" class="ml-package-option" data-package="86 Diamonds" data-price="1.50" onclick="selectMagicChessPackage(this)"><span class="ml-package-label"><strong>💎 86 Diamonds</strong></span><b>$1.50</b></button>
+  <button type="button" class="ml-package-option" data-package="165 Diamonds" data-price="2.60" onclick="selectMagicChessPackage(this)"><span class="ml-package-label"><strong>💎 165 Diamonds</strong></span><b>$2.60</b></button>
+  <button type="button" class="ml-package-option" data-package="275 Diamonds" data-price="4.25" onclick="selectMagicChessPackage(this)"><span class="ml-package-label"><strong>💎 275 Diamonds</strong></span><b>$4.25</b></button>
+  <button type="button" class="ml-package-option" data-package="344 Diamonds" data-price="5.55" onclick="selectMagicChessPackage(this)"><span class="ml-package-label"><strong>💎 344 Diamonds</strong></span><b>$5.55</b></button>
+  <button type="button" class="ml-package-option" data-package="429 Diamonds" data-price="6.55" onclick="selectMagicChessPackage(this)"><span class="ml-package-label"><strong>💎 429 Diamonds</strong></span><b>$6.55</b></button>
+  <button type="button" class="ml-package-option" data-package="516 Diamonds" data-price="7.75" onclick="selectMagicChessPackage(this)"><span class="ml-package-label"><strong>💎 516 Diamonds</strong></span><b>$7.75</b></button>
+  <button type="button" class="ml-package-option" data-package="565 Diamonds" data-price="8.40" onclick="selectMagicChessPackage(this)"><span class="ml-package-label"><strong>💎 565 Diamonds</strong></span><b>$8.40</b></button>
+  <button type="button" class="ml-package-option" data-package="706 Diamonds" data-price="10.65" onclick="selectMagicChessPackage(this)"><span class="ml-package-label"><strong>💎 706 Diamonds</strong></span><b>$10.65</b></button>
+  <button type="button" class="ml-package-option" data-package="Weekly Pass X2" data-price="4.04" onclick="selectMagicChessPackage(this)"><span class="ml-package-label"><strong>💎 Weekly Pass X2</strong></span><b>$4.04</b></button>
 </div>
 <div id="genericGamePackageFields" class="hidden"><label>Top-up package</label><input id="gamePackageFallback" maxlength="180" placeholder="Enter package name"/></div>
 <input id="gamePackage" maxlength="180" type="hidden" value=""/>
@@ -2124,18 +2136,6 @@ function selectPhoneProvider(provider, button) {
   });
 }
 
-function resetMobileLegendsIdConfirmation() {
-  const confirmBox = $("mlIdConfirm");
-  if (confirmBox) confirmBox.checked = false;
-  const message = $("mlCheckMessage");
-  if (message) {
-    message.classList.remove("hidden", "error");
-    message.textContent = "ID format has not been validated. Enter both IDs and select Validate ID. The account name is not verified.";
-  }
-  const row = $("mlAccountFields");
-  if (row) row.dataset.formatValid = "false";
-}
-
 function selectGameProvider(provider, button) {
   const select = $("gameProvider");
   if (!select) return;
@@ -2147,22 +2147,41 @@ function selectGameProvider(provider, button) {
     item.setAttribute("aria-pressed", active ? "true" : "false");
   });
   const isML = provider === "Mobile Legends KH";
-  resetMobileLegendsIdConfirmation();
+  const isMagicChess = provider === "Magic Chess GoGo";
   $("mlAccountFields")?.classList.toggle("hidden", !isML);
   $("genericGameAccountFields")?.classList.toggle("hidden", isML);
+  const recipientLabel = $("gameRecipientFallbackLabel");
+  const serverLabel = $("gameServerFallbackLabel");
+  const recipientInput = $("gameRecipientFallback");
+  const serverInput = $("gameServerFallback");
+  if (recipientLabel && serverLabel && recipientInput && serverInput) {
+    if (isMagicChess) {
+      recipientLabel.textContent = "User ID:";
+      serverLabel.textContent = "Server ID:";
+      recipientInput.placeholder = "Enter Magic Chess GoGo User ID";
+      serverInput.placeholder = "Enter Magic Chess GoGo Server ID";
+    } else {
+      recipientLabel.textContent = "Player ID / UID";
+      serverLabel.textContent = "Zone ID / Server ID (if applicable)";
+      recipientInput.placeholder = "Enter your Player ID / UID";
+      serverInput.placeholder = "Enter Zone ID or Server ID, if required";
+    }
+  }
   $("mlPackageGrid")?.classList.toggle("hidden", !isML);
-  $("genericGamePackageFields")?.classList.toggle("hidden", isML);
+  $("magicChessPackageGrid")?.classList.toggle("hidden", !isMagicChess);
+  $("genericGamePackageFields")?.classList.toggle("hidden", isML || isMagicChess);
   if (!isML) {
     $("gameRecipient").value = $("gameRecipientFallback").value;
     $("gameServer").value = $("gameServerFallback").value;
-    $("gamePackage").value = $("gamePackageFallback").value;
-    document.querySelectorAll("#mlPackageGrid .ml-package-option").forEach((el) => el.classList.remove("selected"));
-    const examples = {"Magic Chess GoGo":"e.g. Diamond package","Free Fire":"e.g. 100 Diamonds","PUBG":"e.g. 60 UC","Honor of Kings":"e.g. Tokens package"};
+    $("gamePackage").value = isMagicChess ? "" : $("gamePackageFallback").value;
+    document.querySelectorAll("#mlPackageGrid .ml-package-option, #magicChessPackageGrid .ml-package-option").forEach((el) => el.classList.remove("selected"));
+    const examples = {"Free Fire":"e.g. 100 Diamonds","PUBG":"e.g. 60 UC","Honor of Kings":"e.g. Tokens package"};
     $("gamePackageFallback").placeholder = examples[provider] || "Enter package name";
   } else {
     $("gameRecipient").value = "";
     $("gameServer").value = "";
     $("gamePackage").value = "";
+    document.querySelectorAll("#magicChessPackageGrid .ml-package-option").forEach((el) => el.classList.remove("selected"));
   }
   $("gameAmount").value = "1.00";
   previewServiceCoins("game");
@@ -2176,25 +2195,26 @@ function selectMobileLegendsPackage(button) {
   previewServiceCoins("game");
 }
 
+function selectMagicChessPackage(button) {
+  if (!button) return;
+  document.querySelectorAll("#magicChessPackageGrid .ml-package-option").forEach((item) => item.classList.toggle("selected", item === button));
+  $("gamePackage").value = button.dataset.package || "";
+  $("gameAmount").value = Number(button.dataset.price || 0).toFixed(2);
+  previewServiceCoins("game");
+}
+
 function checkMobileLegendsId() {
   const userId = $("gameRecipient").value.trim();
   const serverId = $("gameServer").value.trim();
   const message = $("mlCheckMessage");
   message.classList.remove("hidden", "error");
-  $("mlAccountFields").dataset.formatValid = "false";
-  $("mlIdConfirm").checked = false;
   if (!/^\d{4,20}$/.test(userId) || !/^\d{1,10}$/.test(serverId)) {
     message.classList.add("error");
     message.textContent = "Please enter a valid numeric User ID and Server ID.";
     return;
   }
-  $("mlAccountFields").dataset.formatValid = "true";
-  message.textContent = "ID format is valid. This is only a format check — your Mobile Legends account name has NOT been verified. Please check the IDs in Mobile Legends and tick the confirmation box below.";
+  message.textContent = "ID format looks valid. Live account-name verification is not connected yet; please confirm the ID in Mobile Legends before ordering.";
 }
-
-["gameRecipient", "gameServer"].forEach((id) => {
-  $(id)?.addEventListener("input", resetMobileLegendsIdConfirmation);
-});
 
 function togglePhoneTopupType() {
   const isPin = $("phoneTopupType")?.value === "pin";
@@ -2225,19 +2245,22 @@ async function submitServiceOrder(kind) {
     if (phoneTopupType === "pin") recipient = "PIN voucher";
     itemDetails = (phoneTopupType === "pin" ? "PIN voucher" : "PINless direct top-up") + (itemDetails ? " · " + itemDetails : "");
   } else if (kind === "game") {
-    if (provider !== "Mobile Legends KH") {
+    const serverId = $("gameServerFallback").value.trim();
+    if (provider === "Mobile Legends KH") {
+      if (!/^\d{4,20}$/.test(recipient) || !/^\d{1,10}$/.test($("gameServer").value.trim())) { showMessage(config.message, "Enter a valid numeric Mobile Legends User ID and Server ID, then press Check.", "error"); return; }
+      if (!$("gamePackage").value) { showMessage(config.message, "Please select a Mobile Legends package.", "error"); return; }
+      if ($( "gameServer").value.trim()) itemDetails += " · Server ID: " + $("gameServer").value.trim();
+    } else if (provider === "Magic Chess GoGo") {
+      recipient = $("gameRecipientFallback").value.trim();
+      itemDetails = $("gamePackage").value.trim();
+      if (recipient.length < 2 || !itemDetails) { showMessage(config.message, "Enter your Magic Chess GoGo User ID and select a package.", "error"); return; }
+      if (serverId) itemDetails += " · Server ID: " + serverId;
+    } else {
       recipient = $("gameRecipientFallback").value.trim();
       itemDetails = $("gamePackageFallback").value.trim();
-      const otherServer = $("gameServerFallback").value.trim();
-      if (otherServer) itemDetails += " · Server: " + otherServer;
+      if (serverId) itemDetails += " · Server: " + serverId;
     }
-    if (recipient.length < 2 || itemDetails.length < 2) { showMessage(config.message, "Enter your Player ID and select a package.", "error"); return; }
-    const serverId = $("gameServer").value.trim();
-    if (provider === "Mobile Legends KH" && (!/^\d{4,20}$/.test(recipient) || !/^\d{1,10}$/.test(serverId))) { showMessage(config.message, "Enter a valid numeric Mobile Legends User ID and Server ID, then select Validate ID.", "error"); return; }
-    if (provider === "Mobile Legends KH" && $("mlAccountFields").dataset.formatValid !== "true") { showMessage(config.message, "Please select Validate ID first. This checks the ID format only; it does not verify the account name.", "error"); return; }
-    if (provider === "Mobile Legends KH" && !$("mlIdConfirm").checked) { showMessage(config.message, "Please confirm that your User ID and Server ID are correct before submitting.", "error"); return; }
-    if (provider === "Mobile Legends KH" && !$("gamePackage").value) { showMessage(config.message, "Please select a Mobile Legends package.", "error"); return; }
-    if (serverId && provider === "Mobile Legends KH") itemDetails += " · Server ID: " + serverId;
+    if (recipient.length < 2 || itemDetails.length < 2) { showMessage(config.message, "Enter your Player ID and select or enter a package.", "error"); return; }
   } else {
     const product = $("shopProduct").value.trim();
     const link = $("shopLink").value.trim();
@@ -2253,9 +2276,9 @@ async function submitServiceOrder(kind) {
   button.disabled = true; button.textContent = "Submitting...";
   try {
     const data = await apiRequest("/api/worker/service-orders", {method:"POST", body:JSON.stringify({orderType:kind === "phone" ? "phone_topup" : kind === "game" ? "game_topup" : "shopping", provider, recipient, itemDetails, quantity, amountUsd, phoneTopupType})});
-    showMessage(config.message, data.message || "Order submitted as Pending Admin Review. The administrator will check the details and process it manually.", "success");
+    showMessage(config.message, data.message || "Order submitted. Admin will process it manually.", "success");
     if (kind === "phone") { $("phoneRecipient").value = ""; $("phoneDetails").value = ""; $("phoneTopupType").value = "pinless"; togglePhoneTopupType(); }
-    if (kind === "game") { resetMobileLegendsIdConfirmation(); $("gameRecipient").value = ""; $("gameServer").value = ""; $("gameRecipientFallback").value = ""; $("gameServerFallback").value = ""; $("gamePackageFallback").value = ""; $("gamePackage").value = ""; document.querySelectorAll("#mlPackageGrid .ml-package-option").forEach((el) => el.classList.remove("selected")); $("mlCheckMessage")?.classList.add("hidden"); }
+    if (kind === "game") { $("gameRecipient").value = ""; $("gameServer").value = ""; $("gameRecipientFallback").value = ""; $("gameServerFallback").value = ""; $("gamePackageFallback").value = ""; $("gamePackage").value = ""; document.querySelectorAll("#mlPackageGrid .ml-package-option, #magicChessPackageGrid .ml-package-option").forEach((el) => el.classList.remove("selected")); $("mlCheckMessage")?.classList.add("hidden"); }
     if (kind === "shop") { $("shopProduct").value = ""; $("shopLink").value = ""; $("shopAddress").value = ""; }
     await Promise.all([loadProfile(), loadServiceOrders()]);
   } catch (error) { showMessage(config.message, error.message, "error"); }
