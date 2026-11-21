@@ -103,6 +103,11 @@ a{color:var(--blue);overflow-wrap:anywhere}
 
 .game-provider-value{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 @media(max-width:380px){.game-catalog-grid{gap:7px}.game-catalog-card{min-height:112px;padding:9px 5px!important}.game-art{width:56px;height:56px}}
+
+/* Storefront design */
+.shop-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:2px 0 14px}.shop-heading h3{font-size:20px;margin:5px 0}.shop-cart-btn{position:relative;background:#202e45!important;color:#fff!important;border:1px solid var(--border)!important;border-radius:12px!important;font-size:18px;padding:11px 13px!important;margin:0!important}.shop-cart-btn span{display:inline-grid;place-items:center;min-width:19px;height:19px;border-radius:20px;background:var(--gold);color:#172033;font-size:10px;margin-left:3px}.shop-hero{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:148px;padding:18px;border-radius:16px;background:linear-gradient(115deg,#263f66,#334d70 58%,#55406e);border:1px solid #486083;overflow:hidden}.shop-hero-copy{display:flex;flex-direction:column;gap:8px;max-width:72%}.shop-hero-copy>span{font-size:10px;font-weight:800;letter-spacing:1px;color:#d6e5ff}.shop-hero-copy strong{font-size:23px;line-height:1.12;color:#fff}.shop-hero-copy small{font-size:11px;line-height:1.45;color:#d4def0}.shop-hero-art{font-size:58px;filter:drop-shadow(0 8px 9px #0005);transform:rotate(-9deg)}.shop-search-label{margin-top:17px}.shop-search-wrap{position:relative}.shop-search-wrap>span{position:absolute;left:13px;top:13px;font-size:20px;color:var(--muted)}.shop-search-wrap input{padding-left:42px;margin-top:3px;background:#101a2b}.shop-section-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:17px 0 8px}.shop-section-title h3{margin:0;font-size:15px}.shop-section-title .muted{font-size:11px;margin:4px 0 0}.shop-categories{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.shop-category{margin:0!important;padding:10px 4px!important;display:flex;flex-direction:column;align-items:center;gap:6px;background:#101a2b!important;color:#dce7f7!important;border:1px solid var(--border)!important;border-radius:11px!important;font-size:10px}.shop-category span{font-size:20px}.shop-category.active{border-color:var(--gold)!important;background:#26334a!important;color:var(--gold)!important}.shop-count{font-size:11px;color:var(--muted);white-space:nowrap}.shop-empty-state{margin-top:10px;padding:27px 17px;text-align:center;border:1px dashed #3a4c68;border-radius:14px;background:#101a2b}.shop-empty-icon{width:58px;height:58px;margin:0 auto 12px;display:grid;place-items:center;border-radius:18px;background:#263b61;font-size:29px}.shop-empty-state strong{font-size:14px}.shop-empty-state p{max-width:270px;margin:7px auto 0;color:var(--muted);font-size:12px;line-height:1.5}.shop-quick-links{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.shop-quick-links button{margin:0;font-size:12px}.shop-store-toast{margin-top:9px}.shop-empty-state.filtered{display:none}
+@media(max-width:360px){.shop-hero-copy strong{font-size:20px}.shop-hero-art{font-size:47px}.shop-category{font-size:9px}}
+
 </style>
 </head>
 <body>
@@ -492,39 +497,6 @@ a{color:var(--blue);overflow-wrap:anywhere}
   <button type="button" class="ml-package-option" data-package="706 Diamonds" data-price="10.65" onclick="selectMagicChessPackage(this)"><span class="ml-package-label"><strong>💎 706 Diamonds</strong></span><b>$10.65</b></button>
   <button type="button" class="ml-package-option" data-package="Weekly Pass X2" data-price="4.04" onclick="selectMagicChessPackage(this)"><span class="ml-package-label"><strong>💎 Weekly Pass X2</strong></span><b>$4.04</b></button>
 </div>
-<div class="ml-package-grid hidden" id="freeFirePackageGrid" aria-label="Free Fire packages">
-  <button type="button" class="ml-package-option" data-package="Package Level 6" data-price="0.37" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 Package Level 6</strong></span><b>$0.37</b></button>
-  <button type="button" class="ml-package-option" data-package="Package Level 10" data-price="0.84" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 Package Level 10</strong></span><b>$0.84</b></button>
-  <button type="button" class="ml-package-option" data-package="Package Level 15" data-price="0.84" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 Package Level 15</strong></span><b>$0.84</b></button>
-  <button type="button" class="ml-package-option" data-package="Package Level 20" data-price="0.84" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 Package Level 20</strong></span><b>$0.84</b></button>
-  <button type="button" class="ml-package-option" data-package="Package Level 25" data-price="0.84" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 Package Level 25</strong></span><b>$0.84</b></button>
-  <button type="button" class="ml-package-option" data-package="Package Level 30" data-price="1.05" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 Package Level 30</strong></span><b>$1.05</b></button>
-  <button type="button" class="ml-package-option" data-package="All 6 Package" data-price="4.78" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 All 6 Package</strong></span><b>$4.78</b></button>
-</div>
-<div class="ml-package-grid hidden" id="pubgPackageGrid" aria-label="PUBG packages">
-  <button type="button" class="ml-package-option" data-package="60 UC" data-price="1.04" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 60 UC</strong></span><b>$1.04</b></button>
-  <button type="button" class="ml-package-option" data-package="325 UC" data-price="4.98" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 325 UC</strong></span><b>$4.98</b></button>
-  <button type="button" class="ml-package-option" data-package="660 UC" data-price="10.00" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 660 UC</strong></span><b>$10.00</b></button>
-  <button type="button" class="ml-package-option" data-package="1800 UC" data-price="24.15" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 1800 UC</strong></span><b>$24.15</b></button>
-  <button type="button" class="ml-package-option" data-package="Prime (1 month)" data-price="1.04" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 Prime (1 month)</strong></span><b>$1.04</b></button>
-  <button type="button" class="ml-package-option" data-package="Prime (3 month)" data-price="2.93" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 Prime (3 month)</strong></span><b>$2.93</b></button>
-  <button type="button" class="ml-package-option" data-package="Prime (6 month)" data-price="6.28" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 Prime (6 month)</strong></span><b>$6.28</b></button>
-  <button type="button" class="ml-package-option" data-package="Prime (12 month)" data-price="12.59" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>📦 Prime (12 month)</strong></span><b>$12.59</b></button>
-</div>
-<div class="ml-package-grid hidden" id="honorKingsPackageGrid" aria-label="Honor of Kings packages">
-  <button type="button" class="ml-package-option" data-package="Weekly Card" data-price="1.35" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>🪙 Weekly Card</strong></span><b>$1.35</b></button>
-  <button type="button" class="ml-package-option" data-package="Weekly Plus" data-price="3.66" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>🪙 Weekly Plus</strong></span><b>$3.66</b></button>
-  <button type="button" class="ml-package-option" data-package="16 Tokens" data-price="0.30" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>🪙 16 Tokens</strong></span><b>$0.30</b></button>
-  <button type="button" class="ml-package-option" data-package="80 Tokens" data-price="1.03" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>🪙 80 Tokens</strong></span><b>$1.03</b></button>
-  <button type="button" class="ml-package-option" data-package="240 Tokens" data-price="2.92" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>🪙 240 Tokens</strong></span><b>$2.92</b></button>
-  <button type="button" class="ml-package-option" data-package="400 Tokens" data-price="5.03" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>🪙 400 Tokens</strong></span><b>$5.03</b></button>
-  <button type="button" class="ml-package-option" data-package="560 Tokens" data-price="7.12" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>🪙 560 Tokens</strong></span><b>$7.12</b></button>
-  <button type="button" class="ml-package-option" data-package="830 Tokens" data-price="10.28" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>🪙 830 Tokens</strong></span><b>$10.28</b></button>
-  <button type="button" class="ml-package-option" data-package="1245 Tokens" data-price="14.17" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>🪙 1245 Tokens</strong></span><b>$14.17</b></button>
-  <button type="button" class="ml-package-option" data-package="2508 Tokens" data-price="28.35" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>🪙 2508 Tokens</strong></span><b>$28.35</b></button>
-  <button type="button" class="ml-package-option" data-package="4180 Tokens" data-price="49.35" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>🪙 4180 Tokens</strong></span><b>$49.35</b></button>
-  <button type="button" class="ml-package-option" data-package="8360 Tokens" data-price="94.50" onclick="selectGameCatalogPackage(this)"><span class="ml-package-label"><strong>🪙 8360 Tokens</strong></span><b>$94.50</b></button>
-</div>
 <div id="genericGamePackageFields" class="hidden"><label>Top-up package</label><input id="gamePackageFallback" maxlength="180" placeholder="Enter package name"/></div>
 <input id="gamePackage" maxlength="180" type="hidden" value=""/>
 <label>Price (USD)</label><input id="gameAmount" max="1000" min="0.01" oninput="previewServiceCoins('game')" step="0.01" type="number" value="1.00"/>
@@ -533,16 +505,34 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <button class="full" id="gameSubmit" onclick="submitServiceOrder('game')">Submit Game Top Up</button>
 </div>
 <div class="subpage" id="walletShopping">
-<h3>🛍️ Shopping</h3>
-<p class="muted">Request a product purchase. An administrator will verify the price and arrange delivery manually.</p>
-<label>Product name</label><input id="shopProduct" maxlength="180" placeholder="Enter product name"/>
-<label>Product link (optional)</label><input id="shopLink" maxlength="500" placeholder="https://..." type="url"/>
-<label>Quantity</label><input id="shopQuantity" max="99" min="1" step="1" type="number" value="1"/>
-<label>Delivery address / contact details</label><textarea id="shopAddress" maxlength="700" placeholder="Recipient name, phone number and delivery address"></textarea>
-<label>Estimated total price (USD)</label><input id="shopAmount" max="1000" min="0.01" oninput="previewServiceCoins('shop')" step="0.01" type="number" value="1.00"/>
-<div class="feature"><span>Cost</span><strong id="shopCost">10,000 coins</strong></div>
-<div class="notice" id="shopMessage">Admin will verify product availability and price. Rejected orders are refunded.</div>
-<button class="full" id="shopSubmit" onclick="submitServiceOrder('shop')">Submit Shopping Order</button>
+  <div class="shop-heading">
+    <div><span class="tag">OFFICIAL STORE</span><h3>🛍️ Shopping</h3><p class="muted">Discover products selected and sold by our store.</p></div>
+    <button class="shop-cart-btn" type="button" onclick="showStoreNotice('Your shopping cart will be available when products are added.')" aria-label="Shopping cart">🛒 <span>0</span></button>
+  </div>
+  <div class="shop-hero">
+    <div class="shop-hero-copy"><span>WELCOME TO OUR STORE</span><strong>Find something<br/>you’ll love.</strong><small>Browse our latest products and special offers.</small></div>
+    <div class="shop-hero-art" aria-hidden="true">🛍️</div>
+  </div>
+  <label class="shop-search-label" for="shopSearch">Search products</label>
+  <div class="shop-search-wrap"><span>⌕</span><input id="shopSearch" type="search" placeholder="Search in our store..." oninput="filterStoreProducts()"/></div>
+  <div class="shop-section-title"><h3>Categories</h3><span class="muted">Explore</span></div>
+  <div class="shop-categories" role="group" aria-label="Product categories">
+    <button class="shop-category active" type="button" data-category="all" onclick="selectStoreCategory(this)"><span>✨</span>All</button>
+    <button class="shop-category" type="button" data-category="popular" onclick="selectStoreCategory(this)"><span>🔥</span>Popular</button>
+    <button class="shop-category" type="button" data-category="new" onclick="selectStoreCategory(this)"><span>🆕</span>New</button>
+    <button class="shop-category" type="button" data-category="offers" onclick="selectStoreCategory(this)"><span>🏷️</span>Offers</button>
+  </div>
+  <div class="shop-section-title"><div><h3>Featured products</h3><p class="muted">Products available from our store</p></div><span class="shop-count">0 items</span></div>
+  <div class="shop-empty-state" id="shopEmptyState">
+    <div class="shop-empty-icon">🛍️</div>
+    <strong>Our store is getting ready</strong>
+    <p>New products will appear here as soon as the store catalogue is added.</p>
+  </div>
+  <div class="notice" id="shopStoreMessage" role="status">This store sells platform-owned products only. Product prices and availability will be shown here once the catalogue is configured.</div>
+  <div class="shop-quick-links">
+    <button class="dark" type="button" onclick="showStoreNotice('Your orders will appear here after the store checkout is connected.')">📦 My Orders</button>
+    <button class="dark" type="button" onclick="showStoreNotice('Your saved products will appear here.')">♡ Saved</button>
+  </div>
 </div>
 <div class="card">
 <div class="row"><h3>My Service Orders</h3><button class="dark" onclick="loadServiceOrders()">Refresh</button></div>
@@ -2181,48 +2171,33 @@ function selectGameProvider(provider, button) {
   });
   const isML = provider === "Mobile Legends KH";
   const isMagicChess = provider === "Magic Chess GoGo";
-  const isFreeFire = provider === "Free Fire";
-  const isPUBG = provider === "PUBG";
-  const isHonorKings = provider === "Honor of Kings";
-  const hasCatalogPackages = isFreeFire || isPUBG || isHonorKings;
   $("mlAccountFields")?.classList.toggle("hidden", !isML);
   $("genericGameAccountFields")?.classList.toggle("hidden", isML);
   const recipientLabel = $("gameRecipientFallbackLabel");
   const serverLabel = $("gameServerFallbackLabel");
   const recipientInput = $("gameRecipientFallback");
   const serverInput = $("gameServerFallback");
-  serverLabel?.classList.remove("hidden");
-  serverInput?.classList.remove("hidden");
   if (recipientLabel && serverLabel && recipientInput && serverInput) {
-    if (isMagicChess || isFreeFire || isPUBG || isHonorKings) {
+    if (isMagicChess) {
       recipientLabel.textContent = "User ID:";
       serverLabel.textContent = "Server ID:";
-      recipientInput.placeholder = "Enter " + provider + " User ID";
-      serverInput.placeholder = "Enter " + provider + " Server ID";
-      const hideServerId = isHonorKings || isFreeFire || isPUBG;
-      serverLabel.classList.toggle("hidden", hideServerId);
-      serverInput.classList.toggle("hidden", hideServerId);
-      if (hideServerId) { serverInput.value = ""; $("gameServer").value = ""; }
+      recipientInput.placeholder = "Enter Magic Chess GoGo User ID";
+      serverInput.placeholder = "Enter Magic Chess GoGo Server ID";
     } else {
       recipientLabel.textContent = "Player ID / UID";
       serverLabel.textContent = "Zone ID / Server ID (if applicable)";
       recipientInput.placeholder = "Enter your Player ID / UID";
       serverInput.placeholder = "Enter Zone ID or Server ID, if required";
-      serverLabel.classList.remove("hidden");
-      serverInput.classList.remove("hidden");
     }
   }
   $("mlPackageGrid")?.classList.toggle("hidden", !isML);
   $("magicChessPackageGrid")?.classList.toggle("hidden", !isMagicChess);
-  $("freeFirePackageGrid")?.classList.toggle("hidden", !isFreeFire);
-  $("pubgPackageGrid")?.classList.toggle("hidden", !isPUBG);
-  $("honorKingsPackageGrid")?.classList.toggle("hidden", !isHonorKings);
-  $("genericGamePackageFields")?.classList.toggle("hidden", isML || isMagicChess || hasCatalogPackages);
+  $("genericGamePackageFields")?.classList.toggle("hidden", isML || isMagicChess);
   if (!isML) {
     $("gameRecipient").value = $("gameRecipientFallback").value;
     $("gameServer").value = $("gameServerFallback").value;
-    $("gamePackage").value = (isMagicChess || hasCatalogPackages) ? "" : $("gamePackageFallback").value;
-    document.querySelectorAll("#mlPackageGrid .ml-package-option, #magicChessPackageGrid .ml-package-option, #freeFirePackageGrid .ml-package-option, #pubgPackageGrid .ml-package-option, #honorKingsPackageGrid .ml-package-option").forEach((el) => el.classList.remove("selected"));
+    $("gamePackage").value = isMagicChess ? "" : $("gamePackageFallback").value;
+    document.querySelectorAll("#mlPackageGrid .ml-package-option, #magicChessPackageGrid .ml-package-option").forEach((el) => el.classList.remove("selected"));
     const examples = {"Free Fire":"e.g. 100 Diamonds","PUBG":"e.g. 60 UC","Honor of Kings":"e.g. Tokens package"};
     $("gamePackageFallback").placeholder = examples[provider] || "Enter package name";
   } else {
@@ -2251,16 +2226,6 @@ function selectMagicChessPackage(button) {
   previewServiceCoins("game");
 }
 
-function selectGameCatalogPackage(button) {
-  if (!button) return;
-  const grid = button.closest(".ml-package-grid");
-  if (!grid) return;
-  grid.querySelectorAll(".ml-package-option").forEach((item) => item.classList.toggle("selected", item === button));
-  $("gamePackage").value = button.dataset.package || "";
-  $("gameAmount").value = Number(button.dataset.price || 0).toFixed(2);
-  previewServiceCoins("game");
-}
-
 function checkMobileLegendsId() {
   const userId = $("gameRecipient").value.trim();
   const serverId = $("gameServer").value.trim();
@@ -2279,6 +2244,31 @@ function togglePhoneTopupType() {
   $("phoneNumberGroup")?.classList.toggle("hidden", isPin);
   $("phonePinInfo")?.classList.toggle("hidden", !isPin);
   if (isPin && $("phoneRecipient")) $("phoneRecipient").value = "";
+}
+
+let activeStoreCategory = "all";
+function showStoreNotice(message) {
+  const box = $("shopStoreMessage");
+  if (!box) return;
+  box.textContent = message;
+  box.classList.remove("hidden");
+}
+function selectStoreCategory(button) {
+  document.querySelectorAll(".shop-category").forEach((item) => item.classList.toggle("active", item === button));
+  activeStoreCategory = button.dataset.category || "all";
+  // No product catalogue is connected yet; keep the empty state honest.
+  filterStoreProducts();
+}
+function filterStoreProducts() {
+  const query = ($("shopSearch")?.value || "").trim();
+  const empty = $("shopEmptyState");
+  const count = document.querySelector(".shop-count");
+  if (count) count.textContent = "0 items";
+  if (empty) {
+    empty.classList.remove("filtered");
+    const message = empty.querySelector("p");
+    if (message) message.textContent = query ? "No matching products yet. Our product catalogue has not been added." : "New products will appear here as soon as the store catalogue is added.";
+  }
 }
 
 async function submitServiceOrder(kind) {
@@ -2313,17 +2303,12 @@ async function submitServiceOrder(kind) {
       itemDetails = $("gamePackage").value.trim();
       if (recipient.length < 2 || !itemDetails) { showMessage(config.message, "Enter your Magic Chess GoGo User ID and select a package.", "error"); return; }
       if (serverId) itemDetails += " · Server ID: " + serverId;
-    } else if (["Free Fire", "PUBG", "Honor of Kings"].includes(provider)) {
-      recipient = $("gameRecipientFallback").value.trim();
-      itemDetails = $("gamePackage").value.trim();
-      if (!recipient || !itemDetails) { showMessage(config.message, "Enter your User ID and select a package.", "error"); return; }
-      if (provider === "Magic Chess GoGo" && serverId) itemDetails += " · Server ID: " + serverId;
     } else {
       recipient = $("gameRecipientFallback").value.trim();
       itemDetails = $("gamePackageFallback").value.trim();
       if (serverId) itemDetails += " · Server: " + serverId;
     }
-    if (recipient.length < 2 || itemDetails.length < 2) { showMessage(config.message, "Enter your User ID and select or enter a package.", "error"); return; }
+    if (recipient.length < 2 || itemDetails.length < 2) { showMessage(config.message, "Enter your Player ID and select or enter a package.", "error"); return; }
   } else {
     const product = $("shopProduct").value.trim();
     const link = $("shopLink").value.trim();
@@ -2341,7 +2326,7 @@ async function submitServiceOrder(kind) {
     const data = await apiRequest("/api/worker/service-orders", {method:"POST", body:JSON.stringify({orderType:kind === "phone" ? "phone_topup" : kind === "game" ? "game_topup" : "shopping", provider, recipient, itemDetails, quantity, amountUsd, phoneTopupType})});
     showMessage(config.message, data.message || "Order submitted. Admin will process it manually.", "success");
     if (kind === "phone") { $("phoneRecipient").value = ""; $("phoneDetails").value = ""; $("phoneTopupType").value = "pinless"; togglePhoneTopupType(); }
-    if (kind === "game") { $("gameRecipient").value = ""; $("gameServer").value = ""; $("gameRecipientFallback").value = ""; $("gameServerFallback").value = ""; $("gamePackageFallback").value = ""; $("gamePackage").value = ""; document.querySelectorAll("#mlPackageGrid .ml-package-option, #magicChessPackageGrid .ml-package-option, #freeFirePackageGrid .ml-package-option, #pubgPackageGrid .ml-package-option, #honorKingsPackageGrid .ml-package-option").forEach((el) => el.classList.remove("selected")); $("mlCheckMessage")?.classList.add("hidden"); }
+    if (kind === "game") { $("gameRecipient").value = ""; $("gameServer").value = ""; $("gameRecipientFallback").value = ""; $("gameServerFallback").value = ""; $("gamePackageFallback").value = ""; $("gamePackage").value = ""; document.querySelectorAll("#mlPackageGrid .ml-package-option, #magicChessPackageGrid .ml-package-option").forEach((el) => el.classList.remove("selected")); $("mlCheckMessage")?.classList.add("hidden"); }
     if (kind === "shop") { $("shopProduct").value = ""; $("shopLink").value = ""; $("shopAddress").value = ""; }
     await Promise.all([loadProfile(), loadServiceOrders()]);
   } catch (error) { showMessage(config.message, error.message, "error"); }
