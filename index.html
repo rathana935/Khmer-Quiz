@@ -1,3 +1,11 @@
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -111,6 +119,26 @@ a{color:var(--blue);overflow-wrap:anywhere}
 
 .shop-product-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}.shop-product-card{min-width:0;overflow:hidden;border:1px solid var(--border);border-radius:13px;background:#101a2b}.shop-product-image{height:145px;position:relative;display:grid;place-items:center;background:#0b1423;overflow:hidden}.shop-product-image img{width:100%;height:100%;object-fit:cover}.shop-product-placeholder{width:100%;height:100%;place-items:center;font-size:38px;color:var(--muted)}.shop-featured-tag{position:absolute;top:8px;left:8px;padding:4px 7px;border-radius:6px;background:#e8b84e;color:#172033;font-size:9px;font-weight:900}.shop-product-info{padding:10px;display:flex;flex-direction:column;gap:5px}.shop-product-info>small{font-size:10px;color:var(--gold)}.shop-product-info>strong{font-size:12px;line-height:1.35;overflow-wrap:anywhere}.shop-product-info p{margin:0;color:var(--muted);font-size:10px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.shop-product-bottom{display:flex;justify-content:space-between;align-items:center;gap:5px;margin-top:5px}.shop-product-bottom b{font-size:15px;color:#f4c45c}.shop-product-bottom span{font-size:9px;color:var(--muted);text-align:right}@media(max-width:360px){.shop-product-grid{gap:7px}.shop-product-image{height:120px}.shop-product-info{padding:8px}}
 
+
+.shop-product-actions{display:grid;grid-template-columns:1fr 1.2fr;gap:7px;margin-top:8px}
+.shop-product-actions button{margin:0!important;padding:9px 5px!important;font-size:10px!important;border-radius:9px!important}
+.shop-review-btn{background:#202e45!important;color:#e8eef8!important;border:1px solid var(--border)!important}
+.shop-add-btn{background:var(--gold)!important;color:#172033!important;font-weight:800}
+.shop-add-btn:disabled{opacity:.45;cursor:not-allowed}
+.shop-modal-backdrop{position:fixed;inset:0;z-index:9999;background:#050b16d9;display:none;align-items:center;justify-content:center;padding:18px}
+.shop-modal-backdrop.open{display:flex}
+.shop-modal{width:min(100%,430px);max-height:85vh;overflow:auto;background:#111d30;border:1px solid #3a4c68;border-radius:17px;padding:16px;color:#eef4ff;box-shadow:0 18px 55px #0009}
+.shop-modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.shop-modal-head h3{margin:0;font-size:17px}
+.shop-modal-close{margin:0!important;padding:7px 11px!important;background:#26364f!important;color:#fff!important}
+.shop-modal-product-image{width:100%;max-height:230px;object-fit:contain;border-radius:12px;background:#0b1423}
+.shop-modal-price{font-size:20px;color:#f4c45c;font-weight:900;margin:10px 0}
+.shop-cart-line{display:grid;grid-template-columns:1fr auto;gap:10px;padding:11px 0;border-bottom:1px solid #293a54}
+.shop-cart-line small{display:block;color:#9fb0c8;margin-top:3px}
+.shop-cart-controls{display:flex;align-items:center;gap:6px}
+.shop-cart-controls button{margin:0!important;padding:5px 9px!important;min-width:28px}
+.shop-cart-total{display:flex;justify-content:space-between;font-weight:900;margin:15px 0;color:#f4c45c}
+.shop-modal-note{font-size:11px;color:#aab9ce;line-height:1.5}
 </style>
 </head>
 <body>
@@ -543,7 +571,7 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <div class="subpage" id="walletShopping">
   <div class="shop-heading">
     <div><span class="tag">OFFICIAL STORE</span><h3>🛍️ Shopping</h3><p class="muted">Discover products selected and sold by our store.</p></div>
-    <button class="shop-cart-btn" type="button" onclick="showStoreNotice('Your shopping cart will be available when products are added.')" aria-label="Shopping cart">🛒 <span>0</span></button>
+    <button class="shop-cart-btn" type="button" onclick="openStoreCart()" aria-label="Shopping cart">🛒 <span id="shopCartCount">0</span></button>
   </div>
   <div class="shop-hero">
     <div class="shop-hero-copy"><span>WELCOME TO OUR STORE</span><strong>Find something<br/>you’ll love.</strong><small>Browse our latest products and special offers.</small></div>
@@ -570,6 +598,12 @@ a{color:var(--blue);overflow-wrap:anywhere}
     <button class="dark" type="button" onclick="showStoreNotice('Your orders will appear here after the store checkout is connected.')">📦 My Orders</button>
     <button class="dark" type="button" onclick="showStoreNotice('Your saved products will appear here.')">♡ Saved</button>
   </div>
+</div>
+<div class="shop-modal-backdrop" id="shopModalBackdrop" onclick="if(event.target===this)closeShopModal()">
+  <section class="shop-modal" role="dialog" aria-modal="true" aria-labelledby="shopModalTitle">
+    <div class="shop-modal-head"><h3 id="shopModalTitle">Product details</h3><button class="shop-modal-close" type="button" onclick="closeShopModal()">✕</button></div>
+    <div id="shopModalContent"></div>
+  </section>
 </div>
 <div class="card">
 <div class="row"><h3>My Service Orders</h3><button class="dark" onclick="loadServiceOrders()">Refresh</button></div>
@@ -2316,6 +2350,79 @@ let storeProducts = [];
 let storeProductsLoaded = false;
 let storeProductsLoading = false;
 
+let storeCart = [];
+function storeProductKey(product) { return String(product.id ?? product.product_id ?? product.name ?? "product"); }
+function updateStoreCartCount() {
+  const count = storeCart.reduce((sum, item) => sum + item.quantity, 0);
+  const badge = $("shopCartCount");
+  if (badge) badge.textContent = String(count);
+}
+function openShopModal(title, html) {
+  $("shopModalTitle").textContent = title;
+  $("shopModalContent").innerHTML = html;
+  $("shopModalBackdrop").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeShopModal() {
+  $("shopModalBackdrop")?.classList.remove("open");
+  document.body.style.overflow = "";
+}
+function reviewStoreProduct(key) {
+  const p = storeProducts.find(item => storeProductKey(item) === String(key));
+  if (!p) return;
+  const name = escapeHTML(p.name || "Product");
+  const category = escapeHTML(p.category || "General");
+  const description = escapeHTML(p.description || "No additional product description.");
+  const image = String(p.image_url || "").trim();
+  const safeImage = /^https?:\/\//i.test(image) ? escapeHTML(image) : "";
+  const price = (Number(p.price_cents || 0) / 100).toFixed(2);
+  const stock = Number(p.stock || 0);
+  openShopModal("Review product", `${safeImage ? `<img class="shop-modal-product-image" src="${safeImage}" alt="${name}">` : ""}<p class="muted">${category}</p><h3>${name}</h3><p>${description}</p><div class="shop-modal-price">$${price}</div><p>${stock > 0 ? `${stock} in stock` : "Out of stock"}</p><button class="full shop-add-btn" type="button" ${stock < 1 ? "disabled" : ""} onclick="addStoreProductToCart('${escapeHTML(storeProductKey(p))}');closeShopModal()">🛒 Add to Cart</button>`);
+}
+function addStoreProductToCart(key) {
+  const p = storeProducts.find(item => storeProductKey(item) === String(key));
+  if (!p) return;
+  const stock = Math.max(0, Number(p.stock || 0));
+  const existing = storeCart.find(item => item.key === String(key));
+  if (stock < 1 || (existing && existing.quantity >= stock)) {
+    showStoreNotice("Sorry, the available stock limit has been reached.");
+    return;
+  }
+  if (existing) existing.quantity += 1;
+  else storeCart.push({key:String(key), product:p, quantity:1});
+  updateStoreCartCount();
+  showStoreNotice(`${p.name || "Product"} added to your cart.`);
+}
+function changeStoreCartQuantity(key, delta) {
+  const item = storeCart.find(row => row.key === String(key));
+  if (!item) return;
+  const stock = Math.max(0, Number(item.product.stock || 0));
+  item.quantity = Math.min(stock, item.quantity + delta);
+  if (item.quantity < 1) storeCart = storeCart.filter(row => row.key !== String(key));
+  updateStoreCartCount();
+  openStoreCart();
+}
+function removeStoreCartItem(key) {
+  storeCart = storeCart.filter(row => row.key !== String(key));
+  updateStoreCartCount();
+  openStoreCart();
+}
+function openStoreCart() {
+  if (!storeCart.length) {
+    openShopModal("Your shopping cart", `<div class="shop-empty-state"><div class="shop-empty-icon">🛒</div><strong>Your cart is empty</strong><p>Add products from the store to see them here.</p></div>`);
+    return;
+  }
+  let total = 0;
+  const rows = storeCart.map(item => {
+    const p = item.product;
+    const priceCents = Number(p.price_cents || 0);
+    total += priceCents * item.quantity;
+    const key = escapeHTML(item.key);
+    return `<div class="shop-cart-line"><div><strong>${escapeHTML(p.name || "Product")}</strong><small>$${(priceCents/100).toFixed(2)} each</small><div class="shop-cart-controls"><button type="button" onclick="changeStoreCartQuantity('${key}',-1)">−</button><b>${item.quantity}</b><button type="button" onclick="changeStoreCartQuantity('${key}',1)">+</button><button class="shop-review-btn" type="button" onclick="removeStoreCartItem('${key}')">Remove</button></div></div><strong>$${(priceCents*item.quantity/100).toFixed(2)}</strong></div>`;
+  }).join("");
+  openShopModal("Your shopping cart", `${rows}<div class="shop-cart-total"><span>Total</span><span>$${(total/100).toFixed(2)}</span></div><p class="shop-modal-note">Your cart is currently saved only while this app session remains open. Online checkout and order submission are not connected yet.</p>`);
+}
+
 function selectStoreCategory(button) {
   document.querySelectorAll(".shop-category").forEach((item) => item.classList.toggle("active", item === button));
   activeStoreCategory = button.dataset.category || "all";
@@ -2345,7 +2452,8 @@ function renderStoreProducts() {
     const safeImage = /^https?:\/\//i.test(image) ? escapeHTML(image) : "";
     const price = (Number(p.price_cents || 0) / 100).toFixed(2);
     const stock = Number(p.stock || 0);
-    return `<article class="shop-product-card"><div class="shop-product-image">${safeImage ? `<img src="${safeImage}" alt="${name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">` : ""}<span class="shop-product-placeholder" style="${safeImage ? "display:none" : ""}">🛍️</span>${p.is_featured ? '<span class="shop-featured-tag">FEATURED</span>' : ""}</div><div class="shop-product-info"><small>${category}</small><strong>${name}</strong>${description ? `<p>${description}</p>` : ""}<div class="shop-product-bottom"><b>$${price}</b><span>${stock > 0 ? `${stock} in stock` : "Out of stock"}</span></div></div></article>`;
+    const key = escapeHTML(storeProductKey(p));
+    return `<article class="shop-product-card"><div class="shop-product-image">${safeImage ? `<img src="${safeImage}" alt="${name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">` : ""}<span class="shop-product-placeholder" style="${safeImage ? "display:none" : ""}">🛍️</span>${p.is_featured ? '<span class="shop-featured-tag">FEATURED</span>' : ""}</div><div class="shop-product-info"><small>${category}</small><strong>${name}</strong>${description ? `<p>${description}</p>` : ""}<div class="shop-product-bottom"><b>$${price}</b><span>${stock > 0 ? `${stock} in stock` : "Out of stock"}</span></div><div class="shop-product-actions"><button class="shop-review-btn" type="button" data-shop-action="review" data-product-key="${key}">Review</button><button class="shop-add-btn" type="button" data-shop-action="add" data-product-key="${key}" ${stock < 1 ? "disabled" : ""}>Add to Cart</button></div></div></article>`;
   }).join("");
   empty.style.display = items.length ? "none" : "block";
   if (!items.length) {
@@ -2355,6 +2463,13 @@ function renderStoreProducts() {
 }
 
 function filterStoreProducts() { renderStoreProducts(); }
+$("shopProductGrid")?.addEventListener("click", event => {
+  const button = event.target.closest("button[data-shop-action]");
+  if (!button) return;
+  const key = button.dataset.productKey;
+  if (button.dataset.shopAction === "review") reviewStoreProduct(key);
+  if (button.dataset.shopAction === "add") addStoreProductToCart(key);
+});
 
 async function loadStoreProducts(force = false) {
   if (storeProductsLoading || (storeProductsLoaded && !force)) return;
@@ -2598,3 +2713,7 @@ selectGameProvider("Mobile Legends KH", document.querySelector("#gameCatalogGrid
 </script>
 </body>
 </html>
+
+
+
+
