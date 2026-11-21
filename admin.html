@@ -39,6 +39,7 @@ main{padding:26px;max-width:1500px;width:100%;margin:auto}.top{display:flex;just
       <button data-page="campaigns">▤ &nbsp; Campaigns</button>
       <button data-page="submissions">✓ &nbsp; Task submissions</button>
       <button data-page="products">▣ &nbsp; Products</button>
+      <button data-page="storeorders">🛍️ &nbsp; Store orders</button>
     </div>
     <div class="sidefoot">Admin access is protected by the backend.<br>Marketplace Admin · v1.0</div>
   </aside>
@@ -69,6 +70,10 @@ main{padding:26px;max-width:1500px;width:100%;margin:auto}.top{display:flex;just
     <section class="page" id="page-submissions">
       <div class="panel"><div class="toolbar"><h2>Submitted task proofs</h2><input id="submissionSearch" placeholder="Search campaign / worker"></div><div id="submissionsTable" class="empty">Loading submissions…</div></div>
     </section>
+    <section class="page" id="page-storeorders">
+      <div class="notice">ABA and USDT payments must be independently verified in your bank or TON wallet before moving an order to Processing. Rejecting an order restores stock. Worker Coins are refunded automatically; ABA / USDT refunds must be sent manually outside the app.</div>
+      <div class="panel"><div class="toolbar"><h2>Customer shopping orders</h2><div class="filters"><select id="storeOrderStatus"><option value="all">All statuses</option><option value="pending_payment">Pending payment</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="rejected">Rejected</option></select><button onclick="refreshStoreOrders()">Refresh orders</button></div></div><div id="storeOrdersTable" class="empty">Loading store orders…</div></div>
+    </section>
     <section class="page" id="page-products">
       <div class="notice">Manage products sold by your own store. Customer prices include the 2% store markup, calculated automatically from your base price. Product images currently use image URLs.</div>
       <div class="panel">
@@ -95,7 +100,7 @@ main{padding:26px;max-width:1500px;width:100%;margin:auto}.top{display:flex;just
 <script>
 const API_URL = "https://khmer-quiz-backend.onrender.com";
 let adminSecret = "";
-let dataStore = {deposits:[],withdrawals:[],campaigns:[],submissions:[],products:[]};
+let dataStore = {deposits:[],withdrawals:[],campaigns:[],submissions:[],products:[],storeOrders:[]};
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const usdMicros = v => "$" + (Number(v||0)/1000000).toFixed(2);
@@ -126,8 +131,9 @@ function showPage(name){
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
   $("page-"+name).classList.add("active");
   document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===name));
-  $("pageTitle").textContent=({overview:"Overview",deposits:"Advertiser deposits",withdrawals:"Worker withdrawals",campaigns:"Campaigns",submissions:"Task submissions",products:"Product Management"})[name];
+  $("pageTitle").textContent=({overview:"Overview",deposits:"Advertiser deposits",withdrawals:"Worker withdrawals",campaigns:"Campaigns",submissions:"Task submissions",products:"Product Management",storeorders:"Store Orders"})[name];
   if(name!=="overview")renderAll();
+  if(name==="storeorders")refreshStoreOrders();
 }
 function pill(status){return `<span class="pill ${esc(String(status||"").toLowerCase())}">${esc(status||"unknown")}</span>`}
 function table(headers,rows){if(!rows.length)return '<div class="empty">No records found.</div>';return `<div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`}
@@ -135,14 +141,15 @@ async function refreshAll(){
   if(!adminSecret)return;
   $("refreshBtn").disabled=true;
   try{
-    const [d,w,c,s,p]=await Promise.all([
+    const [d,w,c,s,p,so]=await Promise.all([
       api("/api/admin/advertiser-deposits?status="+encodeURIComponent($("depositStatus")?.value||"pending")),
       api("/api/admin/worker-withdrawals"),
       api("/api/admin/campaigns"),
       api("/api/admin/task-submissions"),
-      api("/api/admin/products")
+      api("/api/admin/products"),
+      api("/api/admin/store-orders?status="+encodeURIComponent($("storeOrderStatus")?.value||"all"))
     ]);
-    dataStore={deposits:d.deposits||[],withdrawals:w.withdrawals||[],campaigns:c.campaigns||[],submissions:s.submissions||[],products:p.products||[]};
+    dataStore={deposits:d.deposits||[],withdrawals:w.withdrawals||[],campaigns:c.campaigns||[],submissions:s.submissions||[],products:p.products||[],storeOrders:so.orders||[]};
     $("lastUpdated").textContent="Last updated "+new Date().toLocaleTimeString();
     updateMetrics();renderAll();
   }catch(e){toast(e.message,true)}
@@ -160,7 +167,7 @@ function updateMetrics(){
     ["Task submissions awaiting review",dataStore.submissions.length,"submissions"]
   ].map(([label,count,page])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 4px;border-bottom:1px solid #203450"><span>${label}</span><button onclick="showPage('${page}')">${count} · Open</button></div>`).join("");
 }
-function renderAll(){renderDeposits();renderWithdrawals();renderCampaigns();renderSubmissions();renderProducts()}
+function renderAll(){renderDeposits();renderWithdrawals();renderCampaigns();renderSubmissions();renderProducts();renderStoreOrders()}
 function renderDeposits(){
  const q=($("depositSearch")?.value||"").toLowerCase();
  const items=dataStore.deposits.filter(x=>(String(x.username||"")+" "+String(x.telegram_id||"")+" "+String(x.payment_reference||"")).toLowerCase().includes(q));
@@ -201,6 +208,29 @@ async function reviewSubmission(id,action){
  try{await api(`/api/admin/task-submissions/${encodeURIComponent(id)}/review`,{method:"POST",body:JSON.stringify({action})});toast(action==="approve"?"Proof approved and worker credited.":"Proof rejected.");await refreshAll()}catch(e){toast(e.message,true)}
 }
 
+
+async function refreshStoreOrders(){
+ try{const d=await api("/api/admin/store-orders?status="+encodeURIComponent($("storeOrderStatus")?.value||"all"));dataStore.storeOrders=d.orders||[];renderStoreOrders();}
+ catch(e){$("storeOrdersTable").innerHTML='<div class="empty">Could not load store orders: '+esc(e.message)+'</div>';}
+}
+function renderStoreOrders(){
+ const items=dataStore.storeOrders||[];
+ $("storeOrdersTable").innerHTML=table(["Order / customer","Items","Delivery","Payment","Total","Status / action"],items.map(o=>{
+  const lines=(Array.isArray(o.items)?o.items:[]).map(i=>`${esc(i.name)} × ${Number(i.quantity)} <small>$${(Number(i.lineTotalCents||0)/100).toFixed(2)}</small>`).join("<br>");
+  const amount="$"+(Number(o.subtotal_cents||0)/100).toFixed(2);
+  const actions=["pending_payment","processing"].includes(o.status)?`<div class="rowbuttons"><button class="success" onclick="reviewStoreOrder('${esc(o.id)}','processing')">${o.status==="pending_payment"?"Verify & Process":"Keep Processing"}</button><button class="success" onclick="reviewStoreOrder('${esc(o.id)}','completed')">Complete</button><button class="danger" onclick="reviewStoreOrder('${esc(o.id)}','rejected')">Reject order</button></div>`:"—";
+  return `<tr><td><b>${esc(o.customer_name)}</b><small>${esc(o.username||o.first_name||"Telegram customer")} · ID ${esc(o.telegram_id)}</small><small>${dateText(o.created_at)}</small><small>Order ${esc(o.id)}</small></td><td>${lines}</td><td>${esc(o.phone)}<small>${esc(o.delivery_address)}</small></td><td>${esc(o.payment_method)}<small>Ref: ${esc(o.payment_reference||"Not supplied")}</small></td><td><b>${amount}</b>${o.payment_method==="Worker Coins"?`<small>${Number(o.amount_coins||0).toLocaleString()} coins</small>`:""}</td><td>${pill(o.status)}<div style="margin-top:7px">${actions}</div>${o.admin_note?`<small>Note: ${esc(o.admin_note)}</small>`:""}</td></tr>`;
+ }));
+}
+async function reviewStoreOrder(id,action){
+ let adminNote="";
+ if(action==="rejected"){adminNote=prompt("Reason for rejecting this order (optional):")??null;if(adminNote===null)return;}
+ if(action==="processing"&&!confirm("Confirm you have verified ABA / USDT payment if applicable, and accept this order for fulfillment?"))return;
+ if(action==="completed"&&!confirm("Confirm this order has been delivered or fulfilled?"))return;
+ try{await api(`/api/admin/store-orders/${encodeURIComponent(id)}/review`,{method:"POST",body:JSON.stringify({action,adminNote})});toast("Store order updated: "+action);await refreshStoreOrders();}
+ catch(e){toast(e.message,true)}
+}
+
 function renderProducts(){
  const q=($("productSearch")?.value||"").toLowerCase();
  const items=dataStore.products.filter(x=>(String(x.name||"")+" "+String(x.category||"")).toLowerCase().includes(q));
@@ -216,7 +246,7 @@ $("productPrice").addEventListener("input",updatePricePreview);$("clearProductBt
 $("loginBtn").addEventListener("click",unlock);$("secretInput").addEventListener("keydown",e=>{if(e.key==="Enter")unlock()});
 $("refreshBtn").addEventListener("click",refreshAll);$("lockBtn").addEventListener("click",lock);
 document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
-["depositStatus","depositSearch","withdrawSearch","campaignSearch","submissionSearch"].forEach(id=>$(id).addEventListener("input",()=>{if(id==="depositStatus")refreshAll();else renderAll()}));
+["depositStatus","depositSearch","withdrawSearch","campaignSearch","submissionSearch","storeOrderStatus"].forEach(id=>$(id).addEventListener("input",()=>{if(id==="depositStatus"||id==="storeOrderStatus")refreshAll();else renderAll()}));
 </script>
 </body>
 </html>
