@@ -12,6 +12,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:1px solid
 main{padding:26px;max-width:1500px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:22px}.eyebrow{color:#7fa9ec;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}h1{font-size:26px;margin:3px 0}h2{font-size:18px;margin:0 0 14px}.sub{color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap}.primary{background:var(--blue);border-color:var(--blue);color:white}.danger{background:#512532;border-color:#78404c}.success{background:#123f3b;border-color:#21695d}.ghost{background:transparent}
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:20px 0}.metric,.panel{background:linear-gradient(160deg,#122541,#0f1e35);border:1px solid var(--line);border-radius:15px;padding:17px}.metric .label{color:var(--muted);font-size:12px}.metric .num{font-size:29px;font-weight:800;margin-top:6px}.metric .hint{font-size:11px;color:var(--muted)}.panel{margin:14px 0}.toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap}.toolbar h2{margin:0}.filters{display:flex;gap:8px;flex-wrap:wrap}.filters input,.filters select,.login input{background:#09172b;border:1px solid var(--line);color:var(--text);border-radius:9px;padding:9px 11px;min-width:150px}
 .tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:780px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid #203450;vertical-align:top}th{font-size:11px;color:#8fa7c8;text-transform:uppercase;letter-spacing:.7px}td{font-size:13px}td small{display:block;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}.pill{display:inline-block;padding:3px 8px;border-radius:99px;background:#263b5a;color:#cbdaf0;font-size:10px;font-weight:800;text-transform:uppercase}.pill.pending{background:#49391d;color:#ffd47a}.pill.active,.pill.approved,.pill.paid{background:#123e36;color:#83e3bd}.pill.rejected,.pill.paused{background:#48232e;color:#ff9eaa}.rowbuttons{display:flex;gap:6px;flex-wrap:wrap}.rowbuttons button{font-size:11px;padding:6px 9px}.empty{padding:30px;text-align:center;color:var(--muted)}.notice{border:1px solid #655127;background:#332b19;color:#f6d58a;padding:12px;border-radius:10px;margin:12px 0}.error{border-color:#7c3948;background:#351c27;color:#ffb0ba}.ok{border-color:#246b59;background:#12352f;color:#9be8cb}
+.product-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.product-form label{display:grid;gap:5px;color:var(--muted);font-size:12px}.product-form input,.product-form textarea,.product-form select{width:100%;background:#09172b;border:1px solid var(--line);color:var(--text);border-radius:9px;padding:10px}.product-form textarea{min-height:78px;resize:vertical}.product-form .wide{grid-column:1/-1}.product-thumb{width:54px;height:54px;object-fit:cover;border-radius:9px;background:#09172b;border:1px solid var(--line)}@media(max-width:600px){.product-form{grid-template-columns:1fr}}
 .page{display:none}.page.active{display:block}.login{max-width:470px;margin:9vh auto;background:var(--panel);border:1px solid var(--line);padding:25px;border-radius:17px}.login input{width:100%;margin:10px 0 13px}.login p{color:var(--muted)}.loginrow{display:flex;gap:8px}.loginrow button{flex:1}.hidden{display:none!important}.toast{position:fixed;right:20px;bottom:20px;max-width:360px;padding:12px 16px;border-radius:10px;background:#183b35;border:1px solid #2d7563;box-shadow:0 12px 35px #0008;z-index:5}.toast.bad{background:#46232c;border-color:#80414d}
 @media(max-width:900px){.shell{grid-template-columns:1fr}.side{height:auto;position:relative;padding:12px;border-right:0;border-bottom:1px solid var(--line)}.brand{padding:3px 6px 10px}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap;padding:9px}.sidefoot{display:none}main{padding:17px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.grid{gap:8px}.metric{padding:12px}.metric .num{font-size:23px}.top{align-items:flex-start;flex-direction:column}h1{font-size:22px}}
@@ -35,9 +36,9 @@ main{padding:26px;max-width:1500px;width:100%;margin:auto}.top{display:flex;just
       <button class="active" data-page="overview">▦ &nbsp; Overview</button>
       <button data-page="deposits">＄ &nbsp; Advertiser deposits</button>
       <button data-page="withdrawals">⇧ &nbsp; Worker withdrawals</button>
-      <button data-page="serviceorders">🛒 &nbsp; Wallet service orders</button>
       <button data-page="campaigns">▤ &nbsp; Campaigns</button>
       <button data-page="submissions">✓ &nbsp; Task submissions</button>
+      <button data-page="products">▣ &nbsp; Products</button>
     </div>
     <div class="sidefoot">Admin access is protected by the backend.<br>Marketplace Admin · v1.0</div>
   </aside>
@@ -51,7 +52,6 @@ main{padding:26px;max-width:1500px;width:100%;margin:auto}.top{display:flex;just
       <div class="grid">
         <div class="metric"><div class="label">Pending deposits</div><div class="num" id="mDeposits">—</div><div class="hint">Advertiser wallet funding</div></div>
         <div class="metric"><div class="label">Pending withdrawals</div><div class="num" id="mWithdrawals">—</div><div class="hint">Worker earnings payout</div></div>
-        <div class="metric"><div class="label">Pending wallet service orders</div><div class="num" id="mServiceOrders">—</div><div class="hint">Phone, game and shopping</div></div>
         <div class="metric"><div class="label">Pending campaigns</div><div class="num" id="mCampaigns">—</div><div class="hint">Awaiting admin decision</div></div>
         <div class="metric"><div class="label">Task submissions</div><div class="num" id="mSubmissions">—</div><div class="hint">Awaiting review</div></div>
       </div>
@@ -63,14 +63,31 @@ main{padding:26px;max-width:1500px;width:100%;margin:auto}.top{display:flex;just
     <section class="page" id="page-withdrawals">
       <div class="panel"><div class="toolbar"><h2>Worker withdrawal requests</h2><input id="withdrawSearch" placeholder="Search Telegram ID / method"></div><div id="withdrawalsTable" class="empty">Loading withdrawals…</div></div>
     </section>
-    <section class="page" id="page-serviceorders">
-      <div class="panel"><div class="toolbar"><h2>Phone, game and shopping orders</h2><div class="filters"><select id="serviceOrderStatus"><option value="pending">Pending</option><option value="processing">Processing</option><option value="all">All statuses</option><option value="completed">Completed</option><option value="rejected">Rejected</option></select><input id="serviceOrderSearch" placeholder="Search user / provider / order"></div></div><div class="notice">Verify the order details and fulfill the purchase manually. Mark completed only after the top-up or product delivery is finished. Rejecting an order automatically refunds the user's coins.</div><div id="serviceOrdersTable" class="empty">Loading service orders…</div></div>
-    </section>
     <section class="page" id="page-campaigns">
       <div class="panel"><div class="toolbar"><h2>Campaign management</h2><input id="campaignSearch" placeholder="Search title / owner / type"></div><div id="campaignsTable" class="empty">Loading campaigns…</div></div>
     </section>
     <section class="page" id="page-submissions">
       <div class="panel"><div class="toolbar"><h2>Submitted task proofs</h2><input id="submissionSearch" placeholder="Search campaign / worker"></div><div id="submissionsTable" class="empty">Loading submissions…</div></div>
+    </section>
+    <section class="page" id="page-products">
+      <div class="notice">Manage products sold by your own store. Customer prices include the 2% store markup, calculated automatically from your base price. Product images currently use image URLs.</div>
+      <div class="panel">
+        <div class="toolbar"><h2 id="productFormTitle">Add new product</h2><button class="ghost" id="clearProductBtn" type="button">Clear form</button></div>
+        <form id="productForm" class="product-form">
+          <input type="hidden" id="productId">
+          <label>Product name<input id="productName" maxlength="120" required placeholder="e.g. Wireless earbuds"></label>
+          <label>Category<input id="productCategory" maxlength="60" required placeholder="e.g. Electronics"></label>
+          <label class="wide">Description<textarea id="productDescription" maxlength="2000" placeholder="Product details"></textarea></label>
+          <label class="wide">Product image URL<input id="productImage" type="url" placeholder="https://... (optional)"></label>
+          <label>Base price (USD)<input id="productPrice" type="number" min="0.01" max="999999" step="0.01" required placeholder="10.00"></label>
+          <label>Stock quantity<input id="productStock" type="number" min="0" max="1000000" step="1" value="1" required></label>
+          <label><span>Featured product</span><select id="productFeatured"><option value="false">No</option><option value="true">Yes</option></select></label>
+          <label><span>Store visibility</span><select id="productActive"><option value="true">Visible in store</option><option value="false">Hidden</option></select></label>
+          <div class="wide actions"><button class="primary" id="saveProductBtn" type="submit">Save product</button></div>
+        </form>
+        <div class="sub" id="pricePreview" style="margin-top:10px">Customer price: —</div>
+      </div>
+      <div class="panel"><div class="toolbar"><h2>Your store products</h2><input id="productSearch" placeholder="Search products"></div><div id="productsTable" class="empty">Loading products…</div></div>
     </section>
   </main>
 </div>
@@ -78,7 +95,7 @@ main{padding:26px;max-width:1500px;width:100%;margin:auto}.top{display:flex;just
 <script>
 const API_URL = "https://khmer-quiz-backend.onrender.com";
 let adminSecret = "";
-let dataStore = {deposits:[],withdrawals:[],serviceOrders:[],campaigns:[],submissions:[]};
+let dataStore = {deposits:[],withdrawals:[],campaigns:[],submissions:[],products:[]};
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const usdMicros = v => "$" + (Number(v||0)/1000000).toFixed(2);
@@ -97,6 +114,7 @@ async function unlock(){
   $("loginBtn").disabled=true;
   try{
     await api("/api/admin/campaigns");
+    await api("/api/admin/products");
     $("loginScreen").classList.add("hidden");$("app").classList.remove("hidden");
     $("loginError").classList.add("hidden");
     await refreshAll();toast("Admin dashboard unlocked.");
@@ -105,68 +123,44 @@ async function unlock(){
 }
 function lock(){adminSecret="";$("secretInput").value="";$("app").classList.add("hidden");$("loginScreen").classList.remove("hidden")}
 function showPage(name){
-  if(name==="deposits" && $("depositSearch")) $("depositSearch").value="";
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
   $("page-"+name).classList.add("active");
   document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===name));
-  $("pageTitle").textContent=({overview:"Overview",deposits:"Advertiser deposits",withdrawals:"Worker withdrawals",serviceorders:"Wallet service orders",campaigns:"Campaigns",submissions:"Task submissions"})[name];
+  $("pageTitle").textContent=({overview:"Overview",deposits:"Advertiser deposits",withdrawals:"Worker withdrawals",campaigns:"Campaigns",submissions:"Task submissions",products:"Product Management"})[name];
   if(name!=="overview")renderAll();
-  if(name==="deposits")refreshDeposits();
-  if(name==="serviceorders")refreshServiceOrders();
 }
 function pill(status){return `<span class="pill ${esc(String(status||"").toLowerCase())}">${esc(status||"unknown")}</span>`}
 function table(headers,rows){if(!rows.length)return '<div class="empty">No records found.</div>';return `<div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`}
-async function refreshDeposits(){
-  if(!adminSecret)return;
-  const target=$("depositsTable");
-  target.innerHTML='<div class="empty">Loading advertiser deposits…</div>';
-  try{
-    const d=await api("/api/admin/advertiser-deposits?status="+encodeURIComponent($("depositStatus")?.value||"pending"));
-    dataStore.deposits=Array.isArray(d.deposits)?d.deposits:[];
-    renderDeposits();updateMetrics();
-  }catch(e){
-    target.innerHTML='<div class="empty">Could not load deposits: '+esc(e.message)+'. Check the backend deployment and admin access, then click Refresh.</div>';
-    toast("Deposit loading failed: "+e.message,true);
-  }
-}
 async function refreshAll(){
   if(!adminSecret)return;
   $("refreshBtn").disabled=true;
   try{
-    const results=await Promise.allSettled([
+    const [d,w,c,s,p]=await Promise.all([
       api("/api/admin/advertiser-deposits?status="+encodeURIComponent($("depositStatus")?.value||"pending")),
       api("/api/admin/worker-withdrawals"),
-      api("/api/admin/service-orders?status="+encodeURIComponent($("serviceOrderStatus")?.value||"pending")),
       api("/api/admin/campaigns"),
-      api("/api/admin/task-submissions")
+      api("/api/admin/task-submissions"),
+      api("/api/admin/products")
     ]);
-    if(results[0].status==="fulfilled")dataStore.deposits=results[0].value.deposits||[];
-    else { $("depositsTable").innerHTML='<div class="empty">Could not load deposits: '+esc(results[0].reason?.message||"Unknown error")+'</div>'; }
-    if(results[1].status==="fulfilled")dataStore.withdrawals=results[1].value.withdrawals||[];
-    if(results[2].status==="fulfilled")dataStore.serviceOrders=results[2].value.orders||[];
-    if(results[3].status==="fulfilled")dataStore.campaigns=results[3].value.campaigns||[];
-    if(results[4].status==="fulfilled")dataStore.submissions=results[4].value.submissions||[];
+    dataStore={deposits:d.deposits||[],withdrawals:w.withdrawals||[],campaigns:c.campaigns||[],submissions:s.submissions||[],products:p.products||[]};
     $("lastUpdated").textContent="Last updated "+new Date().toLocaleTimeString();
     updateMetrics();renderAll();
-    const failed=results.filter(x=>x.status==="rejected");
-    if(failed.length)toast(failed.length+" admin queue(s) failed to load. Check the affected section.",true);
-  }finally{$("refreshBtn").disabled=false}
+  }catch(e){toast(e.message,true)}
+  finally{$("refreshBtn").disabled=false}
 }
 function updateMetrics(){
   $("mDeposits").textContent=dataStore.deposits.filter(x=>x.status==="pending").length;
   $("mWithdrawals").textContent=dataStore.withdrawals.length;
-  $("mServiceOrders").textContent=dataStore.serviceOrders.filter(x=>x.status==="pending").length;
   $("mCampaigns").textContent=dataStore.campaigns.filter(x=>x.status==="pending").length;
   $("mSubmissions").textContent=dataStore.submissions.length;
   $("overviewQueues").innerHTML=[
     ["Advertiser deposits",dataStore.deposits.filter(x=>x.status==="pending").length,"deposits"],
     ["Worker withdrawals",dataStore.withdrawals.length,"withdrawals"],
-    ["Wallet service orders awaiting review",dataStore.serviceOrders.filter(x=>x.status==="pending").length,"serviceorders"],
     ["Campaigns awaiting approval",dataStore.campaigns.filter(x=>x.status==="pending").length,"campaigns"],
     ["Task submissions awaiting review",dataStore.submissions.length,"submissions"]
   ].map(([label,count,page])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 4px;border-bottom:1px solid #203450"><span>${label}</span><button onclick="showPage('${page}')">${count} · Open</button></div>`).join("");
 }
-function renderAll(){renderDeposits();renderWithdrawals();renderServiceOrders();renderCampaigns();renderSubmissions()}
+function renderAll(){renderDeposits();renderWithdrawals();renderCampaigns();renderSubmissions();renderProducts()}
 function renderDeposits(){
  const q=($("depositSearch")?.value||"").toLowerCase();
  const items=dataStore.deposits.filter(x=>(String(x.username||"")+" "+String(x.telegram_id||"")+" "+String(x.payment_reference||"")).toLowerCase().includes(q));
@@ -176,31 +170,6 @@ function renderWithdrawals(){
  const q=($("withdrawSearch")?.value||"").toLowerCase();
  const items=dataStore.withdrawals.filter(x=>(String(x.telegram_id||"")+" "+String(x.method||"")+" "+String(x.payment_details||"")).toLowerCase().includes(q));
  $("withdrawalsTable").innerHTML=table(["Worker","Amount","Payment details","Requested","Status / action"],items.map(x=>`<tr><td><b>${esc(x.telegram_id)}</b></td><td><b>${Number(x.amount_coins||0).toLocaleString()} coins</b><small>${(Number(x.amount_coins||0)/10000).toFixed(4)} USD</small></td><td>${esc(x.method)}<small>${esc(x.payment_details)}</small></td><td>${dateText(x.created_at)}</td><td>${pill(x.status)}<div class="rowbuttons" style="margin-top:7px"><button class="success" onclick="reviewWithdrawal('${esc(x.id)}','paid')">Mark paid</button><button class="danger" onclick="reviewWithdrawal('${esc(x.id)}','rejected')">Reject & refund</button></div></td></tr>`));
-}
-async function refreshServiceOrders(){
- if(!adminSecret)return;
- try{const d=await api("/api/admin/service-orders?status="+encodeURIComponent($("serviceOrderStatus")?.value||"pending"));dataStore.serviceOrders=d.orders||[];renderServiceOrders();updateMetrics()}
- catch(e){$("serviceOrdersTable").innerHTML='<div class="empty">Could not load service orders: '+esc(e.message)+'</div>';toast(e.message,true)}
-}
-function renderServiceOrders(){
- const q=($("serviceOrderSearch")?.value||"").toLowerCase();
- const labels={phone_topup:"Phone Top Up",game_topup:"Game Top Up",shopping:"Shopping"};
- const items=dataStore.serviceOrders.filter(x=>(String(x.username||"")+" "+String(x.telegram_id||"")+" "+String(x.provider||"")+" "+String(x.recipient||"")+" "+String(x.item_details||"")).toLowerCase().includes(q));
- $("serviceOrdersTable").innerHTML=table(["Order / user","Details","Wallet charge","Created","Status / action"],items.map(x=>`<tr><td><b>${esc(labels[x.order_type]||x.order_type)}</b><small>${esc(x.username||"Telegram user")} · ID ${esc(x.telegram_id)}</small></td><td><b>${esc(x.provider)}</b><small>Recipient: ${esc(x.recipient)}</small><small>${esc(x.item_details)}</small><small>Quantity: ${esc(x.quantity)}</small>${x.phone_topup_type?`<small>Top-up type: ${esc(x.phone_topup_type.toUpperCase())}</small>`:""}</td><td><b>${Number(x.amount_coins||0).toLocaleString()} coins</b><small>${usdMicros(x.amount_usd_micros)}</small></td><td>${dateText(x.created_at)}</td><td>${pill(x.status)}${["pending","processing"].includes(x.status)?`<div class="rowbuttons" style="margin-top:7px">${x.status==="pending"?`<button onclick="reviewServiceOrder('${esc(x.id)}','processing')">Start processing</button>`:""}<button class="success" onclick="reviewServiceOrder('${esc(x.id)}','completed')">Mark completed</button><button class="danger" onclick="reviewServiceOrder('${esc(x.id)}','rejected')">Reject & refund</button></div>`:""}${x.admin_note?`<small>Note: ${esc(x.admin_note)}</small>`:""}</td></tr>`));
-}
-async function reviewServiceOrder(id,action){
- let adminNote="";
- if(action==="rejected"){adminNote=prompt("Reason for rejecting this order (coins will be refunded):")??null;if(adminNote===null)return}
- let deliveryPin="";
- const order=dataStore.serviceOrders.find(x=>x.id===id);
- if(action==="completed"&&order?.order_type==="phone_topup"&&order?.phone_topup_type==="pin"){
-   deliveryPin=prompt("Enter the recharge voucher PIN/code to deliver privately to the user:")??null;
-   if(deliveryPin===null)return;
-   if(!deliveryPin.trim()){toast("A PIN code is required before completing this order.",true);return;}
- }
- if(action==="completed"&&!confirm("Confirm the mobile top-up / voucher / game credit / shopping delivery has been completed?"))return;
- if(action==="processing"&&!confirm("Start manually processing this order?"))return;
- try{await api(`/api/admin/service-orders/${encodeURIComponent(id)}/review`,{method:"POST",body:JSON.stringify({action,adminNote,deliveryPin})});toast(action==="rejected"?"Order rejected and coins refunded.":action==="completed"?"Order marked completed.":"Order moved to processing.");await refreshAll()}catch(e){toast(e.message,true)}
 }
 function renderCampaigns(){
  const q=($("campaignSearch")?.value||"").toLowerCase();
@@ -231,10 +200,23 @@ async function reviewSubmission(id,action){
  if(!confirm(action==="approve"?"Approve this proof and credit the worker's earnings?":"Reject this proof?"))return;
  try{await api(`/api/admin/task-submissions/${encodeURIComponent(id)}/review`,{method:"POST",body:JSON.stringify({action})});toast(action==="approve"?"Proof approved and worker credited.":"Proof rejected.");await refreshAll()}catch(e){toast(e.message,true)}
 }
+
+function renderProducts(){
+ const q=($("productSearch")?.value||"").toLowerCase();
+ const items=dataStore.products.filter(x=>(String(x.name||"")+" "+String(x.category||"")).toLowerCase().includes(q));
+ $("productsTable").innerHTML=table(["Product","Base price","Customer price","Stock","Status","Actions"],items.map(x=>`<tr><td><div style="display:flex;gap:9px;align-items:center">${x.image_url?`<img class="product-thumb" src="${esc(x.image_url)}" alt="">`:`<div class="product-thumb"></div>`}<div><b>${esc(x.name)}</b><small>${esc(x.category)}</small><small>${esc(x.description||"")}</small></div></div></td><td>$${(Number(x.base_price_cents||0)/100).toFixed(2)}</td><td><b>$${(Number(x.price_cents||0)/100).toFixed(2)}</b><small>Includes 2% markup</small></td><td>${esc(x.stock)}</td><td>${pill(x.is_active?"active":"hidden")}${x.is_featured?'<small>Featured</small>':""}</td><td><div class="rowbuttons"><button onclick="editProduct('${esc(x.id)}')">Edit</button><button class="danger" onclick="deleteProduct('${esc(x.id)}')">Delete</button></div></td></tr>`));
+}
+function clearProductForm(){$("productForm").reset();$("productId").value="";$("productStock").value="1";$("productFormTitle").textContent="Add new product";$("saveProductBtn").textContent="Save product";updatePricePreview()}
+function updatePricePreview(){const n=Number($("productPrice").value||0);$("pricePreview").textContent=n>0?`Customer price (base + 2%): $${(n*1.02).toFixed(2)}`:"Customer price: —"}
+function editProduct(id){const x=dataStore.products.find(p=>p.id===id);if(!x)return;$("productId").value=x.id;$("productName").value=x.name||"";$("productCategory").value=x.category||"";$("productDescription").value=x.description||"";$("productImage").value=x.image_url||"";$("productPrice").value=(Number(x.base_price_cents||0)/100).toFixed(2);$("productStock").value=x.stock??0;$("productFeatured").value=String(!!x.is_featured);$("productActive").value=String(!!x.is_active);$("productFormTitle").textContent="Edit product";$("saveProductBtn").textContent="Update product";updatePricePreview();window.scrollTo({top:0,behavior:"smooth"})}
+async function deleteProduct(id){if(!confirm("Delete this product from your store?"))return;try{await api(`/api/admin/products/${encodeURIComponent(id)}`,{method:"DELETE"});toast("Product deleted.");await refreshAll()}catch(e){toast(e.message,true)}}
+$("productForm").addEventListener("submit",async e=>{e.preventDefault();const id=$("productId").value;const payload={name:$("productName").value.trim(),category:$("productCategory").value.trim(),description:$("productDescription").value.trim(),imageUrl:$("productImage").value.trim(),basePrice:Number($("productPrice").value),stock:Number($("productStock").value),isFeatured:$("productFeatured").value==="true",isActive:$("productActive").value==="true"};try{await api(id?`/api/admin/products/${encodeURIComponent(id)}`:"/api/admin/products",{method:id?"PATCH":"POST",body:JSON.stringify(payload)});toast(id?"Product updated.":"Product added.");clearProductForm();await refreshAll()}catch(e){toast(e.message,true)}});
+$("productPrice").addEventListener("input",updatePricePreview);$("clearProductBtn").addEventListener("click",clearProductForm);$("productSearch").addEventListener("input",renderProducts);
+
 $("loginBtn").addEventListener("click",unlock);$("secretInput").addEventListener("keydown",e=>{if(e.key==="Enter")unlock()});
 $("refreshBtn").addEventListener("click",refreshAll);$("lockBtn").addEventListener("click",lock);
 document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
-["depositStatus","depositSearch","withdrawSearch","campaignSearch","submissionSearch","serviceOrderSearch","serviceOrderStatus"].forEach(id=>$(id).addEventListener("input",()=>{if(id==="depositStatus")refreshDeposits();else if(id==="serviceOrderStatus")refreshServiceOrders();else renderAll()}));
+["depositStatus","depositSearch","withdrawSearch","campaignSearch","submissionSearch"].forEach(id=>$(id).addEventListener("input",()=>{if(id==="depositStatus")refreshAll();else renderAll()}));
 </script>
 </body>
 </html>
