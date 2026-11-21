@@ -2199,8 +2199,10 @@ function selectGameProvider(provider, button) {
       serverLabel.textContent = "Server ID:";
       recipientInput.placeholder = "Enter " + provider + " User ID";
       serverInput.placeholder = "Enter " + provider + " Server ID";
-      serverLabel.classList.toggle("hidden", isHonorKings);
-      serverInput.classList.toggle("hidden", isHonorKings);
+      const hideServerId = isHonorKings || isFreeFire || isPUBG;
+      serverLabel.classList.toggle("hidden", hideServerId);
+      serverInput.classList.toggle("hidden", hideServerId);
+      if (hideServerId) { serverInput.value = ""; $("gameServer").value = ""; }
     } else {
       recipientLabel.textContent = "Player ID / UID";
       serverLabel.textContent = "Zone ID / Server ID (if applicable)";
@@ -2315,8 +2317,7 @@ async function submitServiceOrder(kind) {
       recipient = $("gameRecipientFallback").value.trim();
       itemDetails = $("gamePackage").value.trim();
       if (!recipient || !itemDetails) { showMessage(config.message, "Enter your User ID and select a package.", "error"); return; }
-      if ((provider === "Free Fire" || provider === "PUBG") && !serverId) { showMessage(config.message, "Enter your Server ID to continue.", "error"); return; }
-      if (serverId && provider !== "Honor of Kings") itemDetails += " · Server ID: " + serverId;
+      if (provider === "Magic Chess GoGo" && serverId) itemDetails += " · Server ID: " + serverId;
     } else {
       recipient = $("gameRecipientFallback").value.trim();
       itemDetails = $("gamePackageFallback").value.trim();
