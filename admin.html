@@ -39,7 +39,8 @@ main{padding:26px;max-width:1500px;width:100%;margin:auto}.top{display:flex;just
       <button data-page="campaigns">▤ &nbsp; Campaigns</button>
       <button data-page="submissions">✓ &nbsp; Task submissions</button>
       <button data-page="products">▣ &nbsp; Products</button>
-      <button data-page="storeorders">🛍️ &nbsp; Store orders</button>
+      <button data-page="serviceorders">📱 &nbsp; Phone / Game orders <span id="serviceOrderBadge" class="pill pending" style="margin-left:5px">0</span></button>
+      <button data-page="storeorders">🛍️ &nbsp; Store orders <span id="storeOrderBadge" class="pill pending" style="margin-left:5px">0</span></button>
     </div>
     <div class="sidefoot">Admin access is protected by the backend.<br>Marketplace Admin · v1.0</div>
   </aside>
@@ -69,6 +70,10 @@ main{padding:26px;max-width:1500px;width:100%;margin:auto}.top{display:flex;just
     </section>
     <section class="page" id="page-submissions">
       <div class="panel"><div class="toolbar"><h2>Submitted task proofs</h2><input id="submissionSearch" placeholder="Search campaign / worker"></div><div id="submissionsTable" class="empty">Loading submissions…</div></div>
+    </section>
+    <section class="page" id="page-serviceorders">
+      <div class="notice">Phone Top Up and Game Top Up orders are held for manual fulfillment. Worker Coins or Advertiser Balance is charged when the order is submitted. Rejecting an order automatically refunds the same wallet. For PIN voucher orders, enter the recharge PIN when marking the order completed.</div>
+      <div class="panel"><div class="toolbar"><h2>Phone Top Up &amp; Game Top Up orders</h2><div class="filters"><select id="serviceOrderStatus"><option value="pending">Pending</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="rejected">Rejected</option><option value="all">All statuses</option></select><button onclick="refreshServiceOrders()">Refresh orders</button></div></div><div id="serviceOrdersTable" class="empty">Loading service orders…</div></div>
     </section>
     <section class="page" id="page-storeorders">
       <div class="notice">ABA and USDT payments must be independently verified in your bank or TON wallet before moving an order to Processing. Rejecting an order restores stock. Worker Coins are refunded automatically; ABA / USDT refunds must be sent manually outside the app.</div>
@@ -100,7 +105,9 @@ main{padding:26px;max-width:1500px;width:100%;margin:auto}.top{display:flex;just
 <script>
 const API_URL = "https://khmer-quiz-backend.onrender.com";
 let adminSecret = "";
-let dataStore = {deposits:[],withdrawals:[],campaigns:[],submissions:[],products:[],storeOrders:[]};
+let dataStore = {deposits:[],withdrawals:[],campaigns:[],submissions:[],products:[],storeOrders:[],serviceOrders:[]};
+let knownServiceOrderIds = new Set();
+let knownStoreOrderIds = new Set();
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const usdMicros = v => "$" + (Number(v||0)/1000000).toFixed(2);
@@ -131,9 +138,10 @@ function showPage(name){
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
   $("page-"+name).classList.add("active");
   document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===name));
-  $("pageTitle").textContent=({overview:"Overview",deposits:"Advertiser deposits",withdrawals:"Worker withdrawals",campaigns:"Campaigns",submissions:"Task submissions",products:"Product Management",storeorders:"Store Orders"})[name];
+  $("pageTitle").textContent=({overview:"Overview",deposits:"Advertiser deposits",withdrawals:"Worker withdrawals",campaigns:"Campaigns",submissions:"Task submissions",products:"Product Management",storeorders:"Store Orders",serviceorders:"Phone & Game Top Up Orders"})[name];
   if(name!=="overview")renderAll();
   if(name==="storeorders")refreshStoreOrders();
+  if(name==="serviceorders")refreshServiceOrders();
 }
 function pill(status){return `<span class="pill ${esc(String(status||"").toLowerCase())}">${esc(status||"unknown")}</span>`}
 function table(headers,rows){if(!rows.length)return '<div class="empty">No records found.</div>';return `<div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`}
@@ -141,15 +149,18 @@ async function refreshAll(){
   if(!adminSecret)return;
   $("refreshBtn").disabled=true;
   try{
-    const [d,w,c,s,p,so]=await Promise.all([
+    const [d,w,c,s,p,so,svc]=await Promise.all([
       api("/api/admin/advertiser-deposits?status="+encodeURIComponent($("depositStatus")?.value||"pending")),
       api("/api/admin/worker-withdrawals"),
       api("/api/admin/campaigns"),
       api("/api/admin/task-submissions"),
       api("/api/admin/products"),
-      api("/api/admin/store-orders?status="+encodeURIComponent($("storeOrderStatus")?.value||"all"))
+      api("/api/admin/store-orders?status="+encodeURIComponent($("storeOrderStatus")?.value||"all")),
+      api("/api/admin/service-orders?status="+encodeURIComponent($("serviceOrderStatus")?.value||"pending"))
     ]);
-    dataStore={deposits:d.deposits||[],withdrawals:w.withdrawals||[],campaigns:c.campaigns||[],submissions:s.submissions||[],products:p.products||[],storeOrders:so.orders||[]};
+    dataStore={deposits:d.deposits||[],withdrawals:w.withdrawals||[],campaigns:c.campaigns||[],submissions:s.submissions||[],products:p.products||[],storeOrders:so.orders||[],serviceOrders:svc.orders||[]};
+    knownServiceOrderIds=new Set(dataStore.serviceOrders.map(o=>String(o.id)));
+    knownStoreOrderIds=new Set(dataStore.storeOrders.map(o=>String(o.id)));
     $("lastUpdated").textContent="Last updated "+new Date().toLocaleTimeString();
     updateMetrics();renderAll();
   }catch(e){toast(e.message,true)}
@@ -160,14 +171,20 @@ function updateMetrics(){
   $("mWithdrawals").textContent=dataStore.withdrawals.length;
   $("mCampaigns").textContent=dataStore.campaigns.filter(x=>x.status==="pending").length;
   $("mSubmissions").textContent=dataStore.submissions.length;
+  const pendingServices=dataStore.serviceOrders.filter(x=>x.status==="pending").length;
+  const pendingStores=dataStore.storeOrders.filter(x=>["pending_payment","processing"].includes(x.status)).length;
+  $("serviceOrderBadge").textContent=pendingServices;
+  $("storeOrderBadge").textContent=pendingStores;
   $("overviewQueues").innerHTML=[
     ["Advertiser deposits",dataStore.deposits.filter(x=>x.status==="pending").length,"deposits"],
     ["Worker withdrawals",dataStore.withdrawals.length,"withdrawals"],
     ["Campaigns awaiting approval",dataStore.campaigns.filter(x=>x.status==="pending").length,"campaigns"],
-    ["Task submissions awaiting review",dataStore.submissions.length,"submissions"]
+    ["Task submissions awaiting review",dataStore.submissions.length,"submissions"],
+    ["Phone / Game Top Up orders",dataStore.serviceOrders.filter(x=>x.status==="pending").length,"serviceorders"],
+    ["Shopping orders to process",dataStore.storeOrders.filter(x=>["pending_payment","processing"].includes(x.status)).length,"storeorders"]
   ].map(([label,count,page])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 4px;border-bottom:1px solid #203450"><span>${label}</span><button onclick="showPage('${page}')">${count} · Open</button></div>`).join("");
 }
-function renderAll(){renderDeposits();renderWithdrawals();renderCampaigns();renderSubmissions();renderProducts();renderStoreOrders()}
+function renderAll(){renderDeposits();renderWithdrawals();renderCampaigns();renderSubmissions();renderProducts();renderStoreOrders();renderServiceOrders()}
 function renderDeposits(){
  const q=($("depositSearch")?.value||"").toLowerCase();
  const items=dataStore.deposits.filter(x=>(String(x.username||"")+" "+String(x.telegram_id||"")+" "+String(x.payment_reference||"")).toLowerCase().includes(q));
@@ -209,9 +226,50 @@ async function reviewSubmission(id,action){
 }
 
 
+async function refreshServiceOrders(){
+ try{
+  const d=await api("/api/admin/service-orders?status="+encodeURIComponent($("serviceOrderStatus")?.value||"pending"));
+  const incoming=d.orders||[];
+  const fresh=incoming.filter(o=>!knownServiceOrderIds.has(String(o.id)));
+  if(knownServiceOrderIds.size&&fresh.length){toast(`${fresh.length} new Phone / Game Top Up order${fresh.length===1?"":"s"} received.`);}
+  incoming.forEach(o=>knownServiceOrderIds.add(String(o.id)));
+  dataStore.serviceOrders=incoming;renderServiceOrders();updateMetrics();
+ }catch(e){$("serviceOrdersTable").innerHTML='<div class="empty">Could not load service orders: '+esc(e.message)+'</div>';}
+}
+function renderServiceOrders(){
+ const items=dataStore.serviceOrders||[];
+ $("serviceOrdersTable").innerHTML=table(["Order / customer","Service details","Recipient","Payment","Amount","Status / action"],items.map(o=>{
+  const type=o.order_type==="phone_topup"?"Phone Top Up":o.order_type==="game_topup"?"Game Top Up":esc(o.order_type);
+  const amount=usdMicros(o.amount_usd_micros);
+  const coinAmount=Number(o.amount_coins||0).toLocaleString();
+  const open=["pending","processing"].includes(o.status);
+  const actions=open?`<div class="rowbuttons"><button class="success" onclick="reviewServiceOrder('${esc(o.id)}','processing')">Process</button><button class="success" onclick="reviewServiceOrder('${esc(o.id)}','completed')">Complete</button><button class="danger" onclick="reviewServiceOrder('${esc(o.id)}','rejected')">Reject &amp; refund</button></div>`:"—";
+  return `<tr><td><b>${type}</b><small>${esc(o.username||o.first_name||"Telegram user")} · ID ${esc(o.telegram_id)}</small><small>${dateText(o.created_at)}</small><small>Order ${esc(o.id)}</small></td><td><b>${esc(o.provider)}</b><small>${esc(o.item_details)}</small><small>Quantity: ${esc(o.quantity)}${o.phone_topup_type?" · "+esc(o.phone_topup_type):""}</small></td><td>${esc(o.recipient)}</td><td>${esc(o.payment_method)}</td><td><b>${amount}</b><small>${coinAmount} coins equivalent</small></td><td>${pill(o.status)}<div style="margin-top:7px">${actions}</div>${o.admin_note?`<small>Note: ${esc(o.admin_note)}</small>`:""}${o.delivery_pin?`<small>PIN: ${esc(o.delivery_pin)}</small>`:""}</td></tr>`;
+ }));
+}
+async function reviewServiceOrder(id,action){
+ let adminNote="";let deliveryPin="";
+ if(action==="rejected"){adminNote=prompt("Reason for rejecting this order (optional):")??null;if(adminNote===null)return;if(!confirm("Reject this order and refund the original payment wallet?"))return;}
+ if(action==="processing"&&!confirm("Accept this order and begin manual fulfillment?"))return;
+ if(action==="completed"){
+  const order=(dataStore.serviceOrders||[]).find(x=>String(x.id)===String(id));
+  if(order?.order_type==="phone_topup"&&order?.phone_topup_type==="pin")deliveryPin=prompt("Enter the recharge PIN to deliver to the customer:")||"";
+  if(order?.order_type==="phone_topup"&&order?.phone_topup_type==="pin"&&!deliveryPin){toast("Recharge PIN is required before completing this order.",true);return;}
+  if(!confirm("Confirm the top-up or service has been successfully fulfilled?"))return;
+ }
+ try{await api(`/api/admin/service-orders/${encodeURIComponent(id)}/review`,{method:"POST",body:JSON.stringify({action,adminNote,deliveryPin})});toast(action==="rejected"?"Order rejected and wallet refunded.":"Service order updated: "+action);await refreshServiceOrders();}
+ catch(e){toast(e.message,true)}
+}
+
 async function refreshStoreOrders(){
- try{const d=await api("/api/admin/store-orders?status="+encodeURIComponent($("storeOrderStatus")?.value||"all"));dataStore.storeOrders=d.orders||[];renderStoreOrders();}
- catch(e){$("storeOrdersTable").innerHTML='<div class="empty">Could not load store orders: '+esc(e.message)+'</div>';}
+ try{
+  const d=await api("/api/admin/store-orders?status="+encodeURIComponent($("storeOrderStatus")?.value||"all"));
+  const incoming=d.orders||[];
+  const fresh=incoming.filter(o=>!knownStoreOrderIds.has(String(o.id)));
+  if(knownStoreOrderIds.size&&fresh.length)toast(`${fresh.length} new Shopping order${fresh.length===1?"":"s"} received.`);
+  incoming.forEach(o=>knownStoreOrderIds.add(String(o.id)));
+  dataStore.storeOrders=incoming;renderStoreOrders();updateMetrics();
+ }catch(e){$("storeOrdersTable").innerHTML='<div class="empty">Could not load store orders: '+esc(e.message)+'</div>';}
 }
 function renderStoreOrders(){
  const items=dataStore.storeOrders||[];
@@ -246,7 +304,9 @@ $("productPrice").addEventListener("input",updatePricePreview);$("clearProductBt
 $("loginBtn").addEventListener("click",unlock);$("secretInput").addEventListener("keydown",e=>{if(e.key==="Enter")unlock()});
 $("refreshBtn").addEventListener("click",refreshAll);$("lockBtn").addEventListener("click",lock);
 document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
-["depositStatus","depositSearch","withdrawSearch","campaignSearch","submissionSearch","storeOrderStatus"].forEach(id=>$(id).addEventListener("input",()=>{if(id==="depositStatus"||id==="storeOrderStatus")refreshAll();else renderAll()}));
+["depositStatus","depositSearch","withdrawSearch","campaignSearch","submissionSearch","storeOrderStatus","serviceOrderStatus"].forEach(id=>$(id).addEventListener("input",()=>{if(id==="depositStatus"||id==="storeOrderStatus"||id==="serviceOrderStatus")refreshAll();else renderAll()}));
+// Poll order queues while the admin dashboard is unlocked so new customer orders appear automatically.
+setInterval(()=>{if(adminSecret){refreshServiceOrders();refreshStoreOrders();}},20000);
 </script>
 </body>
 </html>
