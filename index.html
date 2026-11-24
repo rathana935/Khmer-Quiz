@@ -462,6 +462,7 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <div id="phoneNumberGroup"><label>Phone number (PINless only)</label><input id="phoneRecipient" inputmode="tel" maxlength="24" placeholder="e.g. 012345678"/></div>
 <div class="notice hidden" id="phonePinInfo">PIN voucher: no phone number is required. After admin processing, your recharge PIN will appear in your order history with a copy button.</div>
 <label>Top-up amount / voucher denomination (USD)</label><select id="phoneAmount" onchange="previewServiceCoins('phone')"><option value="0.50">$0.50</option><option selected="" value="1.00">$1.00</option><option value="2.00">$2.00</option><option value="5.00">$5.00</option><option value="10.00">$10.00</option><option value="20.00">$20.00</option></select>
+<label>Payment method</label><select id="phonePaymentMethod"><option value="Worker Coins">Worker Earnings Wallet</option><option value="Advertiser Balance">Advertiser Campaign Wallet</option></select>
 <label>Additional note (optional)</label><input id="phoneDetails" maxlength="250" placeholder="Any special instructions"/>
 <div class="feature"><span>Cost</span><strong id="phoneCost">10,000 coins</strong></div>
 <div class="notice" id="phoneMessage">Your coins are deducted when you submit. PIN codes are delivered inside the app after admin processing. Rejected orders are refunded.</div>
@@ -556,6 +557,7 @@ a{color:var(--blue);overflow-wrap:anywhere}
 </div>
 <div id="genericGamePackageFields" class="hidden"><label>Top-up package</label><input id="gamePackageFallback" maxlength="180" placeholder="Enter package name"/></div>
 <input id="gamePackage" maxlength="180" type="hidden" value=""/>
+<label>Payment method</label><select id="gamePaymentMethod"><option value="Worker Coins">Worker Earnings Wallet</option><option value="Advertiser Balance">Advertiser Campaign Wallet</option></select>
 <label>Price (USD)</label><input id="gameAmount" max="1000" min="0.01" oninput="previewServiceCoins('game')" step="0.01" type="number" value="1.00"/>
 <div class="feature"><span>Cost (10,000 coins = $1.00)</span><strong id="gameCost">10,000 coins</strong></div>
 <div class="notice" id="gameMessage">Double-check your Player ID and package. Coins are reserved when you submit. Rejected orders are refunded.</div>
@@ -2425,11 +2427,11 @@ function openStoreCheckout() {
     <label>Full name<input name="customerName" required maxlength="120" autocomplete="name" placeholder="Your full name"></label>
     <label>Phone number<input name="phone" required maxlength="40" autocomplete="tel" placeholder="Your contact number"></label>
     <label>Delivery address<textarea name="deliveryAddress" required minlength="8" maxlength="700" rows="3" placeholder="House, street, district, province/city"></textarea></label>
-    <label>Payment method<select name="paymentMethod" id="storePaymentMethod" required><option value="ABA">ABA Bank</option><option value="USDT">USDT (TON Network)</option><option value="Worker Coins">Worker Coins</option></select></label>
+    <label>Payment method<select name="paymentMethod" id="storePaymentMethod" required><option value="ABA">ABA Bank</option><option value="USDT">USDT (TON Network)</option><option value="Worker Coins">Worker Earnings Wallet</option><option value="Advertiser Balance">Advertiser Campaign Wallet</option></select></label>
     <label id="storePaymentReferenceWrap">Payment reference / transaction hash (optional)<input name="paymentReference" maxlength="180" placeholder="Enter after making payment"></label>
     <div class="notice" id="storePaymentHint">ABA payment is checked manually by the administrator. Your order is reserved while awaiting payment verification.</div>
     <button class="full shop-add-btn" id="storePlaceOrderBtn" type="submit">Place Order</button>
-    <p class="shop-modal-note">ABA and USDT orders remain pending until the administrator verifies payment. Worker Coins are deducted immediately when the order is placed.</p>
+    <p class="shop-modal-note">ABA and USDT orders remain pending until the administrator verifies payment. Worker Coins or Advertiser Balance are charged immediately when the order is placed.</p>
   </form>`);
   const form=$("storeCheckoutForm");
   const method=$("storePaymentMethod");
@@ -2437,8 +2439,8 @@ function openStoreCheckout() {
   const refWrap=$("storePaymentReferenceWrap");
   method.addEventListener("change",()=>{
     const m=method.value;
-    refWrap.classList.toggle("hidden",m==="Worker Coins");
-    hint.textContent=m==="ABA"?"Use the ABA KHQR payment instructions already shown in your Wallet deposit section. Enter your bank reference if available. Admin verification is required.":m==="USDT"?"Use the USDT TON payment instructions already shown in your Wallet deposit section. Send on TON only. Enter your transaction hash if available. Admin verification is required.":"Your Worker Earnings Wallet will be charged the exact order total at checkout. Orders then await fulfillment.";
+    refWrap.classList.toggle("hidden",m==="Worker Coins"||m==="Advertiser Balance");
+    hint.textContent=m==="ABA"?"Use the ABA KHQR payment instructions already shown in your Wallet deposit section. Enter your bank reference if available. Admin verification is required.":m==="USDT"?"Use the USDT TON payment instructions already shown in your Wallet deposit section. Send on TON only. Enter your transaction hash if available. Admin verification is required.":m==="Advertiser Balance"?"Your Advertiser Campaign Wallet will be charged the exact order total at checkout. Orders then await fulfillment.":"Your Worker Earnings Wallet will be charged the exact order total at checkout. Orders then await fulfillment.";
   });
   form.addEventListener("submit",submitStoreCheckout);
 }
@@ -2590,11 +2592,12 @@ async function submitServiceOrder(kind) {
     if (link && !/^https?:\/\//i.test(link)) { showMessage(config.message, "Product link must start with http:// or https://.", "error"); return; }
     itemDetails = product + (link ? " · Link: " + link : "");
   }
+  const paymentMethod = kind === "phone" ? $("phonePaymentMethod")?.value || "Worker Coins" : kind === "game" ? $("gamePaymentMethod")?.value || "Worker Coins" : "Worker Coins";
   const cost = Math.round(amountUsd * 10000);
-  if (!confirm(`Submit this ${kind === "phone" ? "phone top-up" : kind === "game" ? "game top-up" : "shopping"} order for ${formatCoins(cost)} coins ($${amountUsd.toFixed(2)})?`)) return;
+  if (!confirm(`Submit this ${kind === "phone" ? "phone top-up" : kind === "game" ? "game top-up" : "shopping"} order for $${amountUsd.toFixed(2)} using ${paymentMethod}?`)) return;
   button.disabled = true; button.textContent = "Submitting...";
   try {
-    const data = await apiRequest("/api/worker/service-orders", {method:"POST", body:JSON.stringify({orderType:kind === "phone" ? "phone_topup" : kind === "game" ? "game_topup" : "shopping", provider, recipient, itemDetails, quantity, amountUsd, phoneTopupType})});
+    const data = await apiRequest("/api/worker/service-orders", {method:"POST", body:JSON.stringify({orderType:kind === "phone" ? "phone_topup" : kind === "game" ? "game_topup" : "shopping", provider, recipient, itemDetails, quantity, amountUsd, phoneTopupType, paymentMethod})});
     showMessage(config.message, data.message || "Order submitted. Admin will process it manually.", "success");
     if (kind === "phone") { $("phoneRecipient").value = ""; $("phoneDetails").value = ""; $("phoneTopupType").value = "pinless"; togglePhoneTopupType(); }
     if (kind === "game") { $("gameRecipient").value = ""; $("gameServer").value = ""; $("gameRecipientFallback").value = ""; $("gameServerFallback").value = ""; $("gamePackageFallback").value = ""; $("gamePackage").value = ""; document.querySelectorAll("#mlPackageGrid .ml-package-option, #magicChessPackageGrid .ml-package-option").forEach((el) => el.classList.remove("selected")); $("mlCheckMessage")?.classList.add("hidden"); }
@@ -2613,7 +2616,7 @@ async function loadServiceOrders() {
     const rows = extractArray(data, ["orders"]);
     if (!rows.length) { box.innerHTML = '<div class="empty">No service orders yet.</div>'; return; }
     const names = {phone_topup:"Phone Top Up",game_topup:"Game Top Up",shopping:"Shopping"};
-    box.innerHTML = rows.map(o => `<div class="proof-box"><div class="row"><strong>${escapeHTML(names[o.order_type] || o.order_type)}</strong><span class="status">${escapeHTML(String(o.status || "pending").toUpperCase())}</span></div><p class="muted">${escapeHTML(o.provider || "")} · ${escapeHTML(o.recipient || "")}</p><p>${escapeHTML(o.item_details || "")}</p><div class="feature"><span>Paid from wallet</span><strong>${formatCoins(o.amount_coins)} coins</strong></div><p class="fine">${o.created_at ? escapeHTML(new Date(o.created_at).toLocaleString()) : ""}</p>${o.phone_topup_type ? `<p class="muted">Top-up type: ${escapeHTML(o.phone_topup_type.toUpperCase())}</p>` : ""}${o.delivery_pin ? `<div class="notice success"><strong>Your recharge PIN</strong><p id="voucher-${escapeHTML(o.id)}" style="word-break:break-all;font-size:17px;font-weight:bold">${escapeHTML(o.delivery_pin)}</p><button class="dark" onclick="navigator.clipboard.writeText(document.getElementById('voucher-${escapeHTML(o.id)}').textContent).then(()=>showMessage('phoneMessage','Recharge PIN copied.','success')).catch(()=>showMessage('phoneMessage','Please select and copy the PIN manually.','error'))">Copy PIN</button></div>` : ""}${o.admin_note ? `<p class="muted">Admin note: ${escapeHTML(o.admin_note)}</p>` : ""}</div>`).join("");
+    box.innerHTML = rows.map(o => `<div class="proof-box"><div class="row"><strong>${escapeHTML(names[o.order_type] || o.order_type)}</strong><span class="status">${escapeHTML(String(o.status || "pending").toUpperCase())}</span></div><p class="muted">${escapeHTML(o.provider || "")} · ${escapeHTML(o.recipient || "")}</p><p>${escapeHTML(o.item_details || "")}</p><div class="feature"><span>Payment method</span><strong>${escapeHTML(o.payment_method || "Worker Coins")}${o.payment_method === "Worker Coins" ? ` · ${formatCoins(o.amount_coins)} coins` : o.payment_method === "Advertiser Balance" ? ` · $${(Number(o.amount_usd_micros||0)/1000000).toFixed(2)}` : ""}</strong></div><p class="fine">${o.created_at ? escapeHTML(new Date(o.created_at).toLocaleString()) : ""}</p>${o.phone_topup_type ? `<p class="muted">Top-up type: ${escapeHTML(o.phone_topup_type.toUpperCase())}</p>` : ""}${o.delivery_pin ? `<div class="notice success"><strong>Your recharge PIN</strong><p id="voucher-${escapeHTML(o.id)}" style="word-break:break-all;font-size:17px;font-weight:bold">${escapeHTML(o.delivery_pin)}</p><button class="dark" onclick="navigator.clipboard.writeText(document.getElementById('voucher-${escapeHTML(o.id)}').textContent).then(()=>showMessage('phoneMessage','Recharge PIN copied.','success')).catch(()=>showMessage('phoneMessage','Please select and copy the PIN manually.','error'))">Copy PIN</button></div>` : ""}${o.admin_note ? `<p class="muted">Admin note: ${escapeHTML(o.admin_note)}</p>` : ""}</div>`).join("");
   } catch (error) { box.innerHTML = `<div class="notice error">${escapeHTML(error.message)}</div>`; }
 }
 
