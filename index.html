@@ -176,6 +176,11 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <p class="muted">Faucet rewards are separate from marketplace task earnings and must be verified by the backend.</p>
 <button class="dark" onclick="go('faucet')">Open Faucet</button>
 </div>
+<div class="card">
+<div class="row"><h3>🎬 Watch Ads &amp; Earn</h3><span class="pill">Optional</span></div>
+<p class="muted">Choose to watch a rewarded ad and earn coins based on your active membership after AdsGram confirms a completed view. You can use the rest of the app without watching ads.</p>
+<button class="gold full" onclick="go('watchAds')">Open Watch Ads &amp; Earn</button>
+</div>
 </section>
 <!-- TASKS -->
 <section class="page" id="tasks">
@@ -613,6 +618,27 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <button class="dark full" onclick="go('advertise')">Manage Campaign Budget</button>
 </div>
 </section>
+<!-- ADSGRAM REWARDED ADS: OPTIONAL, SEPARATE FROM FAUCET -->
+<section class="page" id="watchAds">
+<h2>🎬 Watch Ads &amp; Earn</h2>
+<p class="muted">Rewarded ads are optional. Watching an ad is never required to use tasks, Faucet, Wallet or other app features.</p>
+<div class="card">
+<div class="row"><h3>AdsGram Reward</h3><span class="pill" id="adsgramRewardPlanPill">5 coins / completed ad</span></div>
+<p class="muted">Tap the button only when you want to watch an ad. Coins are added to your Worker Earnings Wallet after AdsGram confirms the completed view with our server.</p>
+<div class="grid">
+<div class="stat">Your plan reward<strong id="adsgramRewardAmount">5 coins</strong></div>
+<div class="stat">Watched today<strong id="adsgramClaimsToday">0 / 20</strong></div>
+<div class="stat">Worker balance<strong id="adsgramWorkerBalance">0 coins</strong></div>
+<div class="stat">Daily limit<strong>20 ads</strong></div>
+</div>
+<div class="notice" id="adsgramRewardStatus" role="status">Checking rewarded-ad availability...</div>
+<button class="gold full" id="adsgramWatchButton" onclick="watchAdsgramReward()" disabled>▶ Watch an Ad · Earn 5 Coins</button>
+<p class="fine">A reward is not issued for an ad that fails to load or is not completed. Do not click advertisements to earn a reward; only viewing the ad to completion is required.</p>
+<button class="dark full" onclick="loadAdsgramRewardStatus()">Refresh Reward Status</button>
+<h3>Recent AdsGram Rewards</h3>
+<div id="adsgramRewardHistory"><div class="empty">Your confirmed AdsGram rewards will appear here.</div></div>
+</div>
+</section>
 <!-- PLANS -->
 <section class="page" id="plans">
 <h2>👑 Membership Plans</h2>
@@ -717,6 +743,13 @@ a{color:var(--blue);overflow-wrap:anywhere}
 
 const API_URL = "https://khmer-quiz-backend.onrender.com";
 const ADSGRAM_INTERSTITIAL_BLOCK_ID = "int-60936";
+// Create a separate Reward-type block in the AdsGram publisher dashboard.
+// Replace this placeholder with that Reward block ID before production.
+const ADSGRAM_REWARD_BLOCK_ID = "61760";
+const ADSGRAM_REWARD_COINS = 5;
+const ADSGRAM_REWARD_DAILY_LIMIT = 20;
+let adsgramRewardController = null;
+let adsgramRewardBusy = false;
 const ADSGRAM_INTERSTITIAL_COOLDOWN_MS = 5 * 60 * 1000;
 const ADSGRAM_LAST_SHOWN_KEY = "kem_adsgram_interstitial_last_shown";
 const tg = window.Telegram?.WebApp;
@@ -1536,7 +1569,6 @@ async function submitTaskProof(claimId, verification) {
       if (!response.ok || data.success === false) throw new Error(getErrorMessage(data, `Upload failed (${response.status})`));
       alert(data.message || "Screenshot submitted for advertiser review.");
       await loadMyClaims();
-      await maybeShowAdsgramInterstitial("screenshot-proof-submitted");
       return;
     }
 
@@ -1558,7 +1590,6 @@ async function submitTaskProof(claimId, verification) {
     );
     alert(data.message || "Your proof has been submitted for review.");
     await loadMyClaims();
-    await maybeShowAdsgramInterstitial("task-proof-submitted");
   } catch (error) {
     alert(error.message);
   }
@@ -2048,6 +2079,9 @@ function go(id, button) {
   }
  if (id === "faucet" && authToken) {
   loadFaucetStatus();
+ }
+ if (id === "watchAds" && authToken) {
+  loadAdsgramRewardStatus();
  }
 }
 
@@ -2684,9 +2718,107 @@ async function copyReferralLink() {
 }
 
 // ============================================
+// ADSGRAM REWARDED ADS — OPTIONAL USER-INITIATED FLOW
+// The browser never credits coins. AdsGram calls the backend Reward URL.
+// ============================================
+async function loadAdsgramRewardStatus() {
+  const status = $("adsgramRewardStatus");
+  const button = $("adsgramWatchButton");
+  if (!authToken) {
+    if (status) status.textContent = "Open this Mini App through Telegram to check your reward status.";
+    if (button) button.disabled = true;
+    return null;
+  }
+  try {
+    const data = await apiRequest("/api/adsgram/status", { cache: "no-store" });
+    const count = Number(data.claimsToday || 0);
+    const limit = Number(data.dailyLimit || ADSGRAM_REWARD_DAILY_LIMIT);
+    const reward = Number(data.rewardCoins || ADSGRAM_REWARD_COINS);
+    const plan = String(data.membership || "Free");
+    window.adsgramCurrentRewardCoins = reward;
+    if ($("adsgramRewardPlanPill")) $("adsgramRewardPlanPill").textContent = `${plan}: ${reward} coins / completed ad`;
+    if ($("adsgramRewardAmount")) $("adsgramRewardAmount").textContent = `${reward} coins`;
+    if ($("adsgramWatchButton")) $("adsgramWatchButton").textContent = `▶ Watch an Ad · Earn ${reward} Coins`;
+    if ($("adsgramClaimsToday")) $("adsgramClaimsToday").textContent = `${count} / ${limit}`;
+    if ($("adsgramWorkerBalance")) $("adsgramWorkerBalance").textContent = formatCoins(data.workerEarnings || 0) + " coins";
+    if (status) status.textContent = data.canWatch
+      ? `Ready. Your ${plan} plan earns ${reward} coins after each completed ad is confirmed by the server.`
+      : `Daily rewarded-ad limit reached (${count}/${limit}). You can still use every other app feature.`;
+    if (button) button.disabled = !data.canWatch || adsgramRewardBusy;
+    const history = $("adsgramRewardHistory");
+    if (history) {
+      const rows = Array.isArray(data.recentRewards) ? data.recentRewards : [];
+      history.innerHTML = rows.length ? rows.map(item => `<div class="proof-box"><div class="row"><strong>+${escapeHTML(item.rewardCoins || 5)} coins</strong><span class="status">CONFIRMED</span></div><p class="fine">${escapeHTML(new Date(item.createdAt).toLocaleString())}</p></div>`).join("") : '<div class="empty">No confirmed AdsGram rewards yet.</div>';
+    }
+    return data;
+  } catch (error) {
+    if (status) status.textContent = error.message || "Could not load AdsGram reward status.";
+    if (button) button.disabled = true;
+    return null;
+  }
+}
+
+async function watchAdsgramReward() {
+  if (adsgramRewardBusy) return;
+  if (!tg || !tg.initData || !authToken) {
+    showMessage("adsgramRewardStatus", "Please open this Mini App from Telegram first.", "error");
+    return;
+  }
+  if (!window.Adsgram || typeof window.Adsgram.init !== "function") {
+    showMessage("adsgramRewardStatus", "AdsGram could not load. Please try again later.", "error");
+    return;
+  }
+  if (!ADSGRAM_REWARD_BLOCK_ID || ADSGRAM_REWARD_BLOCK_ID.includes("REPLACE_WITH")) {
+    showMessage("adsgramRewardStatus", "The AdsGram Reward block ID has not been configured yet. Create a Reward block and add its ID to the app.", "error");
+    return;
+  }
+  const current = await loadAdsgramRewardStatus();
+  if (!current || !current.canWatch) return;
+
+  adsgramRewardBusy = true;
+  const button = $("adsgramWatchButton");
+  if (button) { button.disabled = true; button.textContent = "Loading AdsGram ad..."; }
+  const beforeCount = Number(current.claimsToday || 0);
+  try {
+    if (!adsgramRewardController) {
+      adsgramRewardController = window.Adsgram.init({ blockId: ADSGRAM_REWARD_BLOCK_ID, debug: false });
+    }
+    const result = await adsgramRewardController.show();
+    if (!result || result.done !== true || result.error === true) {
+      throw new Error("The ad was not confirmed as completed. No coins were added.");
+    }
+    const status = $("adsgramRewardStatus");
+    if (status) status.textContent = "Ad completed. Waiting for AdsGram's server confirmation...";
+
+    // The Reward URL callback is server-to-server and may arrive shortly after show() resolves.
+    let credited = false;
+    for (let attempt = 0; attempt < 12; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const updated = await apiRequest("/api/adsgram/status", { cache: "no-store" });
+      if (Number(updated.claimsToday || 0) > beforeCount) { credited = true; break; }
+    }
+    await Promise.allSettled([loadProfile(), loadAdsgramRewardStatus(), loadWalletTransactions()]);
+    window.adsgramLastRewardMessage = credited
+      ? `Success! AdsGram confirmed your completed view and your plan reward was added to your Worker Earnings Wallet.`
+      : "Your ad finished. AdsGram's server confirmation has not arrived yet. Please refresh your reward status shortly; coins are never added before confirmation.";
+    if (status) status.textContent = window.adsgramLastRewardMessage;
+  } catch (error) {
+    const status = $("adsgramRewardStatus");
+    if (status) status.textContent = error?.message || "The ad could not be completed. No coins were added.";
+  } finally {
+    adsgramRewardBusy = false;
+    if (button) { button.textContent = `▶ Watch an Ad · Earn ${Number(window.adsgramCurrentRewardCoins || ADSGRAM_REWARD_COINS)} Coins`; }
+    await loadAdsgramRewardStatus();
+    if (window.adsgramLastRewardMessage && $("adsgramRewardStatus")) {
+      $("adsgramRewardStatus").textContent = window.adsgramLastRewardMessage;
+      window.adsgramLastRewardMessage = "";
+    }
+  }
+}
+
+// ============================================
 // ADSGRAM NON-REWARDED INTERSTITIAL ADS
-// Triggered only after successful task-proof submission,
-// with a five-minute cooldown. No wallet or coin rewards.
+// Kept separate; task submission no longer triggers an automatic ad.
 // ============================================
 
 async function maybeShowAdsgramInterstitial(reason) {
