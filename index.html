@@ -136,13 +136,7 @@ a{color:var(--blue);overflow-wrap:anywhere}
 </style>
 </head>
 <body>
-<div class="auth-gate open" id="authGate"><div class="auth-panel"><h2>🇰🇭 Khmer Earn Marketplace</h2><p class="muted">Sign in with email and password or create a new website account.</p>
-<div class="auth-switch"><button type="button" class="selected" id="loginTab" onclick="showAuthPanel('login')">Log In</button><button type="button" id="registerTab" onclick="showAuthPanel('register')">Create Account</button></div>
-<form id="loginForm" onsubmit="submitWebsiteLogin(event)"><label for="loginEmail">Email address</label><input id="loginEmail" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required maxlength="128" placeholder="Your password"><button type="submit" class="gold" id="loginSubmit">Log In</button><button type="button" class="dark" onclick="showAuthPanel('forgot')">Forgot password?</button></form>
-<form id="registerForm" class="auth-hidden" onsubmit="submitWebsiteRegistration(event)"><label for="registerName">Your name</label><input id="registerName" type="text" autocomplete="name" maxlength="60" placeholder="Your name"><label for="registerEmail">Email address</label><input id="registerEmail" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com"><label for="registerPassword">Create password</label><input id="registerPassword" type="password" autocomplete="new-password" required minlength="10" maxlength="128" placeholder="At least 10 characters, letters and numbers"><button type="submit" class="gold" id="registerSubmit">Create Account</button></form>
-<form id="forgotForm" class="auth-hidden" onsubmit="submitForgotPassword(event)"><label for="forgotEmail">Email address</label><input id="forgotEmail" type="email" autocomplete="email" required placeholder="you@example.com"><button type="submit" class="gold">Send Reset Link</button><button type="button" class="dark" onclick="showAuthPanel('login')">Back to Log In</button></form>
-<form id="resetForm" class="auth-hidden" onsubmit="submitPasswordReset(event)"><label for="resetPassword">New password</label><input id="resetPassword" type="password" autocomplete="new-password" required minlength="10" maxlength="128" placeholder="At least 10 characters, letters and numbers"><button type="submit" class="gold">Update Password</button></form>
-<div class="notice" id="authMessage" role="status">Please log in or create an account to continue.</div><button type="button" class="dark auth-hidden" id="resendVerifyButton" onclick="resendVerification()">Resend Verification Email</button></div></div>
+<div class="auth-gate open" id="authGate"><div class="auth-panel"><h2>🇰🇭 Khmer Earn Marketplace</h2><p class="muted">Secure sign-in with your Telegram account. Open this Mini App from your official Telegram bot to continue.</p><div id="authMessage" class="message" role="status">Checking Telegram authentication...</div><button type="button" class="gold" id="telegramRetry" onclick="authenticateTelegram()">Connect Telegram Account</button><p class="muted" style="font-size:12px;margin-top:12px">No email or password is required. Your Telegram account is verified securely by the backend.</p></div></div><button type="button" class="dark auth-hidden" id="resendVerifyButton" onclick="resendVerification()">Resend Verification Email</button></div></div>
 <header>
 <strong>🇰🇭 Khmer Earn Marketplace</strong>
 <span class="balance">🪙 <span id="coinBalance">0</span></span>
@@ -708,7 +702,7 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <div aria-label="Account avatar" class="profile-avatar" id="profileAvatar">👤</div>
 <div class="profile-identity-details">
 <strong id="profileName">Loading...</strong>
-<span id="profileUsername">Email account</span>
+<span id="profileUsername">Telegram account</span>
 </div>
 </div>
 <div class="feature"><span>Account ID</span><strong id="profileAccountId">Loading...</strong></div>
@@ -717,7 +711,7 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <div class="feature"><span>Authentication</span><strong id="authStatus">Checking...</strong></div>
 </div>
 <button class="dark full" onclick="go('plans')">View Membership Plans</button>
-<button class="dark full" onclick="logoutWebsite()">Log Out</button>
+<button class="dark full" onclick="logoutWebsite()">Reconnect Telegram</button>
 <button class="dark full" onclick="go('invite')">Invite Friends</button>
 </section>
 
@@ -756,8 +750,9 @@ a{color:var(--blue);overflow-wrap:anywhere}
 // ============================================
 
 const API_URL = "https://khmer-quiz-backend.onrender.com"; // Replace if the API host changes.
-const AUTH_TOKEN_KEY = "kem_website_auth_token";
-let authToken = localStorage.getItem(AUTH_TOKEN_KEY) || null;
+const tg = window.Telegram?.WebApp;
+let authToken = null;
+if (tg) { tg.ready(); tg.expand(); }
 let currentUser = null;
 let currentTaskFilter = "all";
 let currentSubmissionFilter = "submitted";
@@ -879,7 +874,7 @@ function getErrorMessage(data, fallback) {
 
 async function apiRequest(path, options = {}) {
   if (!authToken) {
-    throw new Error("Please log in with your email address to continue.");
+    throw new Error("Your Telegram account is not authenticated. Open this app inside Telegram.");
   }
 
   const headers = {
@@ -908,25 +903,69 @@ async function apiRequest(path, options = {}) {
 }
 
 // ============================================
-// WEBSITE EMAIL/PASSWORD AUTHENTICATION
+// TELEGRAM AUTHENTICATION
 // ============================================
-function showAuthPanel(panel){["login","register","forgot","reset"].forEach(n=>$(n+"Form")?.classList.toggle("auth-hidden",n!==panel));$("loginTab")?.classList.toggle("selected",panel==="login");$("registerTab")?.classList.toggle("selected",panel==="register");$("loginTab")?.classList.toggle("auth-hidden",panel==="forgot"||panel==="reset");$("registerTab")?.classList.toggle("auth-hidden",panel==="forgot"||panel==="reset");}
-function showAuthGate(message,type="notice"){$("authGate")?.classList.add("open");if(message)showMessage("authMessage",message,type);}
-function hideAuthGate(){$("authGate")?.classList.remove("open");}
-async function submitWebsiteLogin(event){event.preventDefault();const b=$("loginSubmit");b.disabled=true;b.textContent="Signing in...";try{const r=await fetch(API_URL+"/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("loginEmail").value,password:$("loginPassword").value})});const d=await r.json();if(!r.ok||!d.success){if(d.needsVerification)$("resendVerifyButton")?.classList.remove("auth-hidden");throw new Error(getErrorMessage(d,"Login failed."));}authToken=d.token;localStorage.setItem(AUTH_TOKEN_KEY,authToken);$("authStatus").textContent="Email verified";hideAuthGate();await refreshAll();}catch(e){showMessage("authMessage",e.message,"error");}finally{b.disabled=false;b.textContent="Log In";}}
-async function submitWebsiteRegistration(event){event.preventDefault();const b=$("registerSubmit");b.disabled=true;b.textContent="Creating account...";try{const params=new URLSearchParams(location.search);const r=await fetch(API_URL+"/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({firstName:$("registerName").value,email:$("registerEmail").value,password:$("registerPassword").value,ref:params.get("ref")||""})});const d=await r.json();if(!r.ok||!d.success)throw new Error(getErrorMessage(d,"Registration failed."));showMessage("authMessage",d.message,"success");showAuthPanel("login");$("loginEmail").value=$("registerEmail").value;$("loginPassword").value="";}catch(e){showMessage("authMessage",e.message,"error");}finally{b.disabled=false;b.textContent="Create Account";}}
-async function resendVerification(){try{const email=$("loginEmail").value||$("registerEmail").value;const r=await fetch(API_URL+"/api/auth/resend-verification",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});const d=await r.json();if(!r.ok)throw new Error(getErrorMessage(d,"Could not resend email."));showMessage("authMessage",d.message,"success");}catch(e){showMessage("authMessage",e.message,"error");}}
-async function submitForgotPassword(event){event.preventDefault();try{const r=await fetch(API_URL+"/api/auth/forgot-password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("forgotEmail").value})});const d=await r.json();if(!r.ok)throw new Error(getErrorMessage(d,"Could not request a reset."));showMessage("authMessage",d.message,"success");}catch(e){showMessage("authMessage",e.message,"error");}}
-async function submitPasswordReset(event){event.preventDefault();try{const token=new URLSearchParams(location.search).get("reset");const r=await fetch(API_URL+"/api/auth/reset-password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token,password:$("resetPassword").value})});const d=await r.json();if(!r.ok)throw new Error(getErrorMessage(d,"Could not reset password."));history.replaceState({},"",location.pathname);showAuthPanel("login");showMessage("authMessage",d.message,"success");}catch(e){showMessage("authMessage",e.message,"error");}}
-async function verifyEmailFromLink(){const token=new URLSearchParams(location.search).get("verify");if(!token)return;try{const r=await fetch(API_URL+"/api/auth/verify-email",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token})});const d=await r.json();if(!r.ok)throw new Error(getErrorMessage(d,"Email verification failed."));history.replaceState({},"",location.pathname);showAuthGate(d.message,"success");showAuthPanel("login");}catch(e){showAuthGate(e.message,"error");}}
-async function authenticateWebsite(){const q=new URLSearchParams(location.search);if(q.has("reset")){showAuthGate("Choose a new password for your account.");showAuthPanel("reset");return false;}await verifyEmailFromLink();if(!authToken){showAuthPanel("login");showAuthGate("Please log in or create an account to continue.");$("authStatus").textContent="Not logged in";return false;}try{const r=await fetch(API_URL+"/api/me",{headers:{Authorization:"Bearer "+authToken}});if(!r.ok)throw new Error("Your session expired. Please log in again.");hideAuthGate();$("authStatus").textContent="Logged in";await refreshAll();return true;}catch(e){authToken=null;localStorage.removeItem(AUTH_TOKEN_KEY);showAuthGate(e.message,"error");$("authStatus").textContent="Login required";return false;}}
-function logoutWebsite(){authToken=null;currentUser=null;localStorage.removeItem(AUTH_TOKEN_KEY);showAuthPanel("login");showAuthGate("You have been logged out.","success");$("authStatus").textContent="Logged out";}
+function showAuthGate(message, type="notice") {
+  $("authGate")?.classList.add("open");
+  if (message) showMessage("authMessage", message, type);
+}
+function hideAuthGate() { $("authGate")?.classList.remove("open"); }
+
+async function authenticateTelegram() {
+  const button = $("telegramRetry");
+  if (!tg || !tg.initData) {
+    showAuthGate("Open Khmer Earn Marketplace from your Telegram bot. Browser login is disabled.", "error");
+    $("authStatus").textContent = "Not authenticated";
+    return false;
+  }
+  if (button) { button.disabled = true; button.textContent = "Connecting..."; }
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
+    let response;
+    try {
+      response = await fetch(API_URL + "/api/auth/telegram", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData: tg.initData }),
+        signal: controller.signal
+      });
+    } catch (error) {
+      if (error.name === "AbortError") throw new Error("Telegram authentication timed out. Close and reopen the Mini App.");
+      throw error;
+    } finally { clearTimeout(timeout); }
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.success === false) throw new Error(getErrorMessage(data, "Telegram authentication failed."));
+    authToken = data.token || data.accessToken || data.data?.token;
+    if (!authToken) throw new Error("The backend did not return an authentication token.");
+    $("authStatus").textContent = "Telegram authenticated";
+    hideAuthGate();
+    await refreshAll();
+    return true;
+  } catch (error) {
+    console.error("Telegram authentication error:", error);
+    showAuthGate(error.message, "error");
+    $("authStatus").textContent = "Authentication failed";
+    return false;
+  } finally {
+    if (button) { button.disabled = false; button.textContent = "Connect Telegram Account"; }
+  }
+}
+
+function logoutWebsite() {
+  // Telegram Mini Apps do not have a separate website password session to log out of.
+  // Clear the in-memory token and re-validate Telegram initData instead.
+  authToken = null;
+  currentUser = null;
+  showAuthGate("Reconnecting securely to Telegram...", "notice");
+  authenticateTelegram();
+}
 
 // ============================================
 // LOAD USER PROFILE AND BALANCES
 // ============================================
 
-async function loadProfile(){const data=await apiRequest("/api/me");currentUser=data.user||data.data?.user||data.data||data;const bal=currentUser.workerEarnings??currentUser.availableCoins??currentUser.workerBalance??currentUser.worker_balance??0;const plan=currentUser.planName||currentUser.membership||currentUser.plan||"Free";$("coinBalance").textContent=formatCoins(bal);$("homeCoins").textContent=formatCoins(bal)+" coins";$("walletCoins").textContent=formatCoins(bal);$("homePlan").textContent=String(plan);$("profilePlan").textContent=String(plan);const email=currentUser.email||"Email unavailable";const name=currentUser.firstName||currentUser.first_name||email.split("@")[0]||"Member";$("profileName").textContent=name;$("profileUsername").textContent=email;$("profileAccountId").textContent=currentUser.accountId||"—";$("profileAvatar").textContent=name.trim().charAt(0).toUpperCase()||"👤";}
+async function loadProfile(){const data=await apiRequest("/api/me");currentUser=data.user||data.data?.user||data.data||data;const bal=currentUser.workerEarnings??currentUser.availableCoins??currentUser.workerBalance??currentUser.worker_balance??0;const plan=currentUser.planName||currentUser.membership||currentUser.plan||"Free";$("coinBalance").textContent=formatCoins(bal);$("homeCoins").textContent=formatCoins(bal)+" coins";$("walletCoins").textContent=formatCoins(bal);$("homePlan").textContent=String(plan);$("profilePlan").textContent=String(plan);const name=currentUser.firstName||currentUser.first_name||"Telegram User";$("profileName").textContent=name;$("profileUsername").textContent=currentUser.username?"@"+currentUser.username:"Telegram account";$("profileAccountId").textContent=currentUser.telegramId||currentUser.accountId||"—";$("profileAvatar").textContent=name.trim().charAt(0).toUpperCase()||"👤";}
 
 // ============================================
 // REAL BACKEND FAUCET
@@ -2657,7 +2696,7 @@ async function refreshAll() {
 
 campaignFields();
 
-authenticateWebsite().then(authenticated => { if (!authenticated) $("homeTaskCount").textContent = "Login required"; });
+authenticateTelegram().then(authenticated => { if (!authenticated) $("homeTaskCount").textContent = "Telegram login required"; });
 
 selectGameProvider("Mobile Legends KH", document.querySelector("#gameCatalogGrid .game-catalog-card[data-game=\"Mobile Legends KH\"]"));
 
