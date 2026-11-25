@@ -5,8 +5,9 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
 <meta content="#0b1120" name="theme-color"/>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <title>Khmer Earn Marketplace</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <script async="" defer="" src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoaded&amp;render=explicit"></script>
 <style>
 :root{--bg:#0b1120;--panel:#151f32;--panel2:#202e45;--text:#f5f7ff;--muted:#9ba9c0;--gold:#f6c453;--blue:#61a9ff;--green:#37d69a;--red:#f16b6b;--border:#293953}
@@ -131,13 +132,9 @@ a{color:var(--blue);overflow-wrap:anywhere}
 .shop-cart-total{display:flex;justify-content:space-between;font-weight:900;margin:15px 0;color:#f4c45c}
 .shop-modal-note{font-size:11px;color:#aab9ce;line-height:1.5}.shop-checkout-form{display:grid;gap:10px}.shop-checkout-form label{display:grid;gap:5px;color:#b8c7dc;font-size:12px}.shop-checkout-form input,.shop-checkout-form textarea,.shop-checkout-form select{width:100%;background:#0b1423;color:#eef4ff;border:1px solid #3a4c68;border-radius:9px;padding:11px;font:inherit}.shop-checkout-form .notice{font-size:11px;line-height:1.5;margin:0}
 
-
-.network-ad-slot{min-height:90px;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;margin:12px 0;background:#101a2b;border:1px dashed #526783;border-radius:12px;color:#9ba9c0;font-size:12px;line-height:1.5}
-.auth-gate{position:fixed;inset:0;z-index:10000;background:#0b1120;display:none;align-items:center;justify-content:center;padding:18px;overflow:auto}.auth-gate.open{display:flex}.auth-panel{width:min(100%,430px);background:#151f32;border:1px solid #293953;border-radius:18px;padding:22px;box-shadow:0 20px 60px #0008}.auth-panel h2{margin:0 0 8px}.auth-panel .muted{margin-bottom:16px}.auth-panel button{width:100%;margin:7px 0}.auth-switch{display:flex;gap:8px;margin:14px 0}.auth-switch button{flex:1}.auth-switch button.selected{background:var(--gold);color:#172033}.auth-hidden{display:none!important}
 </style>
 </head>
 <body>
-<div class="auth-gate open" id="authGate"><div class="auth-panel"><h2>🇰🇭 Khmer Earn Marketplace</h2><p class="muted">Secure sign-in with your Telegram account. Open this Mini App from your official Telegram bot to continue.</p><div id="authMessage" class="message" role="status">Checking Telegram authentication...</div><button type="button" class="gold" id="telegramRetry" onclick="authenticateTelegram()">Connect Telegram Account</button><p class="muted" style="font-size:12px;margin-top:12px">No email or password is required. Your Telegram account is verified securely by the backend.</p></div></div><button type="button" class="dark auth-hidden" id="resendVerifyButton" onclick="resendVerification()">Resend Verification Email</button></div></div>
 <header>
 <strong>🇰🇭 Khmer Earn Marketplace</strong>
 <span class="balance">🪙 <span id="coinBalance">0</span></span>
@@ -151,8 +148,6 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <p>Promote your website, app or service to marketplace users.</p>
 <button class="dark" onclick="go('advertise')">Advertise with us</button>
 </div>
-<div class="network-ad-slot" id="adsterraHomeSlot" data-ad-provider="adsterra"><span>Adsterra banner slot — publisher code pending</span></div>
-<div class="network-ad-slot" id="monetagHomeSlot" data-ad-provider="monetag" data-publisher-id="3592351"><span>Monetag banner slot — zone code pending</span></div>
 <h2>Welcome to Khmer Earn Marketplace</h2>
 <div class="grid">
 <div class="stat">Worker balance<strong id="homeCoins">0 coins</strong></div>
@@ -182,8 +177,9 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <button class="dark" onclick="go('faucet')">Open Faucet</button>
 </div>
 <div class="card">
-<div class="row"><h3>📢 Sponsored Ads</h3><span class="pill">Optional</span></div>
-<button class="gold full" onclick="go('watchAds')">View Sponsored Ads</button>
+<div class="row"><h3>🎬 Watch Ads &amp; Earn</h3><span class="pill">Optional</span></div>
+<p class="muted">Choose to watch a rewarded ad and earn coins based on your active membership after AdsGram confirms a completed view. You can use the rest of the app without watching ads.</p>
+<button class="gold full" onclick="go('watchAds')">Open Watch Ads &amp; Earn</button>
 </div>
 </section>
 <!-- TASKS -->
@@ -622,10 +618,27 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <button class="dark full" onclick="go('advertise')">Manage Campaign Budget</button>
 </div>
 </section>
-<!-- WEBSITE AD NETWORKS -->
-<section class="page" id="watchAds"><h2>📢 Sponsored Advertisements</h2><p class="muted">Advertisements from our approved website partners may appear in these spaces. Viewing ads is optional and never required to use marketplace features.</p>
-<div class="card"><h3>Adsterra Advertisement</h3><div class="network-ad-slot" id="adsterraWatchSlot" data-ad-provider="adsterra"><span>Adsterra placement — publisher code pending</span></div></div>
-<div class="card"><h3>Monetag Advertisement</h3><div class="network-ad-slot" id="monetagWatchSlot" data-ad-provider="monetag" data-publisher-id="3592351"><span>Monetag placement — zone code pending</span></div></div><p class="fine">Ad scripts will be activated after the website is added and approved in each ad network account.</p></section>
+<!-- ADSGRAM REWARDED ADS: OPTIONAL, SEPARATE FROM FAUCET -->
+<section class="page" id="watchAds">
+<h2>🎬 Watch Ads &amp; Earn</h2>
+<p class="muted">Rewarded ads are optional. Watching an ad is never required to use tasks, Faucet, Wallet or other app features.</p>
+<div class="card">
+<div class="row"><h3>AdsGram Reward</h3><span class="pill" id="adsgramRewardPlanPill">5 coins / completed ad</span></div>
+<p class="muted">Tap the button only when you want to watch an ad. Coins are added to your Worker Earnings Wallet after AdsGram confirms the completed view with our server.</p>
+<div class="grid">
+<div class="stat">Your plan reward<strong id="adsgramRewardAmount">5 coins</strong></div>
+<div class="stat">Watched today<strong id="adsgramClaimsToday">0 / 20</strong></div>
+<div class="stat">Worker balance<strong id="adsgramWorkerBalance">0 coins</strong></div>
+<div class="stat">Daily limit<strong>20 ads</strong></div>
+</div>
+<div class="notice" id="adsgramRewardStatus" role="status">Checking rewarded-ad availability...</div>
+<button class="gold full" id="adsgramWatchButton" onclick="watchAdsgramReward()" disabled>▶ Watch an Ad · Earn 5 Coins</button>
+<p class="fine">A reward is not issued for an ad that fails to load or is not completed. Do not click advertisements to earn a reward; only viewing the ad to completion is required.</p>
+<button class="dark full" onclick="loadAdsgramRewardStatus()">Refresh Reward Status</button>
+<h3>Recent AdsGram Rewards</h3>
+<div id="adsgramRewardHistory"><div class="empty">Your confirmed AdsGram rewards will appear here.</div></div>
+</div>
+</section>
 <!-- PLANS -->
 <section class="page" id="plans">
 <h2>👑 Membership Plans</h2>
@@ -667,7 +680,7 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <h2>👥 Invite Friends</h2>
 <div class="card">
 <h3>Your Personal Referral Link</h3>
-<p class="muted">Share this link with friends. When a new visitor opens your link and creates an account, they will be connected to your account.</p>
+<p class="muted">Share this link with friends. When a new user opens the Mini App through your link and registers, they will be connected to your account.</p>
 <div class="feature" style="display:block">
 <label class="muted" for="referralLink">Your referral link</label>
 <input id="referralLink" readonly="" style="width:100%;margin-top:8px;box-sizing:border-box" type="text" value="Loading your referral link...">
@@ -689,8 +702,8 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <section class="page" id="profile">
 <h2>Profile &amp; Account Mode</h2>
 <div class="card">
-<h3>One Website Account · Two Roles</h3>
-<p class="muted">Use one email account to complete tasks as a Worker and create campaigns as an Advertiser.</p>
+<h3>One Telegram Account · Two Roles</h3>
+<p class="muted">Use the same Telegram account to complete tasks as a Worker and create campaigns as an Advertiser.</p>
 <div class="tabs">
 <button class="selected" onclick="setRole('worker',this)">Worker Mode</button>
 <button onclick="setRole('advertiser',this)">Advertiser Mode</button>
@@ -700,40 +713,20 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <div class="card">
 <h3>Account Information</h3>
 <div class="profile-identity">
-<div aria-label="Account avatar" class="profile-avatar" id="profileAvatar">👤</div>
+<div aria-label="Telegram profile photo" class="profile-avatar" id="profileAvatar">👤</div>
 <div class="profile-identity-details">
 <strong id="profileName">Loading...</strong>
-<span id="profileUsername">Telegram account</span>
+<span id="profileUsername">Username not set</span>
 </div>
 </div>
-<div class="feature"><span>Account ID</span><strong id="profileAccountId">Loading...</strong></div>
+<div class="feature"><span>Telegram ID</span><strong id="profileTelegramId">Loading...</strong></div>
 <div class="feature"><span>Current plan</span><strong id="profilePlan">Free</strong></div>
 <div class="feature"><span>Account roles</span><strong>Worker + Advertiser</strong></div>
 <div class="feature"><span>Authentication</span><strong id="authStatus">Checking...</strong></div>
 </div>
 <button class="dark full" onclick="go('plans')">View Membership Plans</button>
-<button class="dark full" onclick="logoutWebsite()">Reconnect Telegram</button>
 <button class="dark full" onclick="go('invite')">Invite Friends</button>
 </section>
-
-<!-- OPTIONAL SMARTLINKS -->
-<section class="page" id="smartlinks">
- <h2>🔗 Sponsored SmartLinks</h2>
- <p class="muted">These links are optional. Opening a sponsored link does not earn coins and is never required to use Faucet, Shopping, Phone Top Up, Game Top Up, or other app features.</p>
- <div class="card">
-  <h3>Monetag</h3>
-  <p class="muted">Optional sponsored offer from Monetag.</p>
-  <button class="full" id="monetagSmartLinkBtn" onclick="openSmartLink('monetag')" disabled>Loading link...</button>
-  <div class="fine" id="monetagSmartLinkStatus">Checking link availability...</div>
- </div>
- <div class="card">
-  <h3>Adsterra</h3>
-  <p class="muted">Optional sponsored offer from Adsterra.</p>
-  <button class="full" id="adsterraSmartLinkBtn" onclick="openSmartLink('adsterra')" disabled>Loading link...</button>
-  <div class="fine" id="adsterraSmartLinkStatus">Checking link availability...</div>
- </div>
-</section>
-
 </main>
 <nav>
 <button class="active" onclick="go('home',this)"><span>🏠</span>Home</button>
@@ -742,18 +735,28 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <button onclick="go('faucet',this)"><span>🚰</span>Faucet</button>
 <button onclick="go('advertise',this)"><span>📢</span>Advertise</button>
 <button onclick="go('profile',this)"><span>👤</span>Profile</button>
-<button onclick="go('smartlinks',this)"><span>🔗</span>Links</button>
-
 </nav>
 <script>
 // ============================================
 // CONFIGURATION
 // ============================================
 
-const API_URL = "https://khmer-quiz-backend.onrender.com"; // Replace if the API host changes.
+const API_URL = "https://khmer-quiz-backend.onrender.com";
+const ADSGRAM_INTERSTITIAL_BLOCK_ID = "int-60936";
+// Create a separate Reward-type block in the AdsGram publisher dashboard.
+// Replace this placeholder with that Reward block ID before production.
+const ADSGRAM_REWARD_BLOCK_ID = "REPLACE_WITH_ADSGRAM_REWARD_BLOCK_ID";
+const ADSGRAM_REWARD_COINS = 5;
+const ADSGRAM_REWARD_DAILY_LIMIT = 20;
+let adsgramRewardController = null;
+let adsgramRewardBusy = false;
+const ADSGRAM_INTERSTITIAL_COOLDOWN_MS = 5 * 60 * 1000;
+const ADSGRAM_LAST_SHOWN_KEY = "kem_adsgram_interstitial_last_shown";
 const tg = window.Telegram?.WebApp;
+let adsgramInterstitialController = null;
+let adsgramInterstitialBusy = false;
+
 let authToken = null;
-if (tg) { tg.ready(); tg.expand(); }
 let currentUser = null;
 let currentTaskFilter = "all";
 let currentSubmissionFilter = "submitted";
@@ -772,6 +775,10 @@ let turnstileToken = null;
 let turnstileWidgetId = null;
 const TURNSTILE_SITE_KEY = "0x4AAAAAAGHRHCnCICOPF_YC";
 
+if (tg) {
+  tg.ready();
+  tg.expand();
+}
 
 // ============================================
 // CLOUDFLARE TURNSTILE CAPTCHA
@@ -906,143 +913,171 @@ async function apiRequest(path, options = {}) {
 // ============================================
 // TELEGRAM AUTHENTICATION
 // ============================================
-function showAuthGate(message, type="notice") {
-  $("authGate")?.classList.add("open");
-  if (message) showMessage("authMessage", message, type);
-}
-function hideAuthGate() { $("authGate")?.classList.remove("open"); }
-
-function connectTelegramAccount() {
-  const botUrl = "https://t.me/quizkhmerbot";
-
-  // Inside Telegram, authenticate with Telegram's signed Mini App initData.
-  if (window.Telegram?.WebApp?.initData) {
-    return authenticateTelegram();
-  }
-
-  // Outside Telegram, navigate in this tab to avoid popup blockers.
-  showAuthGate(
-    "Opening @quizkhmerbot. Tap Start, then open Khmer Earn Marketplace using the bot's Mini App button.",
-    "notice"
-  );
-  try {
-    if (window.Telegram?.WebApp?.openTelegramLink) {
-      window.Telegram.WebApp.openTelegramLink(botUrl);
-    } else {
-      window.location.assign(botUrl);
-    }
-  } catch (error) {
-    console.error("Could not open Telegram bot:", error);
-    showAuthGate(
-      "Could not open Telegram automatically. Open https://t.me/quizkhmerbot and tap Start.",
-      "error"
-    );
-  }
-  return false;
-}
 
 async function authenticateTelegram() {
-  const button = $("telegramRetry");
+
   if (!tg || !tg.initData) {
-    showAuthGate("Open Khmer Earn Marketplace from your Telegram bot. Browser login is disabled.", "error");
+    showMessage(
+      "connectionNotice",
+      "Open this Mini App from your Telegram bot. Browser preview does not provide Telegram authentication.",
+      "error"
+    );
     $("authStatus").textContent = "Not authenticated";
     return false;
   }
-  if (button) { button.disabled = true; button.textContent = "Connecting..."; }
+
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
+    const authTimeout = setTimeout(() => controller.abort(), 20000);
     let response;
     try {
       response = await fetch(API_URL + "/api/auth/telegram", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: tg.initData }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({initData: tg.initData}),
         signal: controller.signal
       });
     } catch (error) {
-      if (error.name === "AbortError") throw new Error("Telegram authentication timed out. Close and reopen the Mini App.");
+      if (error.name === "AbortError") {
+        throw new Error("Telegram authentication timed out. Please close and reopen the Mini App.");
+      }
       throw error;
-    } finally { clearTimeout(timeout); }
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok || data.success === false) throw new Error(getErrorMessage(data, "Telegram authentication failed."));
+    } finally {
+      clearTimeout(authTimeout);
+    }
+
+    const data = await response.json();
+
+    if (!response.ok || data.success === false) {
+      throw new Error(getErrorMessage(data, "Telegram authentication failed."));
+    }
+
     authToken = data.token || data.accessToken || data.data?.token;
-    if (!authToken) throw new Error("The backend did not return an authentication token.");
-    $("authStatus").textContent = "Telegram authenticated";
-    hideAuthGate();
+
+    if (!authToken) {
+      throw new Error("The backend did not return an authentication token.");
+    }
+
+    $("authStatus").textContent = "Authenticated";
+
     await refreshAll();
     return true;
+
   } catch (error) {
-    console.error("Telegram authentication error:", error);
-    showAuthGate(error.message, "error");
+    console.error("Authentication error:", error);
+    showMessage("connectionNotice", error.message, "error");
     $("authStatus").textContent = "Authentication failed";
     return false;
-  } finally {
-    if (button) { button.disabled = false; button.textContent = "Connect Telegram Account"; }
   }
-}
-
-function logoutWebsite() {
-  // Telegram Mini Apps do not have a separate website password session to log out of.
-  // Clear the in-memory token and re-validate Telegram initData instead.
-  authToken = null;
-  currentUser = null;
-  showAuthGate("Reconnecting securely to Telegram...", "notice");
-  authenticateTelegram();
 }
 
 // ============================================
 // LOAD USER PROFILE AND BALANCES
 // ============================================
 
-let profilePhotoObjectUrl = null;
-function showProfileInitial(name) {
-  const avatar = $("profileAvatar");
-  if (!avatar) return;
-  avatar.replaceChildren();
-  avatar.textContent = String(name || "?").trim().charAt(0).toUpperCase() || "👤";
-}
-async function loadProfilePhoto(name) {
-  const avatar = $("profileAvatar");
-  if (!avatar || !authToken) return;
-  showProfileInitial(name);
-  try {
-    const response = await fetch(API_URL + "/api/me/photo", {
-      method: "GET",
-      headers: { "Authorization": "Bearer " + authToken }
-    });
-    if (!response.ok) return; // No Telegram photo is a normal case; keep initials.
-    const blob = await response.blob();
-    if (!blob.type.startsWith("image/")) return;
-    const nextUrl = URL.createObjectURL(blob);
-    if (profilePhotoObjectUrl) URL.revokeObjectURL(profilePhotoObjectUrl);
-    profilePhotoObjectUrl = nextUrl;
-    const img = document.createElement("img");
-    img.alt = "Telegram profile photo";
-    img.src = nextUrl;
-    img.onerror = () => showProfileInitial(name);
-    avatar.replaceChildren(img);
-  } catch (error) {
-    console.warn("Telegram profile photo is unavailable:", error);
-  }
-}
 async function loadProfile() {
   const data = await apiRequest("/api/me");
   currentUser = data.user || data.data?.user || data.data || data;
-  const bal = currentUser.workerEarnings ?? currentUser.availableCoins ?? currentUser.workerBalance ?? currentUser.worker_balance ?? 0;
-  const plan = currentUser.planName || currentUser.membership || currentUser.plan || "Free";
-  $("coinBalance").textContent = formatCoins(bal);
-  $("homeCoins").textContent = formatCoins(bal) + " coins";
-  $("walletCoins").textContent = formatCoins(bal);
+
+  // Use marketplace worker earnings fields only.
+  // Do not use the old legacy users.coins field.
+  const workerBalance =
+    currentUser.workerEarnings ??
+    currentUser.availableCoins ??
+    currentUser.workerBalance ??
+    currentUser.worker_balance ??
+    0;
+
+  const plan =
+    currentUser.planName ||
+    currentUser.membership ||
+    currentUser.plan ||
+    "Free";
+
+  $("coinBalance").textContent = formatCoins(workerBalance);
+  $("homeCoins").textContent = formatCoins(workerBalance) + " coins";
+  $("walletCoins").textContent = formatCoins(workerBalance);
   $("homePlan").textContent = String(plan);
   $("profilePlan").textContent = String(plan);
-  const name = currentUser.firstName || currentUser.first_name || "Telegram User";
-  $("profileName").textContent = name;
-  $("profileUsername").textContent = currentUser.username ? "@" + currentUser.username : "Telegram account";
-  $("profileAccountId").textContent = currentUser.telegramId || currentUser.accountId || "—";
-  await loadProfilePhoto(name);
-}
 
+  // Telegram may provide optional profile fields through initDataUnsafe.user.
+  // The profile photo is optional in Telegram, so use initials when absent.
+  const telegramUser = tg?.initDataUnsafe?.user || {};
+  const firstName =
+    telegramUser.first_name ||
+    currentUser.firstName ||
+    currentUser.first_name ||
+    currentUser.username ||
+    "Telegram User";
+  const lastName = telegramUser.last_name || currentUser.lastName || currentUser.last_name || "";
+  const displayName = [firstName, lastName].filter(Boolean).join(" ");
+
+  $("profileName").textContent = displayName;
+
+  const username = telegramUser.username || currentUser.username || "";
+  $("profileUsername").textContent = username ? "@" + username : "Username not set";
+
+  const telegramId = currentUser.telegramId || currentUser.telegram_id || telegramUser.id || "";
+  $("profileTelegramId").textContent = telegramId ? String(telegramId) : "Unavailable";
+
+  const avatar = $("profileAvatar");
+  const initials = [firstName, lastName]
+    .filter(Boolean)
+    .map(part => part.trim().charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "👤";
+
+  // Release the previous image URL if the profile is refreshed.
+  if (avatar.dataset.photoObjectUrl) {
+    URL.revokeObjectURL(avatar.dataset.photoObjectUrl);
+    delete avatar.dataset.photoObjectUrl;
+  }
+  avatar.replaceChildren();
+  avatar.textContent = initials;
+
+  // Telegram does not reliably include photo_url in initDataUnsafe.user.
+  // Fetch the image from our authenticated backend endpoint instead.
+  try {
+    const photoResponse = await fetch(API_URL + "/api/me/photo", {
+      method: "GET",
+      headers: { "Authorization": "Bearer " + authToken }
+    });
+
+    if (!photoResponse.ok) {
+      // A user may not have a Telegram profile photo; initials are the fallback.
+      console.info("Telegram profile photo unavailable:", photoResponse.status);
+      return;
+    }
+
+    const contentType = photoResponse.headers.get("content-type") || "";
+    if (!contentType.toLowerCase().startsWith("image/")) {
+      console.warn("Profile photo endpoint did not return an image.");
+      return;
+    }
+
+    const photoBlob = await photoResponse.blob();
+    if (!photoBlob.size) return;
+
+    const photoObjectUrl = URL.createObjectURL(photoBlob);
+    const image = document.createElement("img");
+    image.alt = "Telegram profile photo";
+    image.decoding = "async";
+    image.onload = () => {
+      avatar.dataset.photoObjectUrl = photoObjectUrl;
+      avatar.replaceChildren(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(photoObjectUrl);
+      avatar.textContent = initials;
+    };
+    image.src = photoObjectUrl;
+  } catch (photoError) {
+    // Profile details should still load even if the photo service is unavailable.
+    console.warn("Could not load Telegram profile photo:", photoError);
+    avatar.textContent = initials;
+  }
+}
 // ============================================
 // REAL BACKEND FAUCET
 // ============================================
@@ -1185,7 +1220,7 @@ async function loadFaucetStatus() {
   if (!authToken) {
     showMessage(
       "faucetStatus",
-      "Please log in to continue.",
+      "Please open the app through Telegram and authenticate first.",
       "error"
     );
     return;
@@ -1227,7 +1262,7 @@ async function claimFaucet() {
   if (!authToken) {
     showMessage(
       "faucetMessage",
-      "Please log in to continue.",
+      "Please authenticate through Telegram first.",
       "error"
     );
     return;
@@ -1559,7 +1594,7 @@ async function submitTaskProof(claimId, verification) {
         alert("Please upload a JPG, PNG or WEBP image.");
         return;
       }
-      if (!authToken) throw new Error("Please log in to continue.");
+      if (!authToken) throw new Error("Open this app inside Telegram to authenticate.");
       const formData = new FormData();
       formData.append("screenshot", file);
       const response = await fetch(API_URL + "/api/tasks/" + encodeURIComponent(claimId) + "/submit", {
@@ -1950,6 +1985,8 @@ function renderSubmissions() {
 
     const worker = item.workerUsername ||
       item.worker_username ||
+      item.workerTelegramId ||
+      item.worker_telegram_id ||
       "Worker";
 
     const reason = item.rejectionReason ||
@@ -2034,38 +2071,10 @@ async function reviewSubmission(id, action) {
 }
 
 // ============================================
-
-// OPTIONAL SMARTLINKS — user-initiated only
-const smartLinkUrls = { monetag: "", adsterra: "" };
-async function loadSmartLinks() {
- const ids = { monetag: ["monetagSmartLinkBtn", "monetagSmartLinkStatus"], adsterra: ["adsterraSmartLinkBtn", "adsterraSmartLinkStatus"] };
- try {
-  const response = await fetch(API_URL + "/api/ads/config", { headers: { Accept: "application/json" }, cache: "no-store" });
-  if (!response.ok) throw new Error("Sponsored links are unavailable right now.");
-  const data = await response.json();
-  for (const key of Object.keys(ids)) {
-   const raw = String(data[key] || "").trim();
-   let safe = ""; try { const u = new URL(raw); if (u.protocol === "https:") safe = u.toString(); } catch {}
-   smartLinkUrls[key] = safe;
-   const button = $(ids[key][0]), status = $(ids[key][1]);
-   if (button) { button.disabled = !safe; button.textContent = safe ? "Open " + (key === "monetag" ? "Monetag" : "Adsterra") : "Link not configured"; }
-   if (status) status.textContent = safe ? "Optional sponsored link available." : "No link configured yet.";
-  }
- } catch (error) {
-  for (const key of Object.keys(ids)) { const b=$(ids[key][0]), s=$(ids[key][1]); if(b){b.disabled=true;b.textContent="Unavailable";} if(s)s.textContent=error.message||"Could not load sponsored link."; }
- }
-}
-function openSmartLink(provider) {
- const url = smartLinkUrls[provider]; if (!url || !/^https:\/\//i.test(url)) return;
- if (window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.openLink === "function") window.Telegram.WebApp.openLink(url);
- else window.open(url, "_blank", "noopener,noreferrer");
-}
-
 // NAVIGATION AND TABS
 // ============================================
 
 function go(id, button) {
-  if (id === "smartlinks") loadSmartLinks();
   document.querySelectorAll(".page").forEach(page => {
     page.classList.remove("active");
   });
@@ -2107,6 +2116,9 @@ function go(id, button) {
   }
  if (id === "faucet" && authToken) {
   loadFaucetStatus();
+ }
+ if (id === "watchAds" && authToken) {
+  loadAdsgramRewardStatus();
  }
 }
 
@@ -2734,10 +2746,152 @@ async function copyReferralLink() {
     }
     const button = $("copyReferralButton");
     if (button) button.textContent = "✓ Link Copied";
+    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
   } catch (error) {
     field.focus();
     field.select();
     showMessage("connectionNotice", "Please copy the selected referral link manually.", "notice");
+  }
+}
+
+// ============================================
+// ADSGRAM REWARDED ADS — OPTIONAL USER-INITIATED FLOW
+// The browser never credits coins. AdsGram calls the backend Reward URL.
+// ============================================
+async function loadAdsgramRewardStatus() {
+  const status = $("adsgramRewardStatus");
+  const button = $("adsgramWatchButton");
+  if (!authToken) {
+    if (status) status.textContent = "Open this Mini App through Telegram to check your reward status.";
+    if (button) button.disabled = true;
+    return null;
+  }
+  try {
+    const data = await apiRequest("/api/adsgram/status", { cache: "no-store" });
+    const count = Number(data.claimsToday || 0);
+    const limit = Number(data.dailyLimit || ADSGRAM_REWARD_DAILY_LIMIT);
+    const reward = Number(data.rewardCoins || ADSGRAM_REWARD_COINS);
+    const plan = String(data.membership || "Free");
+    window.adsgramCurrentRewardCoins = reward;
+    if ($("adsgramRewardPlanPill")) $("adsgramRewardPlanPill").textContent = `${plan}: ${reward} coins / completed ad`;
+    if ($("adsgramRewardAmount")) $("adsgramRewardAmount").textContent = `${reward} coins`;
+    if ($("adsgramWatchButton")) $("adsgramWatchButton").textContent = `▶ Watch an Ad · Earn ${reward} Coins`;
+    if ($("adsgramClaimsToday")) $("adsgramClaimsToday").textContent = `${count} / ${limit}`;
+    if ($("adsgramWorkerBalance")) $("adsgramWorkerBalance").textContent = formatCoins(data.workerEarnings || 0) + " coins";
+    if (status) status.textContent = data.canWatch
+      ? `Ready. Your ${plan} plan earns ${reward} coins after each completed ad is confirmed by the server.`
+      : `Daily rewarded-ad limit reached (${count}/${limit}). You can still use every other app feature.`;
+    if (button) button.disabled = !data.canWatch || adsgramRewardBusy;
+    const history = $("adsgramRewardHistory");
+    if (history) {
+      const rows = Array.isArray(data.recentRewards) ? data.recentRewards : [];
+      history.innerHTML = rows.length ? rows.map(item => `<div class="proof-box"><div class="row"><strong>+${escapeHTML(item.rewardCoins || 5)} coins</strong><span class="status">CONFIRMED</span></div><p class="fine">${escapeHTML(new Date(item.createdAt).toLocaleString())}</p></div>`).join("") : '<div class="empty">No confirmed AdsGram rewards yet.</div>';
+    }
+    return data;
+  } catch (error) {
+    if (status) status.textContent = error.message || "Could not load AdsGram reward status.";
+    if (button) button.disabled = true;
+    return null;
+  }
+}
+
+async function watchAdsgramReward() {
+  if (adsgramRewardBusy) return;
+  if (!tg || !tg.initData || !authToken) {
+    showMessage("adsgramRewardStatus", "Please open this Mini App from Telegram first.", "error");
+    return;
+  }
+  if (!window.Adsgram || typeof window.Adsgram.init !== "function") {
+    showMessage("adsgramRewardStatus", "AdsGram could not load. Please try again later.", "error");
+    return;
+  }
+  if (!ADSGRAM_REWARD_BLOCK_ID || ADSGRAM_REWARD_BLOCK_ID.includes("REPLACE_WITH")) {
+    showMessage("adsgramRewardStatus", "The AdsGram Reward block ID has not been configured yet. Create a Reward block and add its ID to the app.", "error");
+    return;
+  }
+  const current = await loadAdsgramRewardStatus();
+  if (!current || !current.canWatch) return;
+
+  adsgramRewardBusy = true;
+  const button = $("adsgramWatchButton");
+  if (button) { button.disabled = true; button.textContent = "Loading AdsGram ad..."; }
+  const beforeCount = Number(current.claimsToday || 0);
+  try {
+    if (!adsgramRewardController) {
+      adsgramRewardController = window.Adsgram.init({ blockId: ADSGRAM_REWARD_BLOCK_ID, debug: false });
+    }
+    const result = await adsgramRewardController.show();
+    if (!result || result.done !== true || result.error === true) {
+      throw new Error("The ad was not confirmed as completed. No coins were added.");
+    }
+    const status = $("adsgramRewardStatus");
+    if (status) status.textContent = "Ad completed. Waiting for AdsGram's server confirmation...";
+
+    // The Reward URL callback is server-to-server and may arrive shortly after show() resolves.
+    let credited = false;
+    for (let attempt = 0; attempt < 12; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const updated = await apiRequest("/api/adsgram/status", { cache: "no-store" });
+      if (Number(updated.claimsToday || 0) > beforeCount) { credited = true; break; }
+    }
+    await Promise.allSettled([loadProfile(), loadAdsgramRewardStatus(), loadWalletTransactions()]);
+    window.adsgramLastRewardMessage = credited
+      ? `Success! AdsGram confirmed your completed view and your plan reward was added to your Worker Earnings Wallet.`
+      : "Your ad finished. AdsGram's server confirmation has not arrived yet. Please refresh your reward status shortly; coins are never added before confirmation.";
+    if (status) status.textContent = window.adsgramLastRewardMessage;
+  } catch (error) {
+    const status = $("adsgramRewardStatus");
+    if (status) status.textContent = error?.message || "The ad could not be completed. No coins were added.";
+  } finally {
+    adsgramRewardBusy = false;
+    if (button) { button.textContent = `▶ Watch an Ad · Earn ${Number(window.adsgramCurrentRewardCoins || ADSGRAM_REWARD_COINS)} Coins`; }
+    await loadAdsgramRewardStatus();
+    if (window.adsgramLastRewardMessage && $("adsgramRewardStatus")) {
+      $("adsgramRewardStatus").textContent = window.adsgramLastRewardMessage;
+      window.adsgramLastRewardMessage = "";
+    }
+  }
+}
+
+// ============================================
+// ADSGRAM NON-REWARDED INTERSTITIAL ADS
+// Kept separate; task submission no longer triggers an automatic ad.
+// ============================================
+
+async function maybeShowAdsgramInterstitial(reason) {
+  if (adsgramInterstitialBusy) return false;
+  if (!tg || !tg.initData) return false;
+  if (!window.Adsgram || typeof window.Adsgram.init !== "function") {
+    console.warn("AdsGram SDK is not available; continuing without an ad.");
+    return false;
+  }
+
+  let lastShown = 0;
+  try {
+    lastShown = Number(localStorage.getItem(ADSGRAM_LAST_SHOWN_KEY) || 0);
+  } catch (_) {}
+  if (Date.now() - lastShown < ADSGRAM_INTERSTITIAL_COOLDOWN_MS) return false;
+
+  adsgramInterstitialBusy = true;
+  // Record the attempt before showing, so repeated submissions do not
+  // trigger repeated requests when AdsGram has no available ad.
+  try { localStorage.setItem(ADSGRAM_LAST_SHOWN_KEY, String(Date.now())); } catch (_) {}
+
+  try {
+    if (!adsgramInterstitialController) {
+      adsgramInterstitialController = window.Adsgram.init({
+        blockId: ADSGRAM_INTERSTITIAL_BLOCK_ID,
+        debug: false
+      });
+    }
+    await adsgramInterstitialController.show();
+    return true;
+  } catch (error) {
+    // No ad or playback error must never interrupt the user's task flow.
+    console.warn("AdsGram interstitial was not shown:", error);
+    return false;
+  } finally {
+    adsgramInterstitialBusy = false;
   }
 }
 
@@ -2772,11 +2926,13 @@ async function refreshAll() {
 
 campaignFields();
 
-authenticateTelegram().then(authenticated => { if (!authenticated) $("homeTaskCount").textContent = "Telegram login required"; });
+authenticateTelegram().then(authenticated => {
+  if (!authenticated) {
+    $("homeTaskCount").textContent = "Login required";
+  }
+});
 
 selectGameProvider("Mobile Legends KH", document.querySelector("#gameCatalogGrid .game-catalog-card[data-game=\"Mobile Legends KH\"]"));
-
-loadSmartLinks(); // public SmartLink config
 </script>
 </body>
 </html>
