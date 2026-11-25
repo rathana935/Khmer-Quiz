@@ -136,7 +136,7 @@ a{color:var(--blue);overflow-wrap:anywhere}
 </style>
 </head>
 <body>
-<div class="auth-gate open" id="authGate"><div class="auth-panel"><h2>🇰🇭 Khmer Earn Marketplace</h2><p class="muted">Secure sign-in with your Telegram account. Open this Mini App from your official Telegram bot to continue.</p><div id="authMessage" class="message" role="status">Checking Telegram authentication...</div><button type="button" class="gold" id="telegramRetry" onclick="authenticateTelegram()">Connect Telegram Account</button><p class="muted" style="font-size:12px;margin-top:12px">No email or password is required. Your Telegram account is verified securely by the backend.</p></div></div><button type="button" class="dark auth-hidden" id="resendVerifyButton" onclick="resendVerification()">Resend Verification Email</button></div></div>
+<div class="auth-gate open" id="authGate"><div class="auth-panel"><h2>🇰🇭 Khmer Earn Marketplace</h2><p class="muted">Secure sign-in with your Telegram account. Open this Mini App from your official Telegram bot to continue.</p><div id="authMessage" class="message" role="status">Checking Telegram authentication...</div><button type="button" class="gold" id="telegramRetry" onclick="connectTelegramAccount()">Connect Telegram Account</button><p class="muted" style="font-size:12px;margin-top:12px">No email or password is required. Your Telegram account is verified securely by the backend.</p></div></div><button type="button" class="dark auth-hidden" id="resendVerifyButton" onclick="resendVerification()">Resend Verification Email</button></div></div>
 <header>
 <strong>🇰🇭 Khmer Earn Marketplace</strong>
 <span class="balance">🪙 <span id="coinBalance">0</span></span>
@@ -910,6 +910,21 @@ function showAuthGate(message, type="notice") {
   if (message) showMessage("authMessage", message, type);
 }
 function hideAuthGate() { $("authGate")?.classList.remove("open"); }
+
+function connectTelegramAccount() {
+  // In Telegram, authenticate using the signed Mini App initData.
+  if (tg && tg.initData) return authenticateTelegram();
+
+  // In a normal browser, send the user to the official Telegram bot.
+  const botUrl = "https://t.me/quizkhmerbot";
+  showAuthGate("Opening @quizkhmerbot. Start the bot and open Khmer Earn Marketplace from its Mini App button.", "notice");
+  if (tg && typeof tg.openTelegramLink === "function") {
+    tg.openTelegramLink(botUrl);
+  } else {
+    window.open(botUrl, "_blank", "noopener,noreferrer");
+  }
+  return false;
+}
 
 async function authenticateTelegram() {
   const button = $("telegramRetry");
