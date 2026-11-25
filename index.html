@@ -133,74 +133,20 @@ a{color:var(--blue);overflow-wrap:anywhere}
 .shop-modal-note{font-size:11px;color:#aab9ce;line-height:1.5}.shop-checkout-form{display:grid;gap:10px}.shop-checkout-form label{display:grid;gap:5px;color:#b8c7dc;font-size:12px}.shop-checkout-form input,.shop-checkout-form textarea,.shop-checkout-form select{width:100%;background:#0b1423;color:#eef4ff;border:1px solid #3a4c68;border-radius:9px;padding:11px;font:inherit}.shop-checkout-form .notice{font-size:11px;line-height:1.5;margin:0}
 
 
-
-.home-sponsored-card{background:linear-gradient(145deg,#172943 0%,#242447 58%,#30264c 100%);border:1px solid #465b7d;border-radius:12px;padding:8px 10px;margin:7px 0 10px;box-shadow:0 5px 14px rgba(0,0,0,.18);overflow:hidden}
-.home-sponsored-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
-.home-sponsored-heading small{display:block;color:#b7c9e7;font-size:9px;font-weight:800;letter-spacing:.8px;margin-bottom:2px}
-.home-sponsored-heading strong{display:block;color:#f4f7ff;font-size:13px;line-height:1.2}
-.home-ad-label{font-size:9px;font-weight:900;letter-spacing:.6px;color:#c6d5ef;border:1px solid #647b9f;border-radius:5px;padding:3px 6px}
-.home-ad-slot{width:100%;min-height:55px;max-height:70px;display:flex;align-items:center;justify-content:center;background:#0b1423;border:1px dashed #536987;border-radius:8px;overflow:hidden;text-align:center}
-.home-ad-slot>iframe,.home-ad-slot>img{max-width:100%;max-height:70px;border:0}
-.home-ad-placeholder{min-height:55px;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:5px;color:#aebed6}
-.home-ad-placeholder-icon{font-size:18px;line-height:1;color:#8ea9dc}
-.home-ad-placeholder strong{font-size:11px;color:#e8efff}
-.home-ad-placeholder span:last-child{font-size:10px}
-.home-sponsored-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;color:#b8c7dc;font-size:10px}
-.home-sponsored-footer button{margin:0;padding:6px 9px;font-size:10px;white-space:nowrap}
-
+.home-sponsored-card{background:linear-gradient(145deg,#172943 0%,#242447 58%,#30264c 100%);border:1px solid #465b7d;border-radius:16px;padding:14px;margin:12px 0 18px;box-shadow:0 10px 26px rgba(0,0,0,.22);overflow:hidden}
+.home-sponsored-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.home-sponsored-heading small{display:block;color:#b7c9e7;font-size:10px;font-weight:800;letter-spacing:1.1px;margin-bottom:4px}
+.home-sponsored-heading strong{display:block;color:#f4f7ff;font-size:16px;line-height:1.2}
+.home-ad-label{font-size:10px;font-weight:900;letter-spacing:.8px;color:#c6d5ef;border:1px solid #647b9f;border-radius:6px;padding:4px 7px}
+.home-ad-slot{width:100%;min-height:112px;display:flex;align-items:center;justify-content:center;background:#0b1423;border:1px dashed #536987;border-radius:11px;overflow:hidden;text-align:center}
+.home-ad-slot>iframe,.home-ad-slot>img{max-width:100%;border:0}
+.home-ad-placeholder{min-height:112px;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:14px;color:#aebed6}
+.home-ad-placeholder-icon{font-size:24px;line-height:1;color:#8ea9dc}
+.home-ad-placeholder strong{font-size:13px;color:#e8efff}
+.home-ad-placeholder span:last-child{font-size:11px}
+.home-sponsored-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px;color:#b8c7dc;font-size:11px}
+.home-sponsored-footer button{margin:0;padding:9px 12px;font-size:11px;white-space:nowrap}
 @media(max-width:380px){.home-sponsored-footer{align-items:flex-start;flex-direction:column}.home-sponsored-footer button{width:100%}}
-
-
-/* HOME AD CARD - COMPACT SIZE */
-#home .home-sponsored-card {
-  display: block !important;
-  position: relative !important;
-  width: 100% !important;
-  height: auto !important;
-  min-height: unset !important;
-  max-height: none !important;
-  padding: 8px 10px !important;
-  margin: 6px 0 10px !important;
-  box-sizing: border-box !important;
-  flex: 0 0 auto !important;
-  align-self: auto !important;
-}
-
-#home .home-sponsored-heading {
-  height: auto !important;
-  margin: 0 0 5px !important;
-}
-
-#home .home-sponsored-heading strong {
-  font-size: 13px !important;
-}
-
-#home .home-ad-slot {
-  display: flex !important;
-  width: 100% !important;
-  height: 48px !important;
-  min-height: 48px !important;
-  max-height: 48px !important;
-  flex: 0 0 48px !important;
-  overflow: hidden !important;
-}
-
-#home .home-ad-placeholder {
-  height: 48px !important;
-  min-height: 48px !important;
-  padding: 3px !important;
-}
-
-#home .home-sponsored-footer {
-  height: auto !important;
-  margin-top: 5px !important;
-}
-
-#home .home-sponsored-footer button {
-  width: auto !important;
-  padding: 5px 9px !important;
-}
-
 
 </style>
 </head>
@@ -210,113 +156,71 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <span class="balance">🪙 <span id="coinBalance">0</span></span>
 </header>
 <main>
-
 <!-- HOME -->
 <section class="page active" id="home">
-
-  <!-- HOME SPONSORED ADVERTISEMENT -->
-  <div class="home-sponsored-card" aria-label="Home sponsored advertisement">
-
-    <div class="home-sponsored-heading">
-      <div>
-        <small>SPONSORED · HOME</small>
-        <strong>Advertisement</strong>
-      </div>
-      <span class="home-ad-label">AD</span>
+<div class="home-sponsored-card" aria-label="Home sponsored advertisement">
+  <div class="home-sponsored-heading">
+    <div>
+      <small>SPONSORED · HOME</small>
+      <strong>Advertisement</strong>
     </div>
+    <span class="home-ad-label">AD</span>
+  </div>
 
-    <div class="home-ad-slot" id="homeAdSlot" aria-label="Advertisement banner">
-      <div class="home-ad-placeholder">
-        <span class="home-ad-placeholder-icon">▧</span>
-        <strong>Your Advertisement Here</strong>
-        <span>Sponsored by Monetag</span>
-      </div>
-    </div>
-
-    <!-- Monetag SDK -->
-    <script
-      src="//libtl.com/sdk.js"
-      data-zone="12341874"
-      data-sdk="show_12341874">
-    </script>
-
-    <div class="home-sponsored-footer">
-      <span>Interested in advertising?</span>
-      <button class="dark" type="button" onclick="go('advertise')">
-        Advertise with us
+  <div class="home-ad-slot" id="homeAdSlot" aria-label="Monetag advertisement">
+    <div class="home-ad-placeholder">
+      <span class="home-ad-placeholder-icon">▧</span>
+      <strong>Your Advertisement Here</strong>
+      <span>Sponsored by Monetag</span>
+      <button class="dark" type="button"
+        onclick="if (typeof window.show_12341874 === 'function') { window.show_12341874(); } else { alert('Advertisement is not ready. Please try again later.'); }">
+        View Advertisement
       </button>
     </div>
-
-  </div>
-  <!-- END HOME SPONSORED ADVERTISEMENT -->
-
-  <h2>Welcome to Khmer Earn Marketplace</h2>
-
-  <div class="grid">
-    <div class="stat">
-      Worker balance
-      <strong id="homeCoins">0 coins</strong>
-    </div>
-
-    <div class="stat">
-      Membership
-      <strong id="homePlan">Free</strong>
-    </div>
-
-    <div class="stat">
-      Available tasks
-      <strong id="homeTaskCount">Loading...</strong>
-    </div>
-
-    <div class="stat">
-      Account mode
-      <strong>Worker + Advertiser</strong>
-    </div>
   </div>
 
-  <div class="card">
-    <div class="row">
-      <h3>Earn by completing tasks</h3>
-      <span class="pill">Worker</span>
-    </div>
-    <p class="muted">
-      Choose an available task, follow its instructions and submit valid completion. Rewards are credited only after approval.
-    </p>
-    <button class="full" onclick="go('tasks')">Browse Available Tasks</button>
-  </div>
+  <!-- Monetag SDK: keep this script only once in the entire page. -->
+  <script src="https://libtl.com/sdk.js" data-zone="12341874" data-sdk="show_12341874"></script>
 
-  <div class="card">
-    <div class="row">
-      <h3>Promote your business</h3>
-      <span class="pill">Advertiser</span>
-    </div>
-    <p class="muted">
-      Create PTC, video, shortlink or micro-job campaigns and track their progress.
-    </p>
-    <button class="full gold" onclick="go('advertise')">Create an Advertising Campaign</button>
+  <div class="home-sponsored-footer">
+    <span>Interested in advertising?</span>
+    <button class="dark" type="button" onclick="go('advertise')">Advertise with us</button>
   </div>
-
-  <div class="card">
-    <h3>🚰 Faucet</h3>
-    <p class="muted">
-      Faucet rewards are separate from marketplace task earnings and must be verified by the backend.
-    </p>
-    <button class="dark" onclick="go('faucet')">Open Faucet</button>
-  </div>
-
-  <div class="card">
-    <div class="row">
-      <h3>🎬 Watch Ads &amp; Earn</h3>
-      <span class="pill">Optional</span>
-    </div>
-    <p class="muted">
-      Choose to watch a rewarded ad and earn coins based on your active membership after AdsGram confirms a completed view. You can use the rest of the app without watching ads.
-    </p>
-    <button class="gold full" onclick="go('watchAds')">Open Watch Ads &amp; Earn</button>
-  </div>
-
+</div>
+<h2>Welcome to Khmer Earn Marketplace</h2>
+<div class="grid">
+<div class="stat">Worker balance<strong id="homeCoins">0 coins</strong></div>
+<div class="stat">Membership<strong id="homePlan">Free</strong></div>
+<div class="stat">Available tasks<strong id="homeTaskCount">Loading...</strong></div>
+<div class="stat">Account mode<strong>Worker + Advertiser</strong></div>
+</div>
+<div class="card">
+<div class="row">
+<h3>Earn by completing tasks</h3>
+<span class="pill">Worker</span>
+</div>
+<p class="muted">Choose an available task, follow its instructions and submit valid completion. Rewards are credited only after approval.</p>
+<button class="full" onclick="go('tasks')">Browse Available Tasks</button>
+</div>
+<div class="card">
+<div class="row">
+<h3>Promote your business</h3>
+<span class="pill">Advertiser</span>
+</div>
+<p class="muted">Create PTC, video, shortlink or micro-job campaigns and track their progress.</p>
+<button class="full gold" onclick="go('advertise')">Create an Advertising Campaign</button>
+</div>
+<div class="card">
+<h3>🚰 Faucet</h3>
+<p class="muted">Faucet rewards are separate from marketplace task earnings and must be verified by the backend.</p>
+<button class="dark" onclick="go('faucet')">Open Faucet</button>
+</div>
+<div class="card">
+<div class="row"><h3>🎬 Watch Ads &amp; Earn</h3><span class="pill">Optional</span></div>
+<p class="muted">Choose to watch a rewarded ad and earn coins based on your active membership after AdsGram confirms a completed view. You can use the rest of the app without watching ads.</p>
+<button class="gold full" onclick="go('watchAds')">Open Watch Ads &amp; Earn</button>
+</div>
 </section>
-
 <!-- TASKS -->
 <section class="page" id="tasks">
 <h2>Available Tasks</h2>
@@ -3189,12 +3093,5 @@ authenticateTelegram().then(authenticated => {
 
 selectGameProvider("Mobile Legends KH", document.querySelector("#gameCatalogGrid .game-catalog-card[data-game=\"Mobile Legends KH\"]"));
 </script>
-  <!-- Monetag SDK -->
-<script src="https://libtl.com/sdk.js"
-        data-zone="12341874"
-        data-sdk="show_12341874"></script>
-
-</body>
-</html>
 </body>
 </html>
