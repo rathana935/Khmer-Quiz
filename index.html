@@ -150,6 +150,45 @@ a{color:var(--blue);overflow-wrap:anywhere}
 
 @media(max-width:380px){.home-sponsored-footer{align-items:flex-start;flex-direction:column}.home-sponsored-footer button{width:100%}}
 
+/* FORCE COMPACT HOME AD CARD */
+#home .home-sponsored-card {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: 145px !important;
+  padding: 7px 9px !important;
+  margin: 6px 0 10px !important;
+  box-sizing: border-box !important;
+  flex: none !important;
+}
+
+#home .home-sponsored-heading {
+  margin-bottom: 5px !important;
+}
+
+#home .home-ad-slot {
+  min-height: 42px !important;
+  height: 42px !important;
+  max-height: 42px !important;
+}
+
+#home .home-ad-placeholder {
+  min-height: 42px !important;
+  height: 42px !important;
+  padding: 3px !important;
+}
+
+#home .home-sponsored-footer {
+  margin-top: 5px !important;
+}
+
+#home .home-ad-slot iframe,
+#home .home-ad-slot img {
+  max-height: 42px !important;
+  max-width: 100% !important;
+}
+
 </style>
 </head>
 <body>
