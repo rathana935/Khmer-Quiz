@@ -912,16 +912,30 @@ function showAuthGate(message, type="notice") {
 function hideAuthGate() { $("authGate")?.classList.remove("open"); }
 
 function connectTelegramAccount() {
-  // In Telegram, authenticate using the signed Mini App initData.
-  if (tg && tg.initData) return authenticateTelegram();
-
-  // In a normal browser, send the user to the official Telegram bot.
   const botUrl = "https://t.me/quizkhmerbot";
-  showAuthGate("Opening @quizkhmerbot. Start the bot and open Khmer Earn Marketplace from its Mini App button.", "notice");
-  if (tg && typeof tg.openTelegramLink === "function") {
-    tg.openTelegramLink(botUrl);
-  } else {
-    window.open(botUrl, "_blank", "noopener,noreferrer");
+
+  // Inside Telegram, authenticate with Telegram's signed Mini App initData.
+  if (window.Telegram?.WebApp?.initData) {
+    return authenticateTelegram();
+  }
+
+  // Outside Telegram, navigate in this tab to avoid popup blockers.
+  showAuthGate(
+    "Opening @quizkhmerbot. Tap Start, then open Khmer Earn Marketplace using the bot's Mini App button.",
+    "notice"
+  );
+  try {
+    if (window.Telegram?.WebApp?.openTelegramLink) {
+      window.Telegram.WebApp.openTelegramLink(botUrl);
+    } else {
+      window.location.assign(botUrl);
+    }
+  } catch (error) {
+    console.error("Could not open Telegram bot:", error);
+    showAuthGate(
+      "Could not open Telegram automatically. Open https://t.me/quizkhmerbot and tap Start.",
+      "error"
+    );
   }
   return false;
 }
