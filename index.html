@@ -150,44 +150,57 @@ a{color:var(--blue);overflow-wrap:anywhere}
 
 @media(max-width:380px){.home-sponsored-footer{align-items:flex-start;flex-direction:column}.home-sponsored-footer button{width:100%}}
 
-/* FORCE COMPACT HOME AD CARD */
+
+/* HOME AD CARD - COMPACT SIZE */
 #home .home-sponsored-card {
   display: block !important;
+  position: relative !important;
   width: 100% !important;
   height: auto !important;
-  min-height: 0 !important;
-  max-height: 145px !important;
-  padding: 7px 9px !important;
+  min-height: unset !important;
+  max-height: none !important;
+  padding: 8px 10px !important;
   margin: 6px 0 10px !important;
   box-sizing: border-box !important;
-  flex: none !important;
+  flex: 0 0 auto !important;
+  align-self: auto !important;
 }
 
 #home .home-sponsored-heading {
-  margin-bottom: 5px !important;
+  height: auto !important;
+  margin: 0 0 5px !important;
+}
+
+#home .home-sponsored-heading strong {
+  font-size: 13px !important;
 }
 
 #home .home-ad-slot {
-  min-height: 42px !important;
-  height: 42px !important;
-  max-height: 42px !important;
+  display: flex !important;
+  width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  flex: 0 0 48px !important;
+  overflow: hidden !important;
 }
 
 #home .home-ad-placeholder {
-  min-height: 42px !important;
-  height: 42px !important;
+  height: 48px !important;
+  min-height: 48px !important;
   padding: 3px !important;
 }
 
 #home .home-sponsored-footer {
+  height: auto !important;
   margin-top: 5px !important;
 }
 
-#home .home-ad-slot iframe,
-#home .home-ad-slot img {
-  max-height: 42px !important;
-  max-width: 100% !important;
+#home .home-sponsored-footer button {
+  width: auto !important;
+  padding: 5px 9px !important;
 }
+
 
 </style>
 </head>
@@ -197,76 +210,113 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <span class="balance">🪙 <span id="coinBalance">0</span></span>
 </header>
 <main>
+
 <!-- HOME -->
 <section class="page active" id="home">
-<div class="home-sponsored-card" aria-label="Home sponsored advertisement">
-  <div class="home-sponsored-heading">
-    <div>
-      <small>SPONSORED · HOME</small>
-      <strong>Advertisement</strong>
+
+  <!-- HOME SPONSORED ADVERTISEMENT -->
+  <div class="home-sponsored-card" aria-label="Home sponsored advertisement">
+
+    <div class="home-sponsored-heading">
+      <div>
+        <small>SPONSORED · HOME</small>
+        <strong>Advertisement</strong>
+      </div>
+      <span class="home-ad-label">AD</span>
     </div>
-    <span class="home-ad-label">AD</span>
-  </div>
-  
-<div class="home-sponsored-card" aria-label="Home sponsored advertisement">
-  <div class="home-sponsored-heading">
-    <div>
 
-  <div class="home-ad-slot" id="homeAdSlot" aria-label="Advertisement banner">
-    <div class="home-ad-placeholder">
-      <span class="home-ad-placeholder-icon">▧</span>
-      <strong>Your Advertisement Here</strong>
-      <span>Sponsored by Monetag</span>
+    <div class="home-ad-slot" id="homeAdSlot" aria-label="Advertisement banner">
+      <div class="home-ad-placeholder">
+        <span class="home-ad-placeholder-icon">▧</span>
+        <strong>Your Advertisement Here</strong>
+        <span>Sponsored by Monetag</span>
+      </div>
+    </div>
+
+    <!-- Monetag SDK -->
+    <script
+      src="//libtl.com/sdk.js"
+      data-zone="12341874"
+      data-sdk="show_12341874">
+    </script>
+
+    <div class="home-sponsored-footer">
+      <span>Interested in advertising?</span>
+      <button class="dark" type="button" onclick="go('advertise')">
+        Advertise with us
+      </button>
+    </div>
+
+  </div>
+  <!-- END HOME SPONSORED ADVERTISEMENT -->
+
+  <h2>Welcome to Khmer Earn Marketplace</h2>
+
+  <div class="grid">
+    <div class="stat">
+      Worker balance
+      <strong id="homeCoins">0 coins</strong>
+    </div>
+
+    <div class="stat">
+      Membership
+      <strong id="homePlan">Free</strong>
+    </div>
+
+    <div class="stat">
+      Available tasks
+      <strong id="homeTaskCount">Loading...</strong>
+    </div>
+
+    <div class="stat">
+      Account mode
+      <strong>Worker + Advertiser</strong>
     </div>
   </div>
 
-  <script
-    src="//libtl.com/sdk.js"
-    data-zone="12341874"
-    data-sdk="show_12341874">
-  </script>
-
-  <div class="home-sponsored-footer">
-    <span>Interested in advertising?</span>
-    <button class="dark" type="button" onclick="go('advertise')">
-      Advertise with us
-    </button>
+  <div class="card">
+    <div class="row">
+      <h3>Earn by completing tasks</h3>
+      <span class="pill">Worker</span>
+    </div>
+    <p class="muted">
+      Choose an available task, follow its instructions and submit valid completion. Rewards are credited only after approval.
+    </p>
+    <button class="full" onclick="go('tasks')">Browse Available Tasks</button>
   </div>
-</div>
-<h2>Welcome to Khmer Earn Marketplace</h2>
-<div class="grid">
-<div class="stat">Worker balance<strong id="homeCoins">0 coins</strong></div>
-<div class="stat">Membership<strong id="homePlan">Free</strong></div>
-<div class="stat">Available tasks<strong id="homeTaskCount">Loading...</strong></div>
-<div class="stat">Account mode<strong>Worker + Advertiser</strong></div>
-</div>
-<div class="card">
-<div class="row">
-<h3>Earn by completing tasks</h3>
-<span class="pill">Worker</span>
-</div>
-<p class="muted">Choose an available task, follow its instructions and submit valid completion. Rewards are credited only after approval.</p>
-<button class="full" onclick="go('tasks')">Browse Available Tasks</button>
-</div>
-<div class="card">
-<div class="row">
-<h3>Promote your business</h3>
-<span class="pill">Advertiser</span>
-</div>
-<p class="muted">Create PTC, video, shortlink or micro-job campaigns and track their progress.</p>
-<button class="full gold" onclick="go('advertise')">Create an Advertising Campaign</button>
-</div>
-<div class="card">
-<h3>🚰 Faucet</h3>
-<p class="muted">Faucet rewards are separate from marketplace task earnings and must be verified by the backend.</p>
-<button class="dark" onclick="go('faucet')">Open Faucet</button>
-</div>
-<div class="card">
-<div class="row"><h3>🎬 Watch Ads &amp; Earn</h3><span class="pill">Optional</span></div>
-<p class="muted">Choose to watch a rewarded ad and earn coins based on your active membership after AdsGram confirms a completed view. You can use the rest of the app without watching ads.</p>
-<button class="gold full" onclick="go('watchAds')">Open Watch Ads &amp; Earn</button>
-</div>
+
+  <div class="card">
+    <div class="row">
+      <h3>Promote your business</h3>
+      <span class="pill">Advertiser</span>
+    </div>
+    <p class="muted">
+      Create PTC, video, shortlink or micro-job campaigns and track their progress.
+    </p>
+    <button class="full gold" onclick="go('advertise')">Create an Advertising Campaign</button>
+  </div>
+
+  <div class="card">
+    <h3>🚰 Faucet</h3>
+    <p class="muted">
+      Faucet rewards are separate from marketplace task earnings and must be verified by the backend.
+    </p>
+    <button class="dark" onclick="go('faucet')">Open Faucet</button>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <h3>🎬 Watch Ads &amp; Earn</h3>
+      <span class="pill">Optional</span>
+    </div>
+    <p class="muted">
+      Choose to watch a rewarded ad and earn coins based on your active membership after AdsGram confirms a completed view. You can use the rest of the app without watching ads.
+    </p>
+    <button class="gold full" onclick="go('watchAds')">Open Watch Ads &amp; Earn</button>
+  </div>
+
 </section>
+
 <!-- TASKS -->
 <section class="page" id="tasks">
 <h2>Available Tasks</h2>
