@@ -5,6 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
 <meta content="#0b1120" name="theme-color"/>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <title>Khmer Earn Marketplace</title>
 <script async="" defer="" src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoaded&amp;render=explicit"></script>
 <style>
@@ -136,7 +137,7 @@ a{color:var(--blue);overflow-wrap:anywhere}
 </style>
 </head>
 <body>
-<div class="auth-gate open" id="authGate"><div class="auth-panel"><h2>🇰🇭 Khmer Earn Marketplace</h2><p class="muted">Secure sign-in with your Telegram account. Open this Mini App from your official Telegram bot to continue.</p><div id="authMessage" class="message" role="status">Checking Telegram authentication...</div><button type="button" class="gold" id="telegramRetry" onclick="connectTelegramAccount()">Connect Telegram Account</button><p class="muted" style="font-size:12px;margin-top:12px">No email or password is required. Your Telegram account is verified securely by the backend.</p></div></div><button type="button" class="dark auth-hidden" id="resendVerifyButton" onclick="resendVerification()">Resend Verification Email</button></div></div>
+<div class="auth-gate open" id="authGate"><div class="auth-panel"><h2>🇰🇭 Khmer Earn Marketplace</h2><p class="muted">Secure sign-in with your Telegram account. Open this Mini App from your official Telegram bot to continue.</p><div id="authMessage" class="message" role="status">Checking Telegram authentication...</div><button type="button" class="gold" id="telegramRetry" onclick="authenticateTelegram()">Connect Telegram Account</button><p class="muted" style="font-size:12px;margin-top:12px">No email or password is required. Your Telegram account is verified securely by the backend.</p></div></div><button type="button" class="dark auth-hidden" id="resendVerifyButton" onclick="resendVerification()">Resend Verification Email</button></div></div>
 <header>
 <strong>🇰🇭 Khmer Earn Marketplace</strong>
 <span class="balance">🪙 <span id="coinBalance">0</span></span>
