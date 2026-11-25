@@ -995,7 +995,53 @@ function logoutWebsite() {
 // LOAD USER PROFILE AND BALANCES
 // ============================================
 
-async function loadProfile(){const data=await apiRequest("/api/me");currentUser=data.user||data.data?.user||data.data||data;const bal=currentUser.workerEarnings??currentUser.availableCoins??currentUser.workerBalance??currentUser.worker_balance??0;const plan=currentUser.planName||currentUser.membership||currentUser.plan||"Free";$("coinBalance").textContent=formatCoins(bal);$("homeCoins").textContent=formatCoins(bal)+" coins";$("walletCoins").textContent=formatCoins(bal);$("homePlan").textContent=String(plan);$("profilePlan").textContent=String(plan);const name=currentUser.firstName||currentUser.first_name||"Telegram User";$("profileName").textContent=name;$("profileUsername").textContent=currentUser.username?"@"+currentUser.username:"Telegram account";$("profileAccountId").textContent=currentUser.telegramId||currentUser.accountId||"—";$("profileAvatar").textContent=name.trim().charAt(0).toUpperCase()||"👤";}
+let profilePhotoObjectUrl = null;
+function showProfileInitial(name) {
+  const avatar = $("profileAvatar");
+  if (!avatar) return;
+  avatar.replaceChildren();
+  avatar.textContent = String(name || "?").trim().charAt(0).toUpperCase() || "👤";
+}
+async function loadProfilePhoto(name) {
+  const avatar = $("profileAvatar");
+  if (!avatar || !authToken) return;
+  showProfileInitial(name);
+  try {
+    const response = await fetch(API_URL + "/api/me/photo", {
+      method: "GET",
+      headers: { "Authorization": "Bearer " + authToken }
+    });
+    if (!response.ok) return; // No Telegram photo is a normal case; keep initials.
+    const blob = await response.blob();
+    if (!blob.type.startsWith("image/")) return;
+    const nextUrl = URL.createObjectURL(blob);
+    if (profilePhotoObjectUrl) URL.revokeObjectURL(profilePhotoObjectUrl);
+    profilePhotoObjectUrl = nextUrl;
+    const img = document.createElement("img");
+    img.alt = "Telegram profile photo";
+    img.src = nextUrl;
+    img.onerror = () => showProfileInitial(name);
+    avatar.replaceChildren(img);
+  } catch (error) {
+    console.warn("Telegram profile photo is unavailable:", error);
+  }
+}
+async function loadProfile() {
+  const data = await apiRequest("/api/me");
+  currentUser = data.user || data.data?.user || data.data || data;
+  const bal = currentUser.workerEarnings ?? currentUser.availableCoins ?? currentUser.workerBalance ?? currentUser.worker_balance ?? 0;
+  const plan = currentUser.planName || currentUser.membership || currentUser.plan || "Free";
+  $("coinBalance").textContent = formatCoins(bal);
+  $("homeCoins").textContent = formatCoins(bal) + " coins";
+  $("walletCoins").textContent = formatCoins(bal);
+  $("homePlan").textContent = String(plan);
+  $("profilePlan").textContent = String(plan);
+  const name = currentUser.firstName || currentUser.first_name || "Telegram User";
+  $("profileName").textContent = name;
+  $("profileUsername").textContent = currentUser.username ? "@" + currentUser.username : "Telegram account";
+  $("profileAccountId").textContent = currentUser.telegramId || currentUser.accountId || "—";
+  await loadProfilePhoto(name);
+}
 
 // ============================================
 // REAL BACKEND FAUCET
