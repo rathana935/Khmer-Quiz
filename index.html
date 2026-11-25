@@ -166,20 +166,35 @@ a{color:var(--blue);overflow-wrap:anywhere}
     </div>
     <span class="home-ad-label">AD</span>
   </div>
-  <div class="home-ad-slot" id="<script src='//libtl.com/sdk.js' data-zone='12341874' data-sdk='show_12341874'></script>" aria-label="Advertisement banner">
-    <!-- PASTE YOUR AD NETWORK'S COMPLETE HTML BANNER CODE HERE.
-         Use the network's banner/ad-unit code, not a smart link or SDK loader alone. -->
+  
+<div class="home-sponsored-card" aria-label="Home sponsored advertisement">
+  <div class="home-sponsored-heading">
+    <div>
+      <small>SPONSORED · HOME</small>
+      <strong>Advertisement</strong>
+    </div>
+    <span class="home-ad-label">AD</span>
+  </div>
+
+  <div class="home-ad-slot" id="homeAdSlot" aria-label="Advertisement banner">
     <div class="home-ad-placeholder">
       <span class="home-ad-placeholder-icon">▧</span>
       <strong>Your Advertisement Here</strong>
-      <span>Promote your website, app or service</span>
+      <span>Sponsored by Monetag</span>
     </div>
   </div>
-  <!-- Monetag SDK loader retained. This initializes the zone but does not itself render an in-card banner. -->
-  <script src="//libtl.com/sdk.js" data-zone="12341874" data-sdk="show_12341874"></script>
+
+  <script
+    src="//libtl.com/sdk.js"
+    data-zone="12341874"
+    data-sdk="show_12341874">
+  </script>
+
   <div class="home-sponsored-footer">
     <span>Interested in advertising?</span>
-    <button class="dark" type="button" onclick="go('advertise')">Advertise with us</button>
+    <button class="dark" type="button" onclick="go('advertise')">
+      Advertise with us
+    </button>
   </div>
 </div>
 <h2>Welcome to Khmer Earn Marketplace</h2>
