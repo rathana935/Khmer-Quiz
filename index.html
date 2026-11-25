@@ -639,6 +639,25 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <div id="adsgramRewardHistory"><div class="empty">Your confirmed AdsGram rewards will appear here.</div></div>
 </div>
 </section>
+<!-- OPTIONAL SMART LINKS: USER-INITIATED, NON-INCENTIVIZED -->
+<section class="page" id="smartLinks">
+<h2>🔗 Smart Links</h2>
+<p class="muted">Optional partner offers from external advertising networks. Choose whether to open a link; you can use the Marketplace without visiting these offers.</p>
+<div class="card">
+  <div class="row"><h3>🟠 Monetag Offers</h3><span class="pill">External link</span></div>
+  <p class="muted">Open a Monetag partner offer in your browser. The offer and destination are selected by the advertising network and may vary.</p>
+  <button class="gold full" id="monetagSmartLinkButton" type="button" onclick="openConfiguredSmartLink('monetag')" disabled>Loading Monetag link…</button>
+  <p class="fine">Optional. No coins, bonuses, tips, membership, or other benefits are given for opening or interacting with this link.</p>
+</div>
+<div class="card">
+  <div class="row"><h3>🟢 Adsterra Offers</h3><span class="pill">External link</span></div>
+  <p class="muted">Open an Adsterra partner offer in your browser. The offer and destination are selected by the advertising network and may vary.</p>
+  <button class="dark full" id="adsterraSmartLinkButton" type="button" onclick="openConfiguredSmartLink('adsterra')" disabled>Adsterra link not configured</button>
+  <p class="fine">This link will appear after its active SmartLink URL is added to the backend settings. No rewards are tied to ad clicks or conversions.</p>
+</div>
+<div class="notice" id="smartLinksStatus" role="status">Smart Links are optional. Never open an offer unless you want to visit it.</div>
+<p class="fine">External advertising destinations are operated by third parties. Review each offer carefully and leave the page if it is not relevant or trustworthy.</p>
+</section>
 <!-- PLANS -->
 <section class="page" id="plans">
 <h2>👑 Membership Plans</h2>
@@ -733,6 +752,7 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <button onclick="go('tasks',this)"><span>📋</span>Tasks</button>
 <button onclick="go('wallet',this)"><span>💰</span>Wallet</button>
 <button onclick="go('faucet',this)"><span>🚰</span>Faucet</button>
+<button onclick="go('smartLinks',this)"><span>🔗</span>Smart Links</button>
 <button onclick="go('advertise',this)"><span>📢</span>Advertise</button>
 <button onclick="go('profile',this)"><span>👤</span>Profile</button>
 </nav>
@@ -2071,6 +2091,103 @@ async function reviewSubmission(id, action) {
 }
 
 // ============================================
+// OPTIONAL SMART LINKS (NO CLICK INCENTIVES)
+// ============================================
+
+let smartLinksConfig = { monetag: "", adsterra: "" };
+let smartLinksLoadedAt = 0;
+
+async function loadSmartLinks(force = false) {
+  const status = $("smartLinksStatus");
+  const monetagButton = $("monetagSmartLinkButton");
+  const adsterraButton = $("adsterraSmartLinkButton");
+  if (!monetagButton || !adsterraButton) return;
+
+  const fresh = Date.now() - smartLinksLoadedAt < 60000;
+  if (!force && fresh) return;
+
+  monetagButton.disabled = true;
+  monetagButton.textContent = "Loading Monetag link…";
+  adsterraButton.disabled = true;
+  adsterraButton.textContent = "Checking Adsterra link…";
+  if (status) status.textContent = "Loading optional partner links…";
+
+  try {
+    const response = await fetch(API_URL + "/api/ads/config", {
+      method: "GET",
+      headers: { "Accept": "application/json" },
+      cache: "no-store"
+    });
+    if (!response.ok) throw new Error("Could not load SmartLink settings.");
+    const config = await response.json();
+    const validHttps = value => {
+      try {
+        const parsed = new URL(String(value || ""));
+        return parsed.protocol === "https:" ? parsed.href : "";
+      } catch {
+        return "";
+      }
+    };
+    smartLinksConfig = {
+      monetag: validHttps(config.monetag),
+      adsterra: validHttps(config.adsterra)
+    };
+    smartLinksLoadedAt = Date.now();
+
+    monetagButton.disabled = !smartLinksConfig.monetag;
+    monetagButton.textContent = smartLinksConfig.monetag
+      ? "Open Monetag Offers ↗"
+      : "Monetag link not configured";
+    adsterraButton.disabled = !smartLinksConfig.adsterra;
+    adsterraButton.textContent = smartLinksConfig.adsterra
+      ? "Open Adsterra Offers ↗"
+      : "Adsterra link not configured";
+
+    if (status) {
+      status.textContent = smartLinksConfig.monetag || smartLinksConfig.adsterra
+        ? "Links are optional and open only when you tap their provider button. No rewards are tied to ad activity."
+        : "No partner links are active yet. Add the active HTTPS SmartLink URLs in the backend settings.";
+    }
+  } catch (error) {
+    smartLinksConfig = { monetag: "", adsterra: "" };
+    monetagButton.disabled = true;
+    monetagButton.textContent = "Monetag link unavailable";
+    adsterraButton.disabled = true;
+    adsterraButton.textContent = "Adsterra link unavailable";
+    if (status) status.textContent = "SmartLink settings could not be loaded. Please try again later.";
+    console.warn("SmartLink configuration error:", error);
+  }
+}
+
+function openConfiguredSmartLink(provider) {
+  const url = smartLinksConfig[provider];
+  if (!url) {
+    const status = $("smartLinksStatus");
+    if (status) status.textContent = "This partner link is not configured yet.";
+    return;
+  }
+
+  // Re-check the URL at the point of use; only HTTPS links are allowed.
+  let safeUrl;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:") throw new Error("HTTPS required");
+    safeUrl = parsed.href;
+  } catch {
+    const status = $("smartLinksStatus");
+    if (status) status.textContent = "This partner link is invalid or unavailable.";
+    return;
+  }
+
+  // Telegram's official external-link handler is preferred inside the Mini App.
+  if (tg && typeof tg.openLink === "function") {
+    tg.openLink(safeUrl);
+  } else {
+    window.open(safeUrl, "_blank", "noopener,noreferrer");
+  }
+}
+
+// ============================================
 // NAVIGATION AND TABS
 // ============================================
 
@@ -2119,6 +2236,9 @@ function go(id, button) {
  }
  if (id === "watchAds" && authToken) {
   loadAdsgramRewardStatus();
+ }
+ if (id === "smartLinks") {
+  loadSmartLinks();
  }
 }
 
