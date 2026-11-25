@@ -1,1895 +1,2330 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Khmer Quiz & Earn</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1120">
+<title>Khmer Earn Marketplace</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoaded&render=explicit" async defer></script>
 
 <style>
-:root {
-  --bg:#0b1120;
-  --panel:#151f32;
-  --panel2:#202e45;
-  --text:#f5f7ff;
-  --muted:#9ba9c0;
-  --gold:#f6c453;
-  --blue:#61a9ff;
-  --green:#37d69a;
-  --red:#f16b6b;
-  --border:#293953;
-}
-
-* {box-sizing:border-box}
-
-body {
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial,sans-serif;
-  padding-bottom:85px;
-}
-
-header {
-  position:sticky;
-  top:0;
-  z-index:5;
-  background:#111b2d;
-  padding:16px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  border-bottom:1px solid var(--border);
-}
-
-header strong {font-size:17px}
-.balance {color:var(--gold);font-weight:bold}
-
-main {
-  max-width:650px;
-  margin:auto;
-  padding:15px;
-}
-
-.page {display:none}
-.page.active {display:block}
-
-h2 {font-size:21px}
-h3 {margin-top:0}
-
-p {line-height:1.5}
-
-.card {
-  background:var(--panel);
-  border:1px solid var(--border);
-  padding:15px;
-  border-radius:14px;
-  margin:12px 0;
-}
-
-.banner {
-  background:linear-gradient(120deg,#263b61,#49366b);
-  padding:17px;
-  text-align:center;
-  border-radius:13px;
-  margin:12px 0;
-  border:1px dashed #8ea9dc;
-}
-
-.banner small {
-  display:block;
-  color:#d4e1ff;
-  margin-bottom:8px;
-  font-weight:bold;
-}
-
-.banner strong {font-size:17px}
-.banner p {font-size:13px;color:#d1dafa}
-
-button {
-  padding:12px 15px;
-  border:0;
-  border-radius:9px;
-  background:var(--blue);
-  color:#071426;
-  font-weight:bold;
-  margin:4px 2px;
-  cursor:pointer;
-}
-
-button.gold {background:var(--gold)}
-button.green {background:var(--green)}
-button.red {background:var(--red)}
-button.dark {
-  background:var(--panel2);
-  color:white;
-  border:1px solid var(--border);
-}
-
-button:disabled {
-  opacity:.4;
-  cursor:not-allowed;
-}
-
-button.full {
-  width:100%;
-  margin:7px 0;
-}
-
-.grid {
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:9px;
-}
-
-.stat {
-  background:var(--panel2);
-  padding:13px;
-  border-radius:10px;
-  color:var(--muted);
-  font-size:13px;
-}
-
-.stat strong {
-  display:block;
-  color:var(--gold);
-  font-size:20px;
-  margin-top:6px;
-}
-
-.price {
-  font-size:26px;
-  color:var(--gold);
-  font-weight:bold;
-  margin:12px 0;
-}
-
-.muted {
-  font-size:13px;
-  color:var(--muted);
-  line-height:1.5;
-}
-
-.tag {
-  font-size:11px;
-  color:var(--green);
-  font-weight:bold;
-}
-
-ul {
-  line-height:1.9;
-  color:#d4deee;
-  padding-left:20px;
-}
-
-.answer {
-  display:block;
-  width:100%;
-  text-align:left;
-  background:var(--panel2);
-  color:white;
-  border:1px solid var(--border);
-  margin:8px 0;
-}
-
-.answer.correct {background:#176b4b}
-.answer.wrong {background:#8c3434}
-.answer.removed {opacity:.3}
-
-input,select {
-  width:100%;
-  padding:12px;
-  margin:8px 0 12px;
-  background:#0d1728;
-  color:white;
-  border:1px solid var(--border);
-  border-radius:8px;
-}
-
-nav {
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  z-index:10;
-  background:#111b2d;
-  border-top:1px solid var(--border);
-  display:flex;
-  justify-content:space-around;
-  overflow-x:auto;
-  padding:8px 2px;
-}
-
-nav button {
-  background:transparent;
-  color:var(--muted);
-  font-size:11px;
-  padding:7px 5px;
-  margin:0;
-  white-space:nowrap;
-}
-
-nav button.active {color:var(--gold)}
-
-.feature {
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  padding:9px 0;
-  border-bottom:1px solid var(--border);
-}
-
-.feature strong {color:var(--gold)}
-
-.hidden {display:none!important}
-
-.reward-section {
-  background:var(--panel2);
-  border:1px solid var(--border);
-  padding:16px;
-  border-radius:13px;
-  margin:13px 0;
-}
-
-.reward-section h3 {margin-bottom:10px}
-
-.reward-amount {
-  color:var(--gold);
-  font-size:23px;
-  font-weight:bold;
-  margin:12px 0;
-}
-
-hr {
-  border:0;
-  border-top:1px solid var(--border);
-  margin:15px 0;
-}
+:root{--bg:#0b1120;--panel:#151f32;--panel2:#202e45;--text:#f5f7ff;--muted:#9ba9c0;--gold:#f6c453;--blue:#61a9ff;--green:#37d69a;--red:#f16b6b;--border:#293953}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;padding-bottom:88px}
+header{position:sticky;top:0;z-index:5;background:#111b2d;padding:15px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+header strong{font-size:16px}
+.balance{color:var(--gold);font-weight:bold;font-size:14px}
+main{max-width:680px;margin:auto;padding:14px}
+.page{display:none}
+.page.active{display:block}
+h2{font-size:21px;margin:16px 0}
+h3{margin:0 0 9px;font-size:17px}
+p{line-height:1.5}
+.card{background:var(--panel);border:1px solid var(--border);padding:15px;border-radius:14px;margin:12px 0}
+.banner{background:linear-gradient(120deg,#263b61,#49366b);padding:17px;text-align:center;border-radius:13px;margin:12px 0;border:1px dashed #8ea9dc}
+.banner small{display:block;color:#d4e1ff;margin-bottom:8px;font-weight:bold}
+.banner strong{font-size:17px}
+.banner p{font-size:13px;color:#d1dafa;margin:8px 0}
+.muted{font-size:13px;color:var(--muted);line-height:1.5}
+.tag{font-size:11px;color:var(--green);font-weight:bold;text-transform:uppercase;letter-spacing:.4px}
+button{padding:12px 15px;border:0;border-radius:9px;background:var(--blue);color:#071426;font-weight:bold;margin:4px 2px;cursor:pointer}
+button.gold{background:var(--gold)}
+button.green{background:var(--green)}
+button.dark{background:var(--panel2);color:white;border:1px solid var(--border)}
+button.full{width:100%;margin:7px 0}
+button:disabled{opacity:.45;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.stat{background:var(--panel2);padding:13px;border-radius:10px;color:var(--muted);font-size:13px;min-width:0}
+.stat strong{display:block;color:var(--gold);font-size:20px;margin-top:6px;overflow-wrap:anywhere}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.price{font-size:25px;color:var(--gold);font-weight:bold;margin:10px 0}
+.pill{display:inline-block;padding:5px 9px;border-radius:20px;background:#263b61;color:#d4e1ff;font-size:11px;margin:2px}
+.task-card{display:flex;gap:12px;align-items:flex-start}
+.task-icon{width:43px;height:43px;display:grid;place-items:center;border-radius:12px;background:var(--panel2);font-size:22px;flex-shrink:0}
+.task-card .grow{flex:1;min-width:0}
+.reward{color:var(--gold);font-weight:bold;white-space:nowrap}
+.feature{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
+.feature strong{color:var(--gold);text-align:right}
+.profile-identity{display:flex;align-items:center;gap:13px;padding:12px 0 16px;border-bottom:1px solid var(--border);margin-bottom:4px;min-width:0}
+.profile-avatar{width:58px;height:58px;flex:0 0 58px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:var(--panel2);border:2px solid var(--border);font-size:22px;font-weight:bold;color:var(--gold)}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-identity-details{display:flex;flex-direction:column;gap:5px;min-width:0;overflow-wrap:anywhere}
+.profile-identity-details strong{font-size:16px;color:var(--text)}
+.profile-identity-details span{font-size:13px;color:var(--muted)}
+label{display:block;font-size:13px;color:#d4deee;margin:11px 0 5px}
+input,select,textarea{width:100%;padding:12px;margin:5px 0 10px;background:#0d1728;color:white;border:1px solid var(--border);border-radius:8px;font:inherit}
+textarea{min-height:90px;resize:vertical}
+.notice{padding:11px 12px;border-radius:9px;background:#332b19;border:1px solid #6c592e;color:#f5d98c;font-size:12px;line-height:1.5;margin:10px 0}
+.success{background:#12372d;border-color:#246b52;color:#a8f1d3}
+.error{background:#3b2027;border-color:#763b48;color:#ffc0c8}
+.tabs{display:flex;gap:7px;overflow-x:auto;padding:3px 0 8px}
+.tabs button{white-space:nowrap;font-size:12px;padding:9px 12px}
+.tabs button.selected{background:var(--gold);color:#18202d}
+.hidden{display:none!important}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:10;background:#111b2d;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:7px 2px calc(7px + env(safe-area-inset-bottom));gap:2px}
+nav button{background:transparent;color:var(--muted);font-size:10px;padding:6px 4px;margin:0;min-width:0;flex:1;white-space:nowrap}
+nav button.active{color:var(--gold)}
+nav span{display:block;font-size:18px;margin-bottom:3px}
+.subpage{display:none}
+.subpage.active{display:block}
+.fine{font-size:11px;color:var(--muted)}
+.status{font-size:11px;padding:5px 8px;border-radius:20px;background:#263b61;color:#d4e1ff}
+.empty{text-align:center;padding:22px 10px;color:var(--muted);font-size:13px}
+.proof-box{background:#0d1728;border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:10px}
+.proof-box label{margin-top:5px}
+a{color:var(--blue);overflow-wrap:anywhere}
+@media(max-width:380px){header strong{font-size:13px}.grid{gap:6px}.stat{padding:10px}.stat strong{font-size:17px}nav button{font-size:9px}}
 </style>
 </head>
 
 <body>
 
 <header>
-  <strong>🇰🇭 Khmer Quiz & Earn</strong>
-  <span class="balance">🪙 <span id="coinBalance">20</span></span>
+ <strong>🇰🇭 Khmer Earn Marketplace</strong>
+ <span class="balance">🪙 <span id="coinBalance">0</span></span>
 </header>
 
 <main>
 
-<!-- ================= HOME ================= -->
-
+<!-- HOME -->
 <section id="home" class="page active">
 
-  <div class="banner">
-    <small>SPONSORED PLACEMENT · HOME</small>
-    <strong>Optional partner offers</strong>
-    <p>View clearly labeled sponsored offers below only when you choose.</p>
+ <div class="banner">
+  <small>SPONSORED PLACEMENT · HOME</small>
+  <strong>Your Advertisement Here</strong>
+  <p>Promote your website, app or service to marketplace users.</p>
+  <button class="dark" onclick="go('advertise')">Advertise with us</button>
+ </div>
+
+ <h2>Welcome to Khmer Earn Marketplace</h2>
+
+ <div class="grid">
+  <div class="stat">Worker balance<strong id="homeCoins">0 coins</strong></div>
+  <div class="stat">Membership<strong id="homePlan">Free</strong></div>
+  <div class="stat">Available tasks<strong id="homeTaskCount">Loading...</strong></div>
+  <div class="stat">Account mode<strong>Worker + Advertiser</strong></div>
+ </div>
+
+ <div class="card">
+  <div class="row">
+   <h3>Earn by completing tasks</h3>
+   <span class="pill">Worker</span>
   </div>
+  <p class="muted">Choose an available task, follow its instructions and submit valid completion. Rewards are credited only after approval.</p>
+  <button class="full" onclick="go('tasks')">Browse Available Tasks</button>
+ </div>
 
-  <div class="card" id="smartlinkOffers" aria-labelledby="smartlinkOffersTitle">
-    <h3 id="smartlinkOffersTitle">Sponsored offers</h3>
-    <p class="muted">Optional external advertisements from our partners. Open only if you are interested. You can return to the game at any time.</p>
-    <div id="monetagOffer" class="reward-section hidden">
-      <strong>Monetag sponsored offer</strong>
-      <p class="muted">You will leave the Mini App to view an advertising offer.</p>
-      <button class="dark full" type="button" onclick="openSmartLink('monetag')">Open Monetag offer</button>
-    </div>
-    <div id="adsterraOffer" class="reward-section hidden">
-      <strong>Adsterra sponsored offer</strong>
-      <p class="muted">You will leave the Mini App to view an advertising offer.</p>
-      <button class="dark full" type="button" onclick="openSmartLink('adsterra')">Open Adsterra offer</button>
-    </div>
-    <p id="smartlinkStatus" class="muted" role="status">Sponsored offers are currently unavailable.</p>
+ <div class="card">
+  <div class="row">
+   <h3>Promote your business</h3>
+   <span class="pill">Advertiser</span>
   </div>
+  <p class="muted">Create PTC, video, shortlink or micro-job campaigns and track their progress.</p>
+  <button class="full gold" onclick="go('advertise')">Create an Advertising Campaign</button>
+ </div>
 
-  <h2>Welcome to Khmer Quiz & Earn!</h2>
-
-  <div class="grid">
-    <div class="stat">
-      Coins
-      <strong id="homeCoins">20</strong>
-    </div>
-
-    <div class="stat">
-      Available Tips
-      <strong id="homeTips">3</strong>
-    </div>
-
-    <div class="stat">
-      Games Played
-      <strong id="gamesPlayed">0</strong>
-    </div>
-
-    <div class="stat">
-      Membership
-      <strong id="memberStatus">Free</strong>
-    </div>
-  </div>
-
-  <div class="card">
-    <h3>🎮 Choose Your Difficulty</h3>
-    <p class="muted">
-      Complete a quiz to earn coins. Each game contains up to 10 questions.
-    </p>
-
-    <button class="full" onclick="startQuiz('easy')">
-      Easy · 5 Coins
-    </button>
-
-    <button class="full" onclick="startQuiz('medium')">
-      Medium · 6 Coins
-    </button>
-
-    <button class="full" onclick="startQuiz('hard')">
-      Hard · 7 Coins
-    </button>
-  </div>
-
-  <div class="card">
-    <h3>🎁 Daily Bonus</h3>
-    <p id="dailyStatus">Claim your daily bonus.</p>
-    <button class="gold" id="dailyButton" onclick="claimDaily()">
-      Claim Daily Bonus
-    </button>
-  </div>
+ <div class="card">
+  <h3>🚰 Faucet</h3>
+  <p class="muted">Faucet rewards are separate from marketplace task earnings and must be verified by the backend.</p>
+  <button class="dark" onclick="go('faucet')">Open Faucet</button>
+ </div>
 
 </section>
 
+<!-- TASKS -->
+<section id="tasks" class="page">
 
-<!-- ================= GAME ================= -->
+ <h2>Available Tasks</h2>
+ <p class="muted">Choose a task and submit the required proof after completing it.</p>
 
-<section id="game" class="page">
+ <div class="tabs" id="taskTabs">
+  <button class="selected" onclick="taskTab('all',this)">All Tasks</button>
+  <button onclick="taskTab('ptc',this)">PTC</button>
+  <button onclick="taskTab('video',this)">Videos</button>
+  <button onclick="taskTab('job',this)">Jobs</button>
+  <button onclick="taskTab('shortlink',this)">Shortlinks</button>
+ </div>
 
-  <div class="card" id="quizCard">
+ <div id="taskList">
+  <div class="empty">Loading available tasks...</div>
+ </div>
 
-    <h2>🎮 Quiz Game</h2>
-
-    <div class="feature">
-      <span>Difficulty</span>
-      <strong id="difficulty">Easy</strong>
-    </div>
-
-    <div class="feature">
-      <span>Question</span>
-      <strong id="questionNumber">0/0</strong>
-    </div>
-
-    <div class="feature">
-      <span>Basic Reward</span>
-      <strong id="potentialReward">5 Coins</strong>
-    </div>
-
-    <h3 id="questionText"></h3>
-
-    <div id="answerList"></div>
-
-    <p id="quizFeedback"></p>
-
-    <button class="dark" id="tipButton" onclick="useTip()" disabled>
-      💡 Use 1 Tip · 50/50
-    </button>
-
-    <button id="nextButton" onclick="nextQuestion()" disabled>
-      Next Question
-    </button>
-
-  </div>
-
-
-  <!-- QUIZ COMPLETION -->
-
-  <div class="card hidden" id="quizComplete" style="text-align:center">
-
-    <h2>🎉 Quiz Completed!</h2>
-
-    <p id="finalScore">Your score: 5/5</p>
-
-    <hr>
-
-    <div class="reward-section">
-      <h3>🪙 Quiz Reward</h3>
-      <div class="reward-amount" id="normalReward">
-        You earned 10 coins!
-      </div>
-      <p class="muted">Your quiz reward has been credited to your wallet.</p>
-      <button class="green full" onclick="finishAndReturn()">
-        Continue
-      </button>
-    </div>
-
-  </div>
+ <div class="card">
+  <h3>My Task Submissions</h3>
+  <p class="muted">Check the status of your claimed tasks and submitted proof.</p>
+  <button class="dark full" onclick="loadMyClaims()">Refresh My Submissions</button>
+  <div id="myClaimsList"><div class="empty">Loading your submissions...</div></div>
+ </div>
 
 </section>
 
-
-<!-- ================= FAUCET ================= -->
-
+<!-- FAUCET -->
 <section id="faucet" class="page">
 
-  <h2>🚰 Faucet</h2>
+ <div class="banner">
+  <small>SPONSORED PLACEMENT · FAUCET</small>
+  <strong>Your Faucet Advertisement</strong>
+  <p>Sponsored content can appear here.</p>
+ </div>
+
+ <h2>🚰 Faucet</h2>
+
+ <div class="card">
+  <h3>Worker Faucet Rewards</h3>
+  <p class="muted">
+   Claim coins every five minutes. Successful rewards are credited
+   directly to your marketplace Worker Earnings Wallet.
+  </p>
+
+  <div class="grid">
+   <div class="stat">
+    Reward per claim
+    <strong id="faucetReward">Loading...</strong>
+   </div>
+
+   <div class="stat">
+    Worker balance
+    <strong id="faucetBalance">0 coins</strong>
+   </div>
+
+   <div class="stat">
+    Claims today
+    <strong id="faucetClaimsToday">0</strong>
+   </div>
+
+   <div class="stat">
+    Daily limit
+    <strong id="faucetDailyLimit">Loading...</strong>
+   </div>
+  </div>
+
+  <div class="notice" id="faucetStatus">
+   Checking Faucet availability...
+  </div>
 
   <div class="card">
-
-    <h3>Claim Free Coins</h3>
-
-    <p>Claim every 5 minutes.</p>
-
-    <div class="grid">
-
-      <div class="stat">
-        Base Reward
-        <strong>5 Coins</strong>
-      </div>
-
-      <div class="stat">
-        Multiplier
-        <strong id="faucetMultiplier">×1.00</strong>
-      </div>
-
+   <div style="text-align:center;padding:10px">
+    <div class="muted">Next claim available in</div>
+    <div id="faucetCountdown"
+         style="font-size:30px;font-weight:bold;color:var(--gold);margin:12px 0">
+     --:--
     </div>
+   </div>
 
-    <p id="faucetCountdown" class="muted">
-      Ready to claim!
-    </p>
+   <div class="notice" style="margin:12px 0 8px">
+    Complete the security check below before claiming your Faucet reward.
+   </div>
+   <div id="faucetTurnstile" style="display:flex;justify-content:center;min-height:66px;margin:10px 0"></div>
 
-    <button class="green" id="faucetButton" onclick="claimFaucet()">
-      Claim Faucet
-    </button>
+   <button
+    id="faucetClaimBtn"
+    class="green full"
+    onclick="claimFaucet()"
+    disabled>
+    Loading Faucet...
+   </button>
 
-    <p class="muted">
-      Multiplier increases by 0.01 for every 100 claims.
-      Membership multipliers also apply.
-    </p>
+   <button
+    class="dark full"
+    onclick="loadFaucetStatus()">
+    Refresh Faucet Status
+   </button>
 
+   <div id="faucetMessage"></div>
   </div>
+
+  <div class="notice">
+   Faucet rewards go to your Worker Earnings Wallet.
+   Advertiser campaign funds and your old legacy coin balance are separate.
+  </div>
+ </div>
 
 </section>
 
+<!-- ADVERTISE -->
+<section id="advertise" class="page">
 
-<!-- ================= TIPS ================= -->
+ <h2>Advertiser Center</h2>
+ <p class="muted">Create campaigns and review submissions from workers. Campaign funds are separate from worker earnings.</p>
 
-<section id="tips" class="page">
+ <div class="grid">
+  <div class="stat">Campaign wallet<strong id="advertiserWallet">$0.00</strong></div>
+  <div class="stat">My campaigns<strong id="myCampaignCount">0</strong></div>
+  <div class="stat">Pending submissions<strong id="pendingSubmissionCount">0</strong></div>
+  <div class="stat">Campaign status<strong id="advertiserStatus">Loading...</strong></div>
+ </div>
 
-  <h2>💡 Tips Center</h2>
+ <div class="card">
+  <h3>Create a Campaign</h3>
 
-  <div class="card">
+  <label for="campaignType">Campaign type</label>
+  <select id="campaignType" onchange="campaignFields()">
+   <option value="ptc">PTC Website Visit</option>
+   <option value="video">Video View</option>
+   <option value="job">Micro Job</option>
+   <option value="shortlink">Shortlink</option>
+  </select>
 
-    <h3>Your Available Tips</h3>
+  <label for="campaignTitle">Campaign title</label>
+  <input id="campaignTitle" type="text" maxlength="100" placeholder="Enter campaign title">
 
-    <div class="price" id="tipsBalance">3</div>
-
-    <p class="muted">
-      Use one Tip to remove two incorrect answers during a quiz.
-    </p>
-
-    <p id="dailyTipInfo"></p>
-
+  <div id="ptcFields">
+   <label>PTC package</label>
+   <select id="ptcPackage">
+    <option value="bronze">Bronze — 5 seconds</option>
+    <option value="silver">Silver — 10 seconds</option>
+    <option value="gold">Gold — 20 seconds</option>
+    <option value="platinum">Platinum — 30 seconds</option>
+    <option value="diamond">Diamond — 60 seconds</option>
+   </select>
+   <label>Website URL</label>
+   <input id="ptcUrl" type="url" placeholder="https://example.com">
   </div>
 
-  <h3>Buy More Tips</h3>
-
-  <div class="card">
-    <h3>100 Tips</h3>
-    <div class="price">$1.00</div>
-    <button onclick="buyTips(100,1)">Pay with ABA</button>
-    <button class="dark" onclick="buyStars(100)">Telegram Stars</button>
+  <div id="videoFields" class="hidden">
+   <label>Video package</label>
+   <select id="videoPackage">
+    <option value="short">Short — 15 seconds</option>
+    <option value="medium">Medium — 30 seconds</option>
+    <option value="long">Long — 60 seconds</option>
+    <option value="premium">Premium — 120 seconds</option>
+   </select>
+   <label>Video URL</label>
+   <input id="videoUrl" type="url" placeholder="https://example.com/video">
   </div>
 
-  <div class="card">
-    <h3>150 Tips</h3>
-    <div class="price">$1.50</div>
-    <button onclick="buyTips(150,1.5)">Pay with ABA</button>
-    <button class="dark" onclick="buyStars(150)">Telegram Stars</button>
+  <div id="jobFields" class="hidden">
+   <label>Job category</label>
+   <select id="jobCategory">
+    <option>Social Media</option>
+    <option>Website</option>
+    <option>App</option>
+    <option>Content Review</option>
+    <option>Other</option>
+   </select>
+
+   <label>Difficulty</label>
+   <select id="jobDifficulty">
+    <option>Easy</option>
+    <option>Medium</option>
+    <option>Hard</option>
+   </select>
+
+   <label>Expected time</label>
+   <input id="jobTime" type="text" placeholder="e.g. 5 minutes">
+
+   <label>Job description and instructions</label>
+   <textarea id="jobDescription" placeholder="Explain what workers must do"></textarea>
+
+   <label>Job URL (optional)</label>
+   <input id="jobUrl" type="url" placeholder="https://example.com">
+
+   <label>Verification type</label>
+   <select id="jobVerification">
+    <option value="link">Link / URL</option>
+    <option value="text">Text</option>
+    <option value="screenshot">Screenshot</option>
+   </select>
+
+   <label>Reward per completed job (coins)</label>
+   <input id="jobReward" type="number" min="1" step="0.01" placeholder="Enter worker reward">
+
+   <label>Total job slots</label>
+   <input id="jobSlots" type="number" min="1" step="1" placeholder="Number of workers">
   </div>
 
-  <div class="card">
-    <h3>200 Tips</h3>
-    <div class="price">$2.00</div>
-    <button onclick="buyTips(200,2)">Pay with ABA</button>
-    <button class="dark" onclick="buyStars(200)">Telegram Stars</button>
+  <div id="shortlinkFields" class="hidden">
+   <label>Shortlink provider</label>
+   <input id="shortlinkProvider" type="text" maxlength="80" placeholder="Enter provider name">
+
+   <label>Shortlink destination URL</label>
+   <input id="shortlinkUrl" type="url" placeholder="https://example.com">
+
+   <label>Reward per completed shortlink (coins)</label>
+   <input id="shortlinkReward" type="number" min="1" step="0.01" placeholder="Enter reward per completion">
+
+   <label>Total shortlink slots</label>
+   <input id="shortlinkSlots" type="number" min="1" step="1" placeholder="Number of completions">
   </div>
 
-  <p class="muted">
-  Telegram Stars purchases are processed and verified by our secure
-  Telegram payment server. ABA payments are not yet connected.
-</p>
+  <label>Campaign quantity</label>
+  <input id="campaignQuantity" type="number" min="1" step="1" value="100">
+
+  <label>Daily limit (0 = unlimited)</label>
+  <input id="campaignDaily" type="number" min="0" step="1" value="0">
+
+  <label>Campaign budget (USD)</label>
+  <input id="campaignBudget" type="number" min="0.01" step="0.01" placeholder="e.g. 10.00">
+
+  <button class="gold full" onclick="previewCampaign()">Preview Campaign Details</button>
+  <p id="campaignPreview" class="muted" aria-live="polite"></p>
+
+  <button id="createCampaignBtn" class="full" onclick="createCampaign()">Submit Campaign for Admin Review</button>
+  <div id="campaignMessage"></div>
+
+  <div class="notice">Campaigns may require administrator approval and verified campaign funding before workers can see them. The backend validates the budget and campaign settings.</div>
+ </div>
+
+ <div class="card">
+  <h3>My Campaigns</h3>
+  <button class="dark full" onclick="loadAdvertiserData()">Refresh Campaigns</button>
+  <div id="myCampaignsList"><div class="empty">Loading your campaigns...</div></div>
+ </div>
+
+ <div class="card">
+  <h3>Worker Submissions</h3>
+  <p class="muted">Review proof submitted for your campaigns. Approving a valid submission triggers the worker reward through the backend.</p>
+
+  <div class="tabs" id="submissionTabs">
+   <button class="selected" onclick="submissionTab('submitted',this)">Pending</button>
+   <button onclick="submissionTab('approved',this)">Approved</button>
+   <button onclick="submissionTab('rejected',this)">Rejected</button>
+   <button onclick="submissionTab('all',this)">All</button>
+  </div>
+
+  <button class="dark full" onclick="loadSubmissions()">Refresh Submissions</button>
+  <div id="submissionsList"><div class="empty">Loading submissions...</div></div>
+ </div>
 
 </section>
 
-
-<!-- ================= MEMBERSHIP ================= -->
-
-<section id="membership" class="page">
-
-  <h2>👑 Monthly Membership</h2>
-
-  <div class="card">
-
-    <span class="tag">SILVER MEMBERSHIP</span>
-    <h3>🥈 Silver</h3>
-    <div class="price">$4.99/month</div>
-
-    <ul>
-      <li>Game Reward ×1.5</li>
-      <li>Referral Commission 30%</li>
-      <li>Referral Bonus 250 coins</li>
-      <li>Faucet Reward ×1.5</li>
-      <li>Daily Tips 5</li>
-    </ul>
-
-    <button class="gold full" onclick="subscribe('Silver')">
-      Subscribe Silver
-    </button>
-
-  </div>
-
-  <div class="card">
-
-    <span class="tag">GOLD MEMBERSHIP</span>
-    <h3>🥇 Gold</h3>
-    <div class="price">$6.99/month</div>
-
-    <ul>
-      <li>Game Reward ×2</li>
-      <li>Referral Commission 35%</li>
-      <li>Referral Bonus 350 coins</li>
-      <li>Faucet Reward ×2</li>
-      <li>Daily Tips 7</li>
-    </ul>
-
-    <button class="gold full" onclick="subscribe('Gold')">
-      Subscribe Gold
-    </button>
-
-  </div>
-
-  <div class="card">
-
-    <span class="tag">DIAMOND MEMBERSHIP</span>
-    <h3>💎 Diamond</h3>
-    <div class="price">$9.99/month</div>
-
-    <ul>
-      <li>Game Reward ×3</li>
-      <li>Referral Commission 40%</li>
-      <li>Referral Bonus 500 coins</li>
-      <li>Faucet Reward ×2.5</li>
-      <li>Daily Tips 10</li>
-    </ul>
-
-    <button class="gold full" onclick="subscribe('Diamond')">
-      Subscribe Diamond
-    </button>
-
-  </div>
-
-  <p class="muted">
-  Membership payments use Telegram Stars. Monthly recurring billing
-  is subject to Telegram's subscription terms. Manage or cancel
-  subscriptions through Telegram.
-</p>
-</section>
-
-
-<!-- ================= WALLET ================= -->
-
+<!-- WALLET -->
 <section id="wallet" class="page">
 
-  <h2>💰 Wallet</h2>
+ <h2>💰 Wallet</h2>
+
+ <div class="card">
+  <h3>Worker Earnings Wallet</h3>
+  <div class="price"><span id="walletCoins">0</span> Coins</div>
+  <p class="muted">10,000 coins = $1.00 · Minimum withdrawal: 2,000 coins ($0.20)</p>
+  <div class="notice">Only approved worker earnings are shown here. Advertiser campaign funds are kept separate.</div>
+
+  <div class="tabs">
+   <button class="selected" onclick="walletTab('withdraw',this)">Withdraw</button>
+   <button onclick="walletTab('deposit',this)">Deposit</button>
+   <button onclick="walletTab('exchange',this)">Exchange</button>
+   <button onclick="walletTab('phoneTopup',this)">Phone Top Up</button>
+   <button onclick="walletTab('gameTopup',this)">Game Top Up</button>
+   <button onclick="walletTab('shopping',this)">Shopping</button>
+  </div>
+
+  <div id="walletWithdraw" class="subpage active">
+   <p class="muted">Withdraw approved worker earnings. Minimum 2,000 coins. Requests are reviewed by an administrator.</p>
+   <label>Withdrawal amount (coins)</label>
+   <input id="withdrawAmount" type="number" min="2000" step="1" placeholder="Minimum 2,000 coins">
+   <label>Payment method</label>
+   <select id="withdrawMethod">
+    <option value="ABA Bank">ABA Bank</option>
+    <option value="USDT - TON Network">USDT · TON Network</option>
+   </select>
+   <label>Payment details</label>
+   <textarea id="withdrawDetails" maxlength="300" placeholder="ABA account name and number, or USDT TON wallet address"></textarea>
+   <div id="withdrawMessage" class="notice">Your coins are reserved when the request is submitted. Rejected requests are refunded.</div>
+   <button id="withdrawSubmitBtn" class="full" onclick="submitWithdrawal()">Submit Withdrawal Request</button>
+   <div class="row"><h3>Withdrawal History</h3><button class="dark" onclick="loadWithdrawalHistory()">Refresh</button></div>
+   <div id="withdrawHistory"><div class="empty">Loading withdrawal history...</div></div>
+  </div>
+
+  <div id="walletDeposit" class="subpage">
+   <p class="muted">Add funds to your Advertiser Campaign Wallet only. Deposits are manually checked; funds are not credited until approved.</p>
+   <label>Deposit amount (USD)</label>
+   <input id="depositAmount" type="number" min="1" max="10000" step="0.01" placeholder="e.g. 5.00">
+   <label>Payment method</label>
+   <select id="depositMethod" onchange="showDepositInstructions()">
+    <option value="ABA Bank">ABA Bank · Manual review</option>
+    <option value="USDT - TON Network">USDT · TON · Manual review</option>
+   </select>
+   <div id="depositInstructions" class="notice">Loading available payment instructions...</div>
+   <label>Payment transaction reference</label>
+   <input id="depositReference" maxlength="200" placeholder="Enter transaction ID / reference">
+   <label>Additional payment details (optional)</label>
+   <textarea id="depositDetails" maxlength="1000" placeholder="Sender name, transfer time, or other useful details"></textarea>
+   <div id="depositMessage" class="notice">Minimum deposit: $1.00. Submit only after you have sent the payment.</div>
+   <button id="depositSubmitBtn" class="full" onclick="submitDeposit()">Submit Deposit for Review</button>
+   <div class="row"><h3>Deposit History</h3><button class="dark" onclick="loadDepositHistory()">Refresh</button></div>
+   <div id="depositHistory"><div class="empty">Loading deposit history...</div></div>
+  </div>
+
+  <div id="walletExchange" class="subpage">
+   <p class="muted">Transfer approved worker earnings into your Advertiser Campaign Wallet. No transfer fee.</p>
+   <p class="muted">Conversion: 10,000 coins = $1.00</p>
+   <label>Coins to transfer</label>
+   <input id="transferCoins" type="number" min="1" step="1" inputmode="numeric" placeholder="Enter whole coins" oninput="previewWalletTransfer()">
+   <div class="feature"><span>Campaign wallet receives</span><strong id="transferPreview">$0.00</strong></div>
+   <div class="feature"><span>Transfer fee</span><strong>$0.00</strong></div>
+   <div id="transferMessage" class="notice">Transfers are instant after server confirmation.</div>
+   <button id="transferButton" class="full" onclick="transferToCampaignWallet()">Transfer to Campaign Wallet</button>
+  </div>
+
+  <div id="walletPhoneTopup" class="subpage">
+   <h3>📱 Phone Top Up</h3>
+   <p class="muted">Request mobile credit for Cambodia. The administrator will process your top-up manually.</p>
+   <label>Mobile operator</label>
+   <select id="phoneProvider"><option>Smart</option><option>Cellcard</option><option>Metfone</option><option>Seatel</option><option>Other</option></select>
+   <label>Phone number</label><input id="phoneRecipient" inputmode="tel" maxlength="24" placeholder="e.g. 012345678">
+   <label>Top-up amount (USD)</label><select id="phoneAmount" onchange="previewServiceCoins('phone')"><option value="0.50">$0.50</option><option value="1.00" selected>$1.00</option><option value="2.00">$2.00</option><option value="5.00">$5.00</option><option value="10.00">$10.00</option><option value="20.00">$20.00</option></select>
+   <label>Additional note (optional)</label><input id="phoneDetails" maxlength="250" placeholder="Any special instructions">
+   <div class="feature"><span>Cost</span><strong id="phoneCost">10,000 coins</strong></div>
+   <div id="phoneMessage" class="notice">Your coins are deducted when you submit. If the order is rejected, they are refunded.</div>
+   <button id="phoneSubmit" class="full" onclick="submitServiceOrder('phone')">Submit Phone Top Up</button>
+  </div>
+
+  <div id="walletGameTopup" class="subpage">
+   <h3>🎮 Game Top Up</h3>
+   <p class="muted">Request game credits or items. Enter the correct player details; admin will fulfill the order manually.</p>
+   <label>Game / platform</label><select id="gameProvider"><option>Mobile Legends: Bang Bang</option><option>Free Fire</option><option>PUBG Mobile</option><option>Honor of Kings</option><option>Roblox</option><option>Other</option></select>
+   <label>Player ID / UID</label><input id="gameRecipient" maxlength="80" placeholder="Enter your Player ID">
+   <label>Server ID (if applicable)</label><input id="gameServer" maxlength="40" placeholder="Enter server ID or leave blank">
+   <label>Package / item requested</label><input id="gamePackage" maxlength="180" placeholder="e.g. 86 Diamonds">
+   <label>Price (USD)</label><input id="gameAmount" type="number" min="0.01" max="1000" step="0.01" value="1.00" oninput="previewServiceCoins('game')">
+   <div class="feature"><span>Cost</span><strong id="gameCost">10,000 coins</strong></div>
+   <div id="gameMessage" class="notice">Check your Player ID carefully. Coins are refunded if admin rejects the order.</div>
+   <button id="gameSubmit" class="full" onclick="submitServiceOrder('game')">Submit Game Top Up</button>
+  </div>
+
+  <div id="walletShopping" class="subpage">
+   <h3>🛍️ Shopping</h3>
+   <p class="muted">Request a product purchase. An administrator will verify the price and arrange delivery manually.</p>
+   <label>Product name</label><input id="shopProduct" maxlength="180" placeholder="Enter product name">
+   <label>Product link (optional)</label><input id="shopLink" type="url" maxlength="500" placeholder="https://...">
+   <label>Quantity</label><input id="shopQuantity" type="number" min="1" max="99" step="1" value="1">
+   <label>Delivery address / contact details</label><textarea id="shopAddress" maxlength="700" placeholder="Recipient name, phone number and delivery address"></textarea>
+   <label>Estimated total price (USD)</label><input id="shopAmount" type="number" min="0.01" max="1000" step="0.01" value="1.00" oninput="previewServiceCoins('shop')">
+   <div class="feature"><span>Cost</span><strong id="shopCost">10,000 coins</strong></div>
+   <div id="shopMessage" class="notice">Admin will verify product availability and price. Rejected orders are refunded.</div>
+   <button id="shopSubmit" class="full" onclick="submitServiceOrder('shop')">Submit Shopping Order</button>
+  </div>
 
   <div class="card">
-
-    <h3>Available Balance</h3>
-
-    <div class="price">
-      <span id="walletCoins">20</span> Coins
-    </div>
-
-    <p>10,000 coins = $1.00</p>
-    <p>Minimum withdrawal: 2,000 coins ($0.20)</p>
-
-    <label>Withdrawal Amount</label>
-    <input
-      type="number"
-      id="withdrawAmount"
-      placeholder="Enter coins"
-      min="2000"
-    >
-
-    <label>Payment Method</label>
-
-    <select id="withdrawMethod">
-      <option>ABA Bank</option>
-      <option>USDT - TON Network</option>
-    </select>
-
-    <button class="full" onclick="requestWithdrawal()">
-      Request Withdrawal
-    </button>
-
-    <p class="muted">
-      Withdrawal requests must be processed and approved by the backend administrator.
-    </p>
-
+   <div class="row"><h3>My Service Orders</h3><button class="dark" onclick="loadServiceOrders()">Refresh</button></div>
+   <div id="serviceOrderHistory"><div class="empty">Your phone, game and shopping orders will appear here.</div></div>
   </div>
+ </div>
+
+ <div class="card">
+  <h3>Advertiser Campaign Wallet</h3>
+  <div class="price" id="walletAdvertiser">$0.00</div>
+  <p class="muted">Use this balance to fund campaigns and subscribe to membership plans. Worker earnings remain separate unless you transfer them here. No transfer fee.</p>
+  <button class="dark full" onclick="walletTab('exchange',document.querySelector('#wallet .tabs button:nth-child(3)'))">Transfer Worker Earnings</button>
+  <button class="dark full" onclick="go('advertise')">Manage Campaign Budget</button>
+ </div>
 
 </section>
 
+<!-- PLANS -->
+<section id="plans" class="page">
+ <h2>👑 Membership Plans</h2>
+ <p class="muted">Subscribe directly using your Advertiser Campaign Wallet. Each paid plan lasts 30 days.</p>
+ <div class="card"><div class="feature"><span>Advertiser Campaign Wallet balance</span><strong id="plansWalletBalance">$0.00</strong></div><p class="muted">Add funds or transfer worker earnings in the Wallet section. No transfer fee.</p></div>
 
-<!-- ================= INVITE ================= -->
+ <div class="card">
+  <span class="tag">FREE</span><h3>🆓 Free</h3><div class="price">Forever</div>
+  <ul>
+   <li>Faucet multiplier ×1</li>
+   <li>Daily Faucet Limit: Not specified</li>
+   <li>Referral commission 10%</li>
+   <li>Referral bonus 200 coins</li>
+  </ul>
+  <button class="full" disabled>Free Plan</button>
+ </div>
 
+ <div class="card">
+  <span class="tag">BRONZE</span><h3>🥉 Bronze</h3><div class="price">$2.99 / month</div>
+  <ul><li>Faucet multiplier ×1.6</li><li>160 daily claims</li><li>15% referral commission</li><li>200 coin referral bonus</li></ul>
+  <button class="full" onclick="subscribeWithWallet('Bronze')">Subscribe Bronze with Campaign Wallet</button>
+ </div>
+
+ <div class="card">
+  <span class="tag">SILVER</span><h3>🥈 Silver</h3><div class="price">$5.99 / month</div>
+  <ul><li>Faucet multiplier ×2</li><li>200 daily claims</li><li>20% referral commission</li><li>250 coin referral bonus</li></ul>
+  <button class="full" onclick="subscribeWithWallet('Silver')">Subscribe Silver with Campaign Wallet</button>
+ </div>
+
+ <div class="card">
+  <span class="tag">GOLD</span><h3>🥇 Gold</h3><div class="price">$9.99 / month</div>
+  <ul><li>Faucet multiplier ×5</li><li>250 daily claims</li><li>25% referral commission</li><li>300 coin referral bonus</li></ul>
+  <button class="full" onclick="subscribeWithWallet('Gold')">Subscribe Gold with Campaign Wallet</button>
+ </div>
+
+ <div class="card">
+  <span class="tag">VIP</span><h3>💎 VIP</h3><div class="price">$16.99 / month</div>
+  <ul><li>Faucet multiplier ×7</li><li>288 daily claims</li><li>30% referral commission</li><li>350 coin referral bonus</li></ul>
+  <button class="full" onclick="subscribeWithWallet('VIP')">Subscribe VIP with Campaign Wallet</button>
+ </div>
+</section>
+
+<!-- INVITE -->
 <section id="invite" class="page">
-
-  <h2>👥 Invite Friends</h2>
-
-  <div class="card">
-
-    <h3>Referral Benefits</h3>
-
-    <p id="referralInfo"></p>
-
-    <p class="muted">
-      Referral tracking and commission payments require a backend.
-    </p>
-
-    <button onclick="copyReferral()">
-      Copy Referral Link
-    </button>
-
+ <h2>👥 Invite Friends</h2>
+ <div class="card">
+  <h3>Your Personal Referral Link</h3>
+  <p class="muted">Share this link with friends. When a new user opens the Mini App through your link and registers, they will be connected to your account.</p>
+  <div class="feature" style="display:block">
+   <label for="referralLink" class="muted">Your referral link</label>
+   <input id="referralLink" type="text" readonly value="Loading your referral link..." style="width:100%;margin-top:8px;box-sizing:border-box" />
   </div>
+  <button class="dark full" id="copyReferralButton" onclick="copyReferralLink()">📋 Copy Referral Link</button>
+  <div class="feature"><span>Invited users</span><strong id="referralInvited">0</strong></div>
+  <div class="feature"><span>Successful referrals</span><strong id="referralSuccessful">0</strong></div>
+  <div class="feature"><span>Referral earnings</span><strong id="referralEarnings">0 coins</strong></div>
+ </div>
+ <div class="card">
+  <h3>Referral Program</h3>
+  <p class="muted">Referral commissions are credited to your Worker wallet when your referred users complete eligible tasks and their rewards are approved.</p>
+  <div class="feature"><span>Free commission</span><strong>10%</strong></div>
+  <div class="feature"><span>Free referral bonus</span><strong>200 coins</strong></div>
+  <p class="muted">Bronze 15% · Silver 20% · Gold 25% · VIP 30%.</p>
+ </div>
+</section>
 
+<!-- SMART LINKS -->
+<section id="smartlinks" class="page">
+ <h2>🔗 Sponsored SmartLinks</h2>
+ <p class="muted">Open an optional sponsored link if you are interested. Link visits do not earn coins and are not required to use the app.</p>
+ <div class="card">
+  <h3>Monetag</h3>
+  <p class="muted">Sponsored offer from Monetag.</p>
+  <button id="monetagSmartLinkBtn" class="full" onclick="openSmartLink('monetag')" disabled>Loading link...</button>
+  <div id="monetagSmartLinkStatus" class="fine">Checking link availability...</div>
+ </div>
+ <div class="card">
+  <h3>Adsterra</h3>
+  <p class="muted">Sponsored offer from Adsterra.</p>
+  <button id="adsterraSmartLinkBtn" class="full" onclick="openSmartLink('adsterra')" disabled>Loading link...</button>
+  <div id="adsterraSmartLinkStatus" class="fine">Checking link availability...</div>
+ </div>
+ <div class="notice">Sponsored links are optional. Never click an advertisement unless you genuinely want to visit it.</div>
+</section>
+
+<!-- PROFILE -->
+<section id="profile" class="page">
+ <h2>Profile & Account Mode</h2>
+
+ <div class="card">
+  <h3>One Telegram Account · Two Roles</h3>
+  <p class="muted">Use the same Telegram account to complete tasks as a Worker and create campaigns as an Advertiser.</p>
+  <div class="tabs">
+   <button class="selected" onclick="setRole('worker',this)">Worker Mode</button>
+   <button onclick="setRole('advertiser',this)">Advertiser Mode</button>
+  </div>
+  <p id="roleDescription" class="muted">Worker mode: browse tasks, submit proof and view approved earnings.</p>
+ </div>
+
+ <div class="card">
+  <h3>Account Information</h3>
+  <div class="profile-identity">
+   <div id="profileAvatar" class="profile-avatar" aria-label="Telegram profile photo">👤</div>
+   <div class="profile-identity-details">
+    <strong id="profileName">Loading...</strong>
+    <span id="profileUsername">Username not set</span>
+   </div>
+  </div>
+  <div class="feature"><span>Telegram ID</span><strong id="profileTelegramId">Loading...</strong></div>
+  <div class="feature"><span>Current plan</span><strong id="profilePlan">Free</strong></div>
+  <div class="feature"><span>Account roles</span><strong>Worker + Advertiser</strong></div>
+  <div class="feature"><span>Authentication</span><strong id="authStatus">Checking...</strong></div>
+ </div>
+
+ <button class="dark full" onclick="go('plans')">View Membership Plans</button>
+ <button class="dark full" onclick="go('invite')">Invite Friends</button>
 </section>
 
 </main>
 
-
-<!-- ================= NAVIGATION ================= -->
-
 <nav>
-
-  <button class="active" onclick="showPage('home',this)">
-    🏠<br>Home
-  </button>
-
-  <button onclick="showPage('game',this)">
-    🎮<br>Game
-  </button>
-
-  <button onclick="showPage('faucet',this)">
-    🚰<br>Faucet
-  </button>
-
-  <button onclick="showPage('tips',this)">
-    💡<br>Tips
-  </button>
-
-  <button onclick="showPage('membership',this)">
-    👑<br>Plans
-  </button>
-
-  <button onclick="showPage('wallet',this)">
-    💰<br>Wallet
-  </button>
-
-  <button onclick="showPage('invite',this)">
-    👥<br>Invite
-  </button>
-
+ <button class="active" onclick="go('home',this)"><span>🏠</span>Home</button>
+ <button onclick="go('tasks',this)"><span>📋</span>Tasks</button>
+ <button onclick="go('wallet',this)"><span>💰</span>Wallet</button>
+ <button onclick="go('faucet',this)"><span>🚰</span>Faucet</button>
+ <button onclick="go('advertise',this)"><span>📢</span>Advertise</button>
+ <button onclick="go('smartlinks',this)"><span>🔗</span>Links</button>
+ <button onclick="go('profile',this)"><span>👤</span>Profile</button>
 </nav>
 
-
 <script>
-
-// ==========================================
+// ============================================
 // CONFIGURATION
-// ==========================================
+// ============================================
 
 const API_URL = "https://khmer-quiz-backend.onrender.com";
-
+const tg = window.Telegram?.WebApp;
 
 let authToken = null;
-let starsCatalog = {};
-let paymentBusy = false;
+let currentUser = null;
+let currentTaskFilter = "all";
+let currentSubmissionFilter = "submitted";
+let taskCache = [];
+let claimCache = [];
+let campaignCache = [];
+let submissionCache = [];
+let requestBusy = false;
+ // Faucet state
+let faucetRemainingMs = 0;
+let faucetCountdownTimer = null;
+let faucetReady = false;
+let faucetBusy = false;
+let faucetDailyLimit = null;
+let turnstileToken = null;
+let turnstileWidgetId = null;
+const TURNSTILE_SITE_KEY = "0x4AAAAAAGHRHCnCICOPF_YC";
 
-// SmartLinks are supplied by the backend only after they are configured
-// with active publisher URLs. Never auto-open or reward an ad click.
-const smartLinkUrls = { monetag: null, adsterra: null };
+if (tg) {
+  tg.ready();
+  tg.expand();
+}
 
-async function loadAdvertisingConfig() {
-  const status = document.getElementById("smartlinkStatus");
+// ============================================
+// CLOUDFLARE TURNSTILE CAPTCHA
+// ============================================
+function onTurnstileLoaded() {
+  const mount = $("faucetTurnstile");
+  if (!mount || !window.turnstile || turnstileWidgetId !== null) return;
+
+  turnstileWidgetId = window.turnstile.render(mount, {
+    sitekey: TURNSTILE_SITE_KEY,
+    theme: "dark",
+    callback(token) {
+      turnstileToken = token;
+      updateFaucetClaimButton();
+      showMessage("faucetMessage", "Security check completed. You can claim when the Faucet is ready.", "success");
+    },
+    "expired-callback"() {
+      turnstileToken = null;
+      updateFaucetClaimButton();
+      showMessage("faucetMessage", "CAPTCHA expired. Please complete the security check again.", "notice");
+    },
+    "error-callback"() {
+      turnstileToken = null;
+      updateFaucetClaimButton();
+      showMessage("faucetMessage", "CAPTCHA could not load. Please refresh and try again.", "error");
+    }
+  });
+}
+
+function resetFaucetCaptcha() {
+  turnstileToken = null;
+  if (window.turnstile && turnstileWidgetId !== null) {
+    window.turnstile.reset(turnstileWidgetId);
+  }
+  updateFaucetClaimButton();
+}
+
+function updateFaucetClaimButton() {
+  const button = $("faucetClaimBtn");
+  if (!button || faucetBusy) return;
+  const canClaim = faucetReady && faucetRemainingMs <= 0 && Boolean(turnstileToken);
+  button.disabled = !canClaim;
+  if (!faucetReady) return;
+  button.textContent = canClaim
+    ? "Claim Faucet Reward"
+    : (turnstileToken ? "Claim Not Available" : "Complete CAPTCHA to Claim");
+}
+
+// ============================================
+// GENERAL HELPERS
+// ============================================
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function showMessage(id, message, type = "notice") {
+  const element = $(id);
+  if (!element) return;
+  element.className = type;
+  element.textContent = message;
+}
+
+function formatCoins(value) {
+  const number = Number(value || 0);
+  return Number.isFinite(number)
+    ? number.toLocaleString(undefined, {maximumFractionDigits: 2})
+    : "0";
+}
+
+function formatUSD(value) {
+  const number = Number(value || 0);
+  return Number.isFinite(number) ? "$" + number.toFixed(2) : "$0.00";
+}
+
+function extractArray(data, keys = []) {
+  if (Array.isArray(data)) return data;
+
+  for (const key of keys) {
+    if (Array.isArray(data?.[key])) return data[key];
+    if (Array.isArray(data?.data?.[key])) return data.data[key];
+  }
+
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
+}
+
+function getErrorMessage(data, fallback) {
+  return data?.message || data?.error || data?.details || fallback;
+}
+
+async function apiRequest(path, options = {}) {
+  if (!authToken) {
+    throw new Error("Your Telegram account is not authenticated. Open this app inside Telegram.");
+  }
+
+  const headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + authToken,
+    ...(options.headers || {})
+  };
+
+  const response = await fetch(API_URL + path, {
+    ...options,
+    headers
+  });
+
+  let data = {};
   try {
-    const response = await fetch(API_URL + "/api/ads/config", {
-      method: "GET",
-      headers: { "Accept": "application/json" },
-      cache: "no-store"
-    });
-    const config = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error("Advertising configuration unavailable.");
+    data = await response.json();
+  } catch {
+    data = {};
+  }
 
-    for (const provider of ["monetag", "adsterra"]) {
-      const candidate = config?.[provider]?.url;
-      if (typeof candidate === "string") {
-        try {
-          const parsed = new URL(candidate);
-          if (parsed.protocol === "https:" && !parsed.username && !parsed.password) {
-            smartLinkUrls[provider] = parsed.href;
-          }
-        } catch { /* Ignore invalid publisher URLs. */ }
+  if (!response.ok || data.success === false) {
+    throw new Error(getErrorMessage(data, `Request failed (${response.status})`));
+  }
+
+  return data;
+}
+
+// ============================================
+// TELEGRAM AUTHENTICATION
+// ============================================
+
+async function authenticateTelegram() {
+
+  if (!tg || !tg.initData) {
+    showMessage(
+      "connectionNotice",
+      "Open this Mini App from your Telegram bot. Browser preview does not provide Telegram authentication.",
+      "error"
+    );
+    $("authStatus").textContent = "Not authenticated";
+    return false;
+  }
+
+  try {
+    const controller = new AbortController();
+    const authTimeout = setTimeout(() => controller.abort(), 20000);
+    let response;
+    try {
+      response = await fetch(API_URL + "/api/auth/telegram", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({initData: tg.initData}),
+        signal: controller.signal
+      });
+    } catch (error) {
+      if (error.name === "AbortError") {
+        throw new Error("Telegram authentication timed out. Please close and reopen the Mini App.");
       }
-      const placement = document.getElementById(provider + "Offer");
-      if (placement) placement.classList.toggle("hidden", !smartLinkUrls[provider]);
+      throw error;
+    } finally {
+      clearTimeout(authTimeout);
     }
 
-    const anyEnabled = Boolean(smartLinkUrls.monetag || smartLinkUrls.adsterra);
-    status.textContent = anyEnabled
-      ? "Sponsored links are optional. No game coins or benefits are awarded for opening them."
-      : "Sponsored offers are not configured yet.";
+    const data = await response.json();
+
+    if (!response.ok || data.success === false) {
+      throw new Error(getErrorMessage(data, "Telegram authentication failed."));
+    }
+
+    authToken = data.token || data.accessToken || data.data?.token;
+
+    if (!authToken) {
+      throw new Error("The backend did not return an authentication token.");
+    }
+
+    $("authStatus").textContent = "Authenticated";
+
+    await refreshAll();
+    return true;
+
   } catch (error) {
-    status.textContent = "Sponsored offers are temporarily unavailable.";
-    console.warn("Could not load sponsored links:", error);
+    console.error("Authentication error:", error);
+    showMessage("connectionNotice", error.message, "error");
+    $("authStatus").textContent = "Authentication failed";
+    return false;
+  }
+}
+
+// ============================================
+// LOAD USER PROFILE AND BALANCES
+// ============================================
+
+async function loadProfile() {
+  const data = await apiRequest("/api/me");
+  currentUser = data.user || data.data?.user || data.data || data;
+
+  // Use marketplace worker earnings fields only.
+  // Do not use the old legacy users.coins field.
+  const workerBalance =
+    currentUser.workerEarnings ??
+    currentUser.availableCoins ??
+    currentUser.workerBalance ??
+    currentUser.worker_balance ??
+    0;
+
+  const plan =
+    currentUser.planName ||
+    currentUser.membership ||
+    currentUser.plan ||
+    "Free";
+
+  $("coinBalance").textContent = formatCoins(workerBalance);
+  $("homeCoins").textContent = formatCoins(workerBalance) + " coins";
+  $("walletCoins").textContent = formatCoins(workerBalance);
+  $("homePlan").textContent = String(plan);
+  $("profilePlan").textContent = String(plan);
+
+  // Telegram may provide optional profile fields through initDataUnsafe.user.
+  // The profile photo is optional in Telegram, so use initials when absent.
+  const telegramUser = tg?.initDataUnsafe?.user || {};
+  const firstName =
+    telegramUser.first_name ||
+    currentUser.firstName ||
+    currentUser.first_name ||
+    currentUser.username ||
+    "Telegram User";
+  const lastName = telegramUser.last_name || currentUser.lastName || currentUser.last_name || "";
+  const displayName = [firstName, lastName].filter(Boolean).join(" ");
+
+  $("profileName").textContent = displayName;
+
+  const username = telegramUser.username || currentUser.username || "";
+  $("profileUsername").textContent = username ? "@" + username : "Username not set";
+
+  const telegramId = currentUser.telegramId || currentUser.telegram_id || telegramUser.id || "";
+  $("profileTelegramId").textContent = telegramId ? String(telegramId) : "Unavailable";
+
+  const avatar = $("profileAvatar");
+  const photoUrl = typeof telegramUser.photo_url === "string" ? telegramUser.photo_url : "";
+  const initials = [firstName, lastName]
+    .filter(Boolean)
+    .map(part => part.trim().charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "👤";
+  avatar.replaceChildren();
+
+  if (photoUrl && /^https:\/\//i.test(photoUrl)) {
+    const image = document.createElement("img");
+    image.src = photoUrl;
+    image.alt = "Telegram profile photo";
+    image.referrerPolicy = "no-referrer";
+    image.onerror = () => { avatar.textContent = initials; };
+    avatar.appendChild(image);
+  } else {
+    avatar.textContent = initials;
+  }
+}
+// ============================================
+// REAL BACKEND FAUCET
+// ============================================
+
+function formatFaucetTime(milliseconds) {
+  const totalSeconds = Math.max(
+    0,
+    Math.ceil(milliseconds / 1000)
+  );
+
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return (
+    String(minutes).padStart(2, "0") +
+    ":" +
+    String(seconds).padStart(2, "0")
+  );
+}
+
+function stopFaucetCountdown() {
+  if (faucetCountdownTimer) {
+    clearInterval(faucetCountdownTimer);
+    faucetCountdownTimer = null;
+  }
+}
+
+function startFaucetCountdown(remainingMs) {
+  stopFaucetCountdown();
+
+  faucetRemainingMs = Math.max(0, Number(remainingMs) || 0);
+
+  const countdown = $("faucetCountdown");
+
+  if (!countdown) return;
+
+  countdown.textContent = formatFaucetTime(faucetRemainingMs);
+
+  if (faucetRemainingMs <= 0) {
+    return;
+  }
+
+  faucetCountdownTimer = setInterval(() => {
+    faucetRemainingMs = Math.max(
+      0,
+      faucetRemainingMs - 1000
+    );
+
+    countdown.textContent = formatFaucetTime(faucetRemainingMs);
+
+    if (faucetRemainingMs <= 0) {
+      stopFaucetCountdown();
+      loadFaucetStatus();
+    }
+  }, 1000);
+}
+
+function renderFaucetStatus(data) {
+  const reward = Number(data.reward || 0);
+  const balance = Number(data.workerEarnings || 0);
+  const claims = Number(data.claimsToday || 0);
+  const limit = data.dailyLimit;
+
+  faucetDailyLimit = limit;
+  faucetReady = Boolean(data.ready);
+
+  $("faucetReward").textContent =
+    formatCoins(reward) + " coins";
+
+  $("faucetBalance").textContent =
+    formatCoins(balance) + " coins";
+
+  $("faucetClaimsToday").textContent =
+    formatCoins(claims);
+
+  $("faucetDailyLimit").textContent =
+    limit === null || limit === undefined
+      ? "Unlimited"
+      : formatCoins(limit);
+
+  // Update the main worker balance display.
+  $("coinBalance").textContent = formatCoins(balance);
+  $("homeCoins").textContent = formatCoins(balance) + " coins";
+  $("walletCoins").textContent = formatCoins(balance);
+
+  startFaucetCountdown(data.remainingMs || 0);
+
+  const button = $("faucetClaimBtn");
+
+  if (limit !== null && limit !== undefined && claims >= limit) {
+    button.disabled = true;
+    button.textContent = "Daily Limit Reached";
+
+    showMessage(
+      "faucetStatus",
+      "You have reached your daily Faucet claim limit. Please try again tomorrow.",
+      "notice"
+    );
+
+    return;
+  }
+
+  if (Number(data.remainingMs || 0) > 0) {
+    button.disabled = true;
+    button.textContent = "Please Wait";
+
+    showMessage(
+      "faucetStatus",
+      "Your next Faucet claim is not ready yet.",
+      "notice"
+    );
+
+    return;
+  }
+
+  if (faucetReady) {
+    button.disabled = !turnstileToken;
+    button.textContent = turnstileToken
+      ? "Claim " + formatCoins(reward) + " Coins"
+      : "Complete CAPTCHA to Claim";
+
+    showMessage(
+      "faucetStatus",
+      "Your Faucet is ready. You can claim your reward now.",
+      "success"
+    );
+  } else {
+    button.disabled = true;
+    button.textContent = "Not Available";
+
+    showMessage(
+      "faucetStatus",
+      "Faucet is currently unavailable. Refresh the status to check again.",
+      "notice"
+    );
+  }
+}
+
+async function loadFaucetStatus() {
+  if (!authToken) {
+    showMessage(
+      "faucetStatus",
+      "Please open the app through Telegram and authenticate first.",
+      "error"
+    );
+    return;
+  }
+
+  const button = $("faucetClaimBtn");
+
+  if (button && !faucetBusy) {
+    button.disabled = true;
+    button.textContent = "Checking...";
+  }
+
+  try {
+    const data = await apiRequest("/api/faucet/status");
+
+    if (!data.success) {
+      throw new Error("Unable to retrieve Faucet status.");
+    }
+
+    renderFaucetStatus(data);
+
+  } catch (error) {
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Faucet Unavailable";
+    }
+
+    showMessage(
+      "faucetStatus",
+      error.message,
+      "error"
+    );
+  }
+}
+
+async function claimFaucet() {
+  if (faucetBusy) return;
+
+  if (!authToken) {
+    showMessage(
+      "faucetMessage",
+      "Please authenticate through Telegram first.",
+      "error"
+    );
+    return;
+  }
+
+  if (!faucetReady) {
+    await loadFaucetStatus();
+    return;
+  }
+
+  if (!turnstileToken) {
+    showMessage("faucetMessage", "Please complete the CAPTCHA before claiming your reward.", "error");
+    updateFaucetClaimButton();
+    return;
+  }
+
+  if (!confirm("Claim your Faucet reward now?")) {
+    return;
+  }
+
+  faucetBusy = true;
+
+  const button = $("faucetClaimBtn");
+  button.disabled = true;
+  button.textContent = "Claiming...";
+
+  try {
+    const data = await apiRequest("/api/faucet/claim", {
+      method: "POST",
+      body: JSON.stringify({ turnstileToken })
+    });
+
+    if (!data.success) {
+      throw new Error("Faucet claim was unsuccessful.");
+    }
+
+    if (data.balanceType !== "worker_earnings") {
+      throw new Error(
+        "Unexpected reward destination. Please contact support."
+      );
+    }
+
+    showMessage(
+      "faucetMessage",
+      "Success! You received " +
+        formatCoins(data.reward) +
+        " coins in your Worker Earnings Wallet.",
+      "success"
+    );
+
+    // Refresh actual backend balances and Faucet status.
+    await loadProfile();
+    await loadFaucetStatus();
+
+  } catch (error) {
+    showMessage(
+      "faucetMessage",
+      error.message,
+      "error"
+    );
+
+    // Refresh status after cooldown or daily-limit errors.
+    await loadFaucetStatus();
+
+  } finally {
+    faucetBusy = false;
+    resetFaucetCaptcha();
+    updateFaucetClaimButton();
+  }
+}
+// ============================================
+// TASK LIST
+// ============================================
+
+function taskType(task) {
+  const type = String(
+    task.type || task.campaignType || task.campaign_type || ""
+  ).toLowerCase();
+
+  if (type === "job" || type === "jobs") return "job";
+  if (type === "shortlink") return "shortlink";
+  if (type === "video") return "video";
+  return "ptc";
+}
+
+function taskTitle(task) {
+  return task.title || task.campaignTitle || task.campaign_title || "Marketplace Task";
+}
+
+function taskReward(task) {
+  return task.rewardCoins ??
+    task.reward_coins ??
+    task.rewardPerTaskCoins ??
+    task.reward_per_task_coins ??
+    task.workerReward ??
+    0;
+}
+
+function taskId(task) {
+  return task.id ?? task.campaignId ?? task.campaign_id;
+}
+
+function taskDescription(task) {
+  return task.description ||
+    task.instructions ||
+    task.jobDescription ||
+    task.job_description ||
+    "Follow the advertiser's instructions and submit the required proof.";
+}
+
+function taskIcon(type) {
+  return {
+    ptc: "🌐",
+    video: "▶️",
+    job: "🧰",
+    shortlink: "🔗"
+  }[type] || "📋";
+}
+
+async function loadTasks() {
+  const container = $("taskList");
+  container.innerHTML = '<div class="empty">Loading tasks...</div>';
+
+  const data = await apiRequest("/api/tasks");
+  taskCache = extractArray(data, ["tasks", "campaigns", "items"]);
+
+  $("homeTaskCount").textContent = String(taskCache.length);
+
+  renderTasks();
+}
+
+function renderTasks() {
+  const container = $("taskList");
+
+  const filtered = taskCache.filter(task => {
+    return currentTaskFilter === "all" ||
+      taskType(task) === currentTaskFilter;
+  });
+
+  if (!filtered.length) {
+    container.innerHTML = '<div class="empty">No available tasks in this category right now.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(task => {
+    const type = taskType(task);
+    const id = taskId(task);
+    const reward = taskReward(task);
+    const title = taskTitle(task);
+    const description = taskDescription(task);
+    const slots = task.remainingSlots ??
+      task.remaining_slots ??
+      task.availableSlots ??
+      task.available_slots;
+
+    return `
+      <div class="card">
+        <div class="task-card">
+          <div class="task-icon">${taskIcon(type)}</div>
+          <div class="grow">
+            <div class="row">
+              <h3>${escapeHTML(title)}</h3>
+              <span class="reward">${formatCoins(reward)} coins</span>
+            </div>
+            <p class="muted">${escapeHTML(description)}</p>
+            <span class="pill">${escapeHTML(type.toUpperCase())}</span>
+            ${slots !== undefined ? `<span class="pill">${escapeHTML(slots)} slots left</span>` : ""}
+          </div>
+        </div>
+        <button class="full" onclick="claimTask('${escapeHTML(id)}')">Claim Task</button>
+      </div>
+    `;
+  }).join("");
+}
+
+function taskTab(type, button) {
+  currentTaskFilter = type;
+
+  document.querySelectorAll("#taskTabs button").forEach(item => {
+    item.classList.remove("selected");
+  });
+
+  button.classList.add("selected");
+  renderTasks();
+}
+
+// ============================================
+// CLAIM TASK
+// ============================================
+
+async function claimTask(id) {
+  if (!id) {
+    alert("Task ID is missing.");
+    return;
+  }
+
+  if (!confirm("Claim this task?")) return;
+
+  try {
+    const data = await apiRequest(
+      "/api/tasks/" + encodeURIComponent(id) + "/claim",
+      {method: "POST", body: JSON.stringify({})}
+    );
+
+    alert(data.message || "Task claimed successfully. Please complete it and submit your proof.");
+
+    await loadTasks();
+    await loadMyClaims();
+
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+// ============================================
+// WORKER CLAIMS AND PROOF SUBMISSION
+// ============================================
+
+function claimStatus(claim) {
+  return String(claim.status || "claimed").toLowerCase();
+}
+
+function claimIdentifier(claim) {
+  return claim.id ?? claim.claimId ?? claim.claim_id;
+}
+
+async function loadMyClaims() {
+  const container = $("myClaimsList");
+  container.innerHTML = '<div class="empty">Loading your task history...</div>';
+
+  try {
+    const data = await apiRequest("/api/tasks/my-claims");
+    claimCache = extractArray(data, ["claims", "tasks", "items"]);
+    renderMyClaims();
+  } catch (error) {
+    container.innerHTML = `<div class="notice error">${escapeHTML(error.message)}</div>`;
+  }
+}
+
+function renderMyClaims() {
+  const container = $("myClaimsList");
+
+  if (!claimCache.length) {
+    container.innerHTML = '<div class="empty">You have not claimed any tasks yet.</div>';
+    return;
+  }
+
+  container.innerHTML = claimCache.map(claim => {
+    const id = claimIdentifier(claim);
+    const status = claimStatus(claim);
+    const title = claim.title ||
+      claim.campaignTitle ||
+      claim.campaign_title ||
+      "Claimed Task";
+
+    const reason = claim.rejectionReason ||
+      claim.rejection_reason ||
+      "";
+
+    const verification = String(
+      claim.verificationType ||
+      claim.verification_type ||
+      "text"
+    ).toLowerCase();
+
+    const targetUrl = claim.targetUrl ||
+      claim.target_url ||
+      claim.url ||
+      "";
+
+    let proofForm = "";
+
+    if (status === "claimed") {
+      if (verification === "screenshot") {
+        proofForm = `
+          <div class="proof-box">
+            <h3>Upload Screenshot Proof</h3>
+            <p class="muted">Choose a JPG, PNG or WEBP image. Maximum size: 5 MB.</p>
+            <input id="proofImage_${escapeHTML(id)}" type="file" accept="image/jpeg,image/png,image/webp">
+            <button class="green full" onclick="submitTaskProof('${escapeHTML(id)}','screenshot')">Upload &amp; Submit for Review</button>
+          </div>
+        `;
+      } else {
+        proofForm = `
+          <div class="proof-box">
+            <h3>Submit Your Proof</h3>
+            ${verification === "link" ? `
+              <label>Proof URL</label>
+              <input id="proofUrl_${escapeHTML(id)}" type="url" placeholder="https://example.com/proof">
+            ` : `
+              <label>Proof text</label>
+              <textarea id="proofText_${escapeHTML(id)}" placeholder="Enter your completion proof"></textarea>
+            `}
+            <button class="green full" onclick="submitTaskProof('${escapeHTML(id)}','${escapeHTML(verification)}')">Submit for Advertiser Review</button>
+          </div>
+        `;
+      }
+    }
+
+    return `
+      <div class="card">
+        <div class="row">
+          <h3>${escapeHTML(title)}</h3>
+          <span class="status">${escapeHTML(status.toUpperCase())}</span>
+        </div>
+        <p class="muted">Reward: ${formatCoins(taskReward(claim))} coins</p>
+        ${targetUrl ? `<p class="muted">Task URL: <a href="${escapeHTML(targetUrl)}" target="_blank" rel="noopener noreferrer">Open task</a></p>` : ""}
+        ${reason ? `<div class="notice error">Rejection reason: ${escapeHTML(reason)}</div>` : ""}
+        ${(claim.proof_image_url || claim.proofImageUrl) ? `<div class="proof-box"><strong>Your uploaded screenshot</strong><p><a href="${escapeHTML(claim.proof_image_url || claim.proofImageUrl)}" target="_blank" rel="noopener noreferrer">View screenshot</a></p></div>` : ""}
+        ${proofForm}
+      </div>
+    `;
+  }).join("");
+}
+
+async function submitTaskProof(claimId, verification) {
+  try {
+    if (verification === "screenshot") {
+      const file = $("proofImage_" + claimId)?.files?.[0];
+      if (!file) {
+        alert("Please choose a screenshot image.");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Screenshot must be 5 MB or smaller.");
+        return;
+      }
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        alert("Please upload a JPG, PNG or WEBP image.");
+        return;
+      }
+      if (!authToken) throw new Error("Open this app inside Telegram to authenticate.");
+      const formData = new FormData();
+      formData.append("screenshot", file);
+      const response = await fetch(API_URL + "/api/tasks/" + encodeURIComponent(claimId) + "/submit", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + authToken },
+        body: formData
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success === false) throw new Error(getErrorMessage(data, `Upload failed (${response.status})`));
+      alert(data.message || "Screenshot submitted for advertiser review.");
+      await loadMyClaims();
+      return;
+    }
+
+    let body = {};
+    if (verification === "link") {
+      const proofUrl = $("proofUrl_" + claimId)?.value.trim();
+      if (!proofUrl) { alert("Please enter your proof URL."); return; }
+      try { new URL(proofUrl); } catch { alert("Please enter a valid URL."); return; }
+      body.proofUrl = proofUrl;
+    } else {
+      const proofText = $("proofText_" + claimId)?.value.trim();
+      if (!proofText) { alert("Please enter your proof text."); return; }
+      body.proofText = proofText;
+    }
+
+    const data = await apiRequest(
+      "/api/tasks/" + encodeURIComponent(claimId) + "/submit",
+      {method: "POST", body: JSON.stringify(body)}
+    );
+    alert(data.message || "Your proof has been submitted for review.");
+    await loadMyClaims();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+// ============================================
+// CAMPAIGN FORM
+// ============================================
+
+function campaignFields() {
+  const type = $("campaignType").value;
+
+  $("ptcFields").classList.toggle("hidden", type !== "ptc");
+  $("videoFields").classList.toggle("hidden", type !== "video");
+  $("jobFields").classList.toggle("hidden", type !== "job");
+  $("shortlinkFields").classList.toggle("hidden", type !== "shortlink");
+}
+
+function getCampaignFormData() {
+  const type = $("campaignType").value;
+  const title = $("campaignTitle").value.trim();
+  const quantity = Number($("campaignQuantity").value);
+  const dailyLimit = Number($("campaignDaily").value);
+  const budgetUsd = Number($("campaignBudget").value);
+
+  if (!title) throw new Error("Please enter a campaign title.");
+  if (!Number.isInteger(quantity) || quantity < 1) {
+    throw new Error("Campaign quantity must be a whole number greater than zero.");
+  }
+  if (!Number.isInteger(dailyLimit) || dailyLimit < 0) {
+    throw new Error("Daily limit must be zero or a positive whole number.");
+  }
+  if (!Number.isFinite(budgetUsd) || budgetUsd <= 0) {
+    throw new Error("Please enter a valid campaign budget.");
+  }
+
+  const payload = {
+    type,
+    title,
+    quantity,
+    totalSlots: quantity,
+    dailyLimit,
+    budgetUsd
+  };
+
+  if (type === "ptc") {
+    payload.package = $("ptcPackage").value;
+    payload.url = $("ptcUrl").value.trim();
+    if (!isValidHttpUrl(payload.url)) {
+      throw new Error("Please enter a valid PTC website URL.");
+    }
+  }
+
+  if (type === "video") {
+    payload.package = $("videoPackage").value;
+    payload.url = $("videoUrl").value.trim();
+    if (!isValidHttpUrl(payload.url)) {
+      throw new Error("Please enter a valid video URL.");
+    }
+  }
+
+  if (type === "job") {
+    payload.category = $("jobCategory").value;
+    payload.difficulty = $("jobDifficulty").value;
+    payload.expectedTime = $("jobTime").value.trim();
+    payload.description = $("jobDescription").value.trim();
+    payload.url = $("jobUrl").value.trim();
+    payload.verificationType = $("jobVerification").value;
+    payload.rewardCoins = Number($("jobReward").value);
+    payload.totalSlots = Number($("jobSlots").value);
+    payload.quantity = payload.totalSlots;
+
+    if (!payload.description) throw new Error("Please enter the job instructions.");
+    if (!Number.isFinite(payload.rewardCoins) || payload.rewardCoins <= 0) {
+      throw new Error("Enter a valid reward per job.");
+    }
+    if (!Number.isInteger(payload.totalSlots) || payload.totalSlots < 1) {
+      throw new Error("Enter a valid number of job slots.");
+    }
+    if (payload.url && !isValidHttpUrl(payload.url)) {
+      throw new Error("Please enter a valid job URL or leave it empty.");
+    }
+  }
+
+  if (type === "shortlink") {
+    payload.providerName = $("shortlinkProvider").value.trim();
+    payload.url = $("shortlinkUrl").value.trim();
+    payload.rewardCoins = Number($("shortlinkReward").value);
+    payload.totalSlots = Number($("shortlinkSlots").value);
+    payload.quantity = payload.totalSlots;
+
+    if (!payload.providerName) throw new Error("Please enter the shortlink provider name.");
+    if (!isValidHttpUrl(payload.url)) throw new Error("Please enter a valid shortlink destination URL.");
+    if (!Number.isFinite(payload.rewardCoins) || payload.rewardCoins <= 0) {
+      throw new Error("Enter a valid shortlink reward.");
+    }
+    if (!Number.isInteger(payload.totalSlots) || payload.totalSlots < 1) {
+      throw new Error("Enter a valid number of shortlink slots.");
+    }
+  }
+
+  return payload;
+}
+
+function isValidHttpUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function previewCampaign() {
+  try {
+    const data = getCampaignFormData();
+    $("campaignPreview").textContent =
+      `Preview: ${data.title} · ${data.type.toUpperCase()} · ${data.totalSlots} slots · Budget ${formatUSD(data.budgetUsd)}. The backend will validate the campaign before creation.`;
+    showMessage("campaignMessage", "", "notice");
+  } catch (error) {
+    $("campaignPreview").textContent = "";
+    showMessage("campaignMessage", error.message, "error");
+  }
+}
+
+async function createCampaign() {
+  if (requestBusy) return;
+
+  let payload;
+
+  try {
+    payload = getCampaignFormData();
+  } catch (error) {
+    showMessage("campaignMessage", error.message, "error");
+    return;
+  }
+
+  if (!confirm("Submit this campaign for administrator review?")) return;
+
+  requestBusy = true;
+  $("createCampaignBtn").disabled = true;
+  $("createCampaignBtn").textContent = "Submitting...";
+
+  try {
+    const data = await apiRequest("/api/campaigns", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    showMessage(
+      "campaignMessage",
+      data.message || "Campaign submitted. It may require administrator approval and funding before becoming active.",
+      "success"
+    );
+
+    $("campaignTitle").value = "";
+    $("campaignPreview").textContent = "";
+
+    await loadAdvertiserData();
+
+  } catch (error) {
+    showMessage("campaignMessage", error.message, "error");
+  } finally {
+    requestBusy = false;
+    $("createCampaignBtn").disabled = false;
+    $("createCampaignBtn").textContent = "Submit Campaign for Admin Review";
+  }
+}
+
+// ============================================
+// ADVERTISER WALLET AND CAMPAIGNS
+// ============================================
+
+function previewWalletTransfer() {
+  const coins = Number($("transferCoins")?.value || 0);
+  const usd = Number.isSafeInteger(coins) && coins > 0 ? coins / 10000 : 0;
+  if ($("transferPreview")) $("transferPreview").textContent = formatUSD(usd);
+}
+
+async function transferToCampaignWallet() {
+  const button = $("transferButton");
+  const amountCoins = Number($("transferCoins")?.value || 0);
+  if (!Number.isSafeInteger(amountCoins) || amountCoins < 1) {
+    showMessage("transferMessage", "Enter a whole number of coins greater than zero.", "error");
+    return;
+  }
+  if (!confirm(`Transfer ${formatCoins(amountCoins)} worker coins to your Advertiser Campaign Wallet? You will receive ${formatUSD(amountCoins / 10000)}. Transfer fee: $0.00.`)) return;
+  button.disabled = true;
+  button.textContent = "Transferring...";
+  try {
+    const data = await apiRequest("/api/wallet/transfer-to-advertiser", {
+      method: "POST",
+      body: JSON.stringify({ amountCoins })
+    });
+    $("transferCoins").value = "";
+    previewWalletTransfer();
+    showMessage("transferMessage", `Transfer successful. ${formatUSD(data.creditedUsd)} added to your Campaign Wallet. No fee charged.`, "success");
+    await loadProfile();
+    await loadAdvertiserData();
+  } catch (error) {
+    showMessage("transferMessage", error.message, "error");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Transfer to Campaign Wallet";
+  }
+}
+
+async function subscribeWithWallet(plan) {
+  const button = [...document.querySelectorAll("#plans button")].find(item => item.textContent.includes(`Subscribe ${plan}`));
+  if (button) button.disabled = true;
+  try {
+    const catalog = await apiRequest("/api/plans");
+    const selected = (catalog.plans || []).find(item => item.name === plan);
+    const price = selected?.monthlyPriceUsd || "0.00";
+    if (!confirm(`Subscribe to ${plan} for ${formatUSD(price)} for 30 days using your Advertiser Campaign Wallet?`)) return;
+    const data = await apiRequest("/api/plans/subscribe", {
+      method: "POST",
+      body: JSON.stringify({ plan })
+    });
+    alert(data.message || `${plan} membership activated.`);
+    await loadProfile();
+    await loadAdvertiserData();
+  } catch (error) {
+    alert(error.message);
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
+async function loadAdvertiserData() {
+  try {
+    const walletData = await apiRequest("/api/advertiser/wallet");
+    const wallet = walletData.wallet || walletData.data?.wallet || walletData.data || walletData;
+
+    const balance =
+      wallet.balanceUsd ??
+      wallet.balance_usd ??
+      wallet.availableBalance ??
+      wallet.available_balance ??
+      wallet.balance ??
+      0;
+
+    $("advertiserWallet").textContent = formatUSD(balance);
+    $("walletAdvertiser").textContent = formatUSD(balance);
+    if ($("plansWalletBalance")) $("plansWalletBalance").textContent = formatUSD(balance);
+
+    const campaignData = await apiRequest("/api/campaigns/my");
+    campaignCache = extractArray(campaignData, ["campaigns", "items"]);
+    renderCampaigns();
+
+    $("myCampaignCount").textContent = String(campaignCache.length);
+    $("advertiserStatus").textContent = "Connected";
+
+  } catch (error) {
+    $("advertiserStatus").textContent = "Unavailable";
+    $("myCampaignsList").innerHTML =
+      `<div class="notice error">${escapeHTML(error.message)}</div>`;
+  }
+}
+
+function renderCampaigns() {
+  const container = $("myCampaignsList");
+
+  if (!campaignCache.length) {
+    container.innerHTML = '<div class="empty">You have not created any campaigns yet.</div>';
+    return;
+  }
+
+  container.innerHTML = campaignCache.map(campaign => {
+    const title = campaign.title || "Campaign";
+    const status = campaign.status || "unknown";
+    const total = campaign.totalSlots ??
+      campaign.total_slots ??
+      campaign.quantity ??
+      0;
+    const completed = campaign.completedCount ??
+      campaign.completed_count ??
+      0;
+
+    return `
+      <div class="card">
+        <div class="row">
+          <h3>${escapeHTML(title)}</h3>
+          <span class="status">${escapeHTML(String(status).toUpperCase())}</span>
+        </div>
+        <div class="feature"><span>Type</span><strong>${escapeHTML(campaign.type || campaign.campaignType || campaign.campaign_type || "—")}</strong></div>
+        <div class="feature"><span>Completed</span><strong>${escapeHTML(completed)} / ${escapeHTML(total)}</strong></div>
+      </div>
+    `;
+  }).join("");
+}
+
+// ============================================
+// ADVERTISER SUBMISSION REVIEW
+// ============================================
+
+function submissionTab(status, button) {
+  currentSubmissionFilter = status;
+
+  document.querySelectorAll("#submissionTabs button").forEach(item => {
+    item.classList.remove("selected");
+  });
+
+  button.classList.add("selected");
+  loadSubmissions();
+}
+
+async function loadSubmissions() {
+  const container = $("submissionsList");
+  container.innerHTML = '<div class="empty">Loading submissions...</div>';
+
+  try {
+    const data = await apiRequest(
+      "/api/advertiser/submissions?status=" +
+      encodeURIComponent(currentSubmissionFilter)
+    );
+
+    submissionCache = extractArray(data, ["submissions", "claims", "items"]);
+    renderSubmissions();
+
+    const pending = submissionCache.filter(item =>
+      String(item.status || "").toLowerCase() === "submitted"
+    ).length;
+
+    $("pendingSubmissionCount").textContent = String(pending);
+
+  } catch (error) {
+    container.innerHTML =
+      `<div class="notice error">${escapeHTML(error.message)}</div>`;
+  }
+}
+
+function renderSubmissions() {
+  const container = $("submissionsList");
+
+  if (!submissionCache.length) {
+    container.innerHTML = '<div class="empty">No submissions found in this category.</div>';
+    return;
+  }
+
+  container.innerHTML = submissionCache.map(item => {
+    const id = item.id ?? item.claimId ?? item.claim_id;
+    const status = String(item.status || "submitted").toLowerCase();
+    const title = item.title ||
+      item.campaignTitle ||
+      item.campaign_title ||
+      "Worker Submission";
+
+    const proofText = item.proofText ||
+      item.proof_text ||
+      "";
+
+    const proofUrl = item.proofUrl ||
+      item.proof_url ||
+      "";
+
+    const worker = item.workerUsername ||
+      item.worker_username ||
+      item.workerTelegramId ||
+      item.worker_telegram_id ||
+      "Worker";
+
+    const reason = item.rejectionReason ||
+      item.rejection_reason ||
+      "";
+
+    const reviewButtons = status === "submitted" ? `
+      <button class="green full" onclick="reviewSubmission('${escapeHTML(id)}','approve')">Approve &amp; Pay</button>
+      <button class="dark full" onclick="reviewSubmission('${escapeHTML(id)}','reject')">Reject Submission</button>
+    ` : "";
+
+    return `
+      <div class="card">
+        <div class="row">
+          <h3>${escapeHTML(title)}</h3>
+          <span class="status">${escapeHTML(status.toUpperCase())}</span>
+        </div>
+        <p class="muted">Worker: ${escapeHTML(worker)}</p>
+        ${proofText ? `<div class="proof-box"><strong>Submitted text</strong><p class="muted">${escapeHTML(proofText)}</p></div>` : ""}
+        ${proofUrl ? `<div class="proof-box"><strong>Proof URL</strong><p><a href="${escapeHTML(proofUrl)}" target="_blank" rel="noopener noreferrer">Open submitted proof</a></p></div>` : ""}
+        ${(item.proof_image_url || item.proofImageUrl) ? `<div class="proof-box"><strong>Screenshot proof</strong><p><a href="${escapeHTML(item.proof_image_url || item.proofImageUrl)}" target="_blank" rel="noopener noreferrer">View uploaded screenshot</a></p><img src="${escapeHTML(item.proof_image_url || item.proofImageUrl)}" alt="Worker screenshot proof" style="display:block;max-width:100%;height:auto;border-radius:10px;margin-top:10px"></div>` : ""}
+        ${reason ? `<div class="notice error">Rejection reason: ${escapeHTML(reason)}</div>` : ""}
+        ${reviewButtons}
+      </div>
+    `;
+  }).join("");
+}
+
+async function reviewSubmission(id, action) {
+  if (!id) {
+    alert("Submission ID is missing.");
+    return;
+  }
+
+  let reason = "";
+
+  if (action === "approve") {
+    if (!confirm("Approve this submission and pay the worker reward? This action should only be used for valid proof.")) {
+      return;
+    }
+  } else {
+    reason = prompt("Please enter a reason for rejecting this submission:");
+
+    if (reason === null) return;
+
+    reason = reason.trim();
+
+    if (reason.length < 5) {
+      alert("Please provide a rejection reason of at least 5 characters.");
+      return;
+    }
+  }
+
+  try {
+    const data = await apiRequest(
+      "/api/advertiser/submissions/" +
+      encodeURIComponent(id) +
+      "/review",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          action,
+          reason
+        })
+      }
+    );
+
+    alert(data.message || (
+      action === "approve"
+        ? "Submission approved. The backend processed the worker reward."
+        : "Submission rejected."
+    ));
+
+    await loadSubmissions();
+    await loadAdvertiserData();
+    await loadMyClaims();
+    await loadProfile();
+
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+// ============================================
+// ============================================
+// OPTIONAL SPONSORED SMARTLINKS
+// ============================================
+let smartLinkUrls = { monetag: "", adsterra: "" };
+let smartLinksLoaded = false;
+
+async function loadSmartLinks() {
+  const statusIds = { monetag: "monetagSmartLinkStatus", adsterra: "adsterraSmartLinkStatus" };
+  const buttonIds = { monetag: "monetagSmartLinkBtn", adsterra: "adsterraSmartLinkBtn" };
+  try {
+    const response = await fetch(`${API_URL}/api/ads/config`, { headers: { "Accept": "application/json" } });
+    if (!response.ok) throw new Error("Sponsored links are currently unavailable.");
+    const data = await response.json();
+    for (const key of ["monetag", "adsterra"]) {
+      const url = String(data[key] || "").trim();
+      smartLinkUrls[key] = /^https:\/\//i.test(url) ? url : "";
+      const button = $(buttonIds[key]);
+      const status = $(statusIds[key]);
+      if (button) {
+        button.disabled = !smartLinkUrls[key];
+        button.textContent = smartLinkUrls[key] ? `Open ${key === "monetag" ? "Monetag" : "Adsterra"}` : "Link not configured";
+      }
+      if (status) status.textContent = smartLinkUrls[key] ? "Optional sponsored link available." : "No link configured yet.";
+    }
+    smartLinksLoaded = true;
+  } catch (error) {
+    for (const key of ["monetag", "adsterra"]) {
+      const button = $(buttonIds[key]);
+      const status = $(statusIds[key]);
+      if (button) { button.disabled = true; button.textContent = "Unavailable"; }
+      if (status) status.textContent = error.message || "Could not load sponsored links.";
+    }
   }
 }
 
 function openSmartLink(provider) {
   const url = smartLinkUrls[provider];
-  if (!url) return;
-  // Telegram requires openLink() to be called directly from a user gesture.
-  const webApp = window.Telegram?.WebApp;
-  if (webApp && typeof webApp.openLink === "function") {
-    webApp.openLink(url);
-    return;
-  }
-  // Browser fallback for testing outside Telegram.
-  const opened = window.open(url, "_blank", "noopener,noreferrer");
-  if (!opened) alert("Please allow the browser to open this advertising link.");
+  if (!url || !/^https:\/\//i.test(url)) return;
+  if (tg?.openLink) tg.openLink(url);
+  else window.open(url, "_blank", "noopener,noreferrer");
 }
 
-// ==========================================
-// QUESTION BANKS
-// ==========================================
-
-// The code supports up to 2,000 questions per difficulty.
-// These are sample questions, not the full 2,000-question datasets.
-
-const questionBanks = {
-
-  easy: [
-
-    {
-      q:"តើរាជធានីនៃប្រទេសកម្ពុជាគឺអ្វី?",
-      a:["ភ្នំពេញ","សៀមរាប","បាត់ដំបង","កំពត"],
-      c:0
-    },
-
-    {
-      q:"តើប្រាសាទអង្គរវត្តស្ថិតនៅខេត្តណា?",
-      a:["កំពង់ចាម","សៀមរាប","កណ្ដាល","កែប"],
-      c:1
-    },
-
-    {
-      q:"តើភាសាផ្លូវការរបស់កម្ពុជាគឺអ្វី?",
-      a:["ថៃ","អង់គ្លេស","ខ្មែរ","ចិន"],
-      c:2
-    },
-
-    {
-      q:"តើទង់ជាតិកម្ពុជាមានប៉ុន្មានពណ៌?",
-      a:["២","៣","៤","៥"],
-      c:1
-    },
-
-    {
-      q:"តើរូបិយប័ណ្ណជាតិរបស់កម្ពុជាគឺអ្វី?",
-      a:["បាត","រៀល","ដុង","គីប"],
-      c:1
-    }
-
-  ],
-
-  medium: [
-
-    {
-      q:"តើទន្លេមេគង្គហូរកាត់ទីក្រុងណា?",
-      a:["ភ្នំពេញ","ប៉ោយប៉ែត","កែប","បានលុង"],
-      c:0
-    },
-
-    {
-      q:"តើថ្ងៃបុណ្យឯករាជ្យជាតិកម្ពុជាគឺថ្ងៃណា?",
-      a:["៩ វិច្ឆិកា","១ មករា","១៣ មេសា","១ ឧសភា"],
-      c:0
-    },
-
-    {
-      q:"តើប្រាសាទអង្គរវត្តត្រូវបានកសាងក្នុងសម័យណា?",
-      a:["ចេនឡា","អង្គរ","ហ្វូណន","លង្វែក"],
-      c:1
-    },
-
-    {
-      q:"តើបឹងទឹកសាបដ៏ធំរបស់កម្ពុជាមានឈ្មោះអ្វី?",
-      a:["បឹងកន្សែង","បឹងទន្លេសាប","បឹងយក្សឡោម","បឹងកំពីងពួយ"],
-      c:1
-    },
-
-    {
-      q:"តើខេត្តកែបស្ថិតនៅតំបន់ណារបស់កម្ពុជា?",
-      a:["ភាគខាងត្បូង","ភាគខាងជើង","ភាគខាងកើត","ភាគពាយ័ព្យ"],
-      c:0
-    }
-
-  ],
-
-  hard: [
-
-    {
-      q:"តើព្រះបាទជ័យវរ្ម័នទី៧គ្រងរាជ្យក្នុងសតវត្សទីប៉ុន្មាន?",
-      a:["ទី១០","ទី១១","ទី១២","ទី១៤"],
-      c:2
-    },
-
-    {
-      q:"តើប្រាសាទអង្គរវត្តឧទ្ទិសដល់ព្រះណាដំបូង?",
-      a:["ព្រះព្រហ្ម","ព្រះវិស្ណុ","ព្រះសិវៈ","ព្រះពុទ្ធ"],
-      c:1
-    },
-
-    {
-      q:"តើប្រាសាទបាយ័នមានភាពល្បីល្បាញដោយសារអ្វី?",
-      a:["ប៉មមុខញញឹម","បឹងធំ","ស្ពានឈើ","ជញ្ជាំងកញ្ចក់"],
-      c:0
-    },
-
-    {
-      q:"តើព្រះបាទសូរ្យវរ្ម័នទី២ជាប់ទាក់ទងនឹងប្រាសាទណា?",
-      a:["អង្គរវត្ត","បាយ័ន","តាព្រហ្ម","បន្ទាយស្រី"],
-      c:0
-    },
-
-    {
-      q:"តើអង្គរធំត្រូវបានសាងសង់ដោយព្រះមហាក្សត្រអង្គណា?",
-      a:["ជ័យវរ្ម័នទី៧","សូរ្យវរ្ម័នទី២","ជ័យវរ្ម័នទី២","ឥន្ទ្រវរ្ម័នទី១"],
-      c:0
-    }
-
-  ]
-
-};
-
-
-// Load a question bank from another JavaScript file or admin system.
-// Example: loadQuestionBank("easy", yourQuestionArray)
-
-function loadQuestionBank(level,arr) {
-
-  if (!["easy","medium","hard"].includes(level)) {
-    throw new Error("Invalid difficulty.");
-  }
-
-  if (!Array.isArray(arr) || arr.length > 2000) {
-    throw new Error("Maximum 2,000 questions per difficulty.");
-  }
-
-  const valid = arr.every(q =>
-    q &&
-    typeof q.q === "string" &&
-    Array.isArray(q.a) &&
-    q.a.length === 4 &&
-    Number.isInteger(q.c) &&
-    q.c >= 0 &&
-    q.c <= 3
-  );
-
-  if (!valid) {
-    throw new Error("Invalid question format.");
-  }
-
-  questionBanks[level] = arr;
-
-  alert(level + ": " + arr.length + " questions loaded.");
-}
-
-
-// ==========================================
-// MEMBERSHIP SETTINGS
-// ==========================================
-
-const plans = {
-
-  Free: {
-    game:1,
-    faucet:1,
-    commission:0,
-    referral:200,
-    tips:3
-  },
-
-  Silver: {
-    game:1.5,
-    faucet:1.5,
-    commission:30,
-    referral:250,
-    tips:5
-  },
-
-  Gold: {
-    game:2,
-    faucet:2,
-    commission:35,
-    referral:350,
-    tips:7
-  },
-
-  Diamond: {
-    game:3,
-    faucet:2.5,
-    commission:40,
-    referral:500,
-    tips:10
-  }
-
-};
-
-
-const gameBaseReward = {
-  easy:5,
-  medium:6,
-  hard:7
-};
-
-
-// ==========================================
-// SAVE AND LOAD DEMO DATA
-// ==========================================
-
-function loadState() {
-
-  try {
-    return JSON.parse(localStorage.getItem("khmerQuizEarn")) || {};
-  } catch(error) {
-    return {};
-  }
-
-}
-
-const stored = loadState();
-
-let data = {
-
-  coins:Number.isFinite(stored.coins) ? stored.coins : 20,
-
-  purchasedTips:Number.isFinite(stored.purchasedTips)
-    ? stored.purchasedTips : 0,
-
-  dailyTipsRemaining:Number.isFinite(stored.dailyTipsRemaining)
-    ? stored.dailyTipsRemaining : 3,
-
-  dailyTipsDate:stored.dailyTipsDate || "",
-
-  membership:plans[stored.membership]
-    ? stored.membership : "Free",
-
-  membershipExpiry:stored.membershipExpiry || 0,
-
-  games:Number.isFinite(stored.games) ? stored.games : 0,
-
-  lastDaily:stored.lastDaily || "",
-
-  streak:Number.isFinite(stored.streak) ? stored.streak : 0,
-
-  lastFaucet:stored.lastFaucet || 0,
-
-  faucetClaims:Number.isFinite(stored.faucetClaims)
-    ? stored.faucetClaims : 0
-
-};
-
-
-let quiz = {
-  level:"easy",
-  list:[],
-  index:0,
-  score:0,
-  answered:false,
-  finished:false,
-  reward:0
-};
-
-
-
-// ==========================================
-// GENERAL FUNCTIONS
-// ==========================================
-
-function availableTips() {
-  return data.purchasedTips + data.dailyTipsRemaining;
-}
-
-function save() {
-
-  localStorage.setItem(
-    "khmerQuizEarn",
-    JSON.stringify(data)
-  );
-
-  render();
-
-}
-
-// ==========================================
-// REAL TELEGRAM BACKEND AUTHENTICATION
-// ==========================================
-
-async function backendRequest(path, options = {}) {
-  if (!authToken) {
-    throw new Error("Please open the game inside Telegram first.");
-  }
-
-  const response = await fetch(API_URL + path, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + authToken,
-      ...(options.headers || {})
-    }
+// NAVIGATION AND TABS
+// ============================================
+
+function go(id, button) {
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.remove("active");
   });
 
-  const result = await response.json().catch(() => ({}));
+  const page = $(id);
+  if (page) page.classList.add("active");
 
-  if (!response.ok) {
-    throw new Error(result.error || "Backend request failed.");
-  }
-
-  return result;
-}
-
-
-async function loginWithTelegram() {
-  const tg = window.Telegram?.WebApp;
-
-  if (!tg || !tg.initData) {
-    throw new Error(
-      "Please open Khmer Quiz & Earn from your Telegram bot."
-    );
-  }
-
-  tg.ready();
-  tg.expand();
-
-  const response = await fetch(API_URL + "/api/auth/telegram", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      initData: tg.initData
-    })
+  document.querySelectorAll("nav button").forEach(item => {
+    item.classList.remove("active");
   });
 
-  const result = await response.json().catch(() => ({}));
-
-  if (!response.ok || !result.token) {
-    throw new Error(
-      result.error || "Telegram login failed."
-    );
-  }
-
-  authToken = result.token;
-
-  return result;
-}
-
-
-// ==========================================
-// REFRESH ACCOUNT AFTER PAYMENT
-// ==========================================
-
-async function refreshAccountFromServer() {
-  const result = await backendRequest("/api/me");
-
-  const user = result.user;
-
-  data.coins = Number(user.coins);
-  data.purchasedTips = Number(user.purchasedTips);
-  data.dailyTipsRemaining = Number(user.dailyTips);
-  data.membership = plans[user.membership]
-    ? user.membership
-    : "Free";
-
-  data.membershipExpiry = user.membershipExpiry
-    ? new Date(user.membershipExpiry).getTime()
-    : 0;
-
-  data.games = Number(user.games);
-
-  // Prevent the existing local daily-tip function from
-  // immediately overwriting the server's current quota.
-  data.dailyTipsDate = new Date().toDateString();
-
-  save();
-
-  return result;
-}
-
-
-// ==========================================
-// LOAD REAL STARS PRICES
-// ==========================================
-
-async function loadStarsCatalog() {
-  const result = await backendRequest(
-    "/api/payments/stars/catalog"
-  );
-
-  starsCatalog = {};
-
-  for (const product of result.products || []) {
-    starsCatalog[product.code] = product;
-  }
-
-  const tipButtons = {
-    100: "tips_100",
-    150: "tips_150",
-    200: "tips_200"
-  };
-
-  for (const [amount, code] of Object.entries(tipButtons)) {
-    const product = starsCatalog[code];
-
-    const button = document.querySelector(
-      `button[onclick="buyStars(${amount})"]`
-    );
-
-    if (button && product && product.available) {
-      button.textContent =
-        "Pay " + product.amount + " ⭐ with Telegram Stars";
-    }
-
-    if (button && (!product || !product.available)) {
-      button.textContent = "Stars price not configured";
-      button.disabled = true;
-    }
-  }
-}
-
-function addCoins(amount) {
-
-  data.coins += Math.floor(amount);
-
-  save();
-
-}
-
-function render() {
-
-  const tips = availableTips();
-
-  document.getElementById("coinBalance").textContent = data.coins;
-  document.getElementById("homeCoins").textContent = data.coins;
-  document.getElementById("walletCoins").textContent = data.coins;
-
-  document.getElementById("homeTips").textContent = tips;
-  document.getElementById("tipsBalance").textContent = tips;
-
-  document.getElementById("gamesPlayed").textContent = data.games;
-
-  document.getElementById("memberStatus").textContent =
-    data.membership;
-
-  document.getElementById("dailyTipInfo").textContent =
-    "Daily Tips remaining: " + data.dailyTipsRemaining +
-    " | Purchased Tips: " + data.purchasedTips;
-
-  document.getElementById("faucetMultiplier").textContent =
-    "×" + faucetMultiplier().toFixed(2);
-
-  document.getElementById("referralInfo").textContent =
-    data.membership + " membership: " +
-    plans[data.membership].referral +
-    " coins per successful referral, plus " +
-    plans[data.membership].commission +
-    "% eligible commission.";
-
-}
-
-function showPage(id,btn) {
-
-  document.querySelectorAll(".page").forEach(p => {
-    p.classList.remove("active");
-  });
-
-  document.getElementById(id).classList.add("active");
-
-  document.querySelectorAll("nav button").forEach(b => {
-    b.classList.remove("active");
-  });
-
-  if (btn) {
-    btn.classList.add("active");
-  }
-
-}
-
-
-// ==========================================
-// DAILY TIPS
-// ==========================================
-
-function refreshDailyTips() {
-
-  const today = new Date().toDateString();
-
-  if (data.dailyTipsDate !== today) {
-
-    data.dailyTipsDate = today;
-
-    data.dailyTipsRemaining =
-      plans[data.membership].tips;
-
-    save();
-
-  }
-
-}
-
-
-// ==========================================
-// QUIZ SYSTEM
-// ==========================================
-
-function startQuiz(level) {
-
-  refreshDailyTips();
-
-  const bank = questionBanks[level];
-
-  if (!bank || bank.length === 0) {
-    alert("No questions are available for this difficulty.");
-    return;
-  }
-
-  if (bank.length > 2000) {
-    alert("Question bank limit is 2,000.");
-    return;
-  }
-
-  quiz.level = level;
-
-  quiz.list = [...bank]
-    .sort(() => Math.random() - 0.5)
-    .slice(0,10);
-
-  quiz.index = 0;
-  quiz.score = 0;
-  quiz.answered = false;
-  quiz.finished = false;
-  quiz.reward = 0;
-
-
-  document.getElementById("quizCard").classList.remove("hidden");
-
-  document.getElementById("quizComplete").classList.add("hidden");
-
-  showPage("game");
-
-  showQuestion();
-
-}
-
-
-function showQuestion() {
-
-  const q = quiz.list[quiz.index];
-
-  quiz.answered = false;
-
-  document.getElementById("difficulty").textContent =
-    quiz.level.toUpperCase();
-
-  document.getElementById("questionNumber").textContent =
-    (quiz.index + 1) + "/" + quiz.list.length;
-
-  document.getElementById("potentialReward").textContent =
-    Math.floor(
-      gameBaseReward[quiz.level] *
-      plans[data.membership].game
-    ) + " Coins";
-
-  document.getElementById("questionText").textContent = q.q;
-
-  document.getElementById("quizFeedback").textContent = "";
-
-  document.getElementById("nextButton").disabled = true;
-
-  document.getElementById("tipButton").disabled =
-    availableTips() <= 0;
-
-  const list = document.getElementById("answerList");
-
-  list.innerHTML = "";
-
-  q.a.forEach((answer,i) => {
-
-    const button = document.createElement("button");
-
-    button.className = "answer";
-
-    button.textContent =
-      String.fromCharCode(65+i) + ". " + answer;
-
-    button.onclick = () => answerQuestion(i);
-
-    list.appendChild(button);
-
-  });
-
-}
-
-
-function answerQuestion(index) {
-
-  if (quiz.answered || quiz.finished) return;
-
-  quiz.answered = true;
-
-  const q = quiz.list[quiz.index];
-
-  const buttons = [
-    ...document.querySelectorAll(".answer")
-  ];
-
-  buttons.forEach((button,i) => {
-
-    button.disabled = true;
-
-    if (i === q.c) {
-      button.classList.add("correct");
-    } else if (i === index) {
-      button.classList.add("wrong");
-    }
-
-  });
-
-  if (index === q.c) {
-
-    quiz.score++;
-
-    document.getElementById("quizFeedback").textContent =
-      "ត្រឹមត្រូវ! Correct!";
-
+  if (button && button.closest("nav")) {
+    button.classList.add("active");
   } else {
-
-    document.getElementById("quizFeedback").textContent =
-      "មិនត្រឹមត្រូវទេ។";
-
-  }
-
-  document.getElementById("nextButton").disabled = false;
-
-  document.getElementById("tipButton").disabled = true;
-
-}
-
-
-function useTip() {
-
-  if (
-    quiz.answered ||
-    quiz.finished ||
-    availableTips() <= 0
-  ) return;
-
-  const q = quiz.list[quiz.index];
-
-  const wrongAnswers = [0,1,2,3].filter(i => i !== q.c);
-
-  const remove = wrongAnswers.slice(0,2);
-
-  remove.forEach(i => {
-
-    const button = document.querySelectorAll(".answer")[i];
-
-    button.disabled = true;
-
-    button.textContent = "Removed";
-
-    button.classList.add("removed");
-
-  });
-
-  if (data.dailyTipsRemaining > 0) {
-
-    data.dailyTipsRemaining--;
-
-  } else {
-
-    data.purchasedTips--;
-
-  }
-
-  save();
-
-  document.getElementById("tipButton").disabled = true;
-
-}
-
-
-function nextQuestion() {
-
-  if (!quiz.answered || quiz.finished) return;
-
-  if (quiz.index < quiz.list.length - 1) {
-
-    quiz.index++;
-
-    showQuestion();
-
-  } else {
-
-    completeQuiz();
-
-  }
-
-}
-
-
-// ==========================================
-// QUIZ COMPLETION
-// ==========================================
-
-function completeQuiz() {
-
-  if (quiz.finished) return;
-
-  quiz.finished = true;
-
-  const reward = Math.floor(
-    gameBaseReward[quiz.level] *
-    plans[data.membership].game
-  );
-
-  quiz.reward = reward;
-
-  // Basic reward is credited once here.
-  addCoins(reward);
-
-  data.games++;
-
-  save();
-
-  document.getElementById("quizCard").classList.add("hidden");
-
-  document.getElementById("quizComplete").classList.remove("hidden");
-
-  document.getElementById("finalScore").textContent =
-    "Your score: " + quiz.score + "/" + quiz.list.length;
-
-  document.getElementById("normalReward").textContent =
-    "You earned " + reward + " coins!";
-
-}
-
-
-function finishAndReturn() {
-
-  document.getElementById("quizComplete").classList.add("hidden");
-
-  document.getElementById("quizCard").classList.remove("hidden");
-
-  showPage("home");
-
-}
-
-
-// ==========================================
-// DAILY BONUS
-// ==========================================
-
-function claimDaily() {
-
-  const today = new Date().toDateString();
-
-  if (data.lastDaily === today) {
-
-    alert("You already claimed today's daily bonus.");
-
-    return;
-
-  }
-
-  data.streak = data.streak + 1;
-
-  data.lastDaily = today;
-
-  const reward = 19 + data.streak;
-
-  addCoins(reward);
-
-  document.getElementById("dailyStatus").textContent =
-    "Claimed " + reward + " coins! Day " +
-    data.streak + " streak.";
-
-  document.getElementById("dailyButton").disabled = true;
-
-}
-
-
-// ==========================================
-// FAUCET
-// ==========================================
-
-function faucetMultiplier() {
-
-  return 1 +
-    Math.floor(data.faucetClaims / 100) * 0.01;
-
-}
-
-
-function claimFaucet() {
-
-  const now = Date.now();
-
-  const wait = 300000 - (now - data.lastFaucet);
-
-  if (data.lastFaucet && wait > 0) {
-
-    alert(
-      "Please wait " +
-      Math.ceil(wait / 1000) +
-      " seconds."
-    );
-
-    return;
-
-  }
-
-  data.lastFaucet = now;
-
-  data.faucetClaims++;
-
-  const reward = Math.floor(
-    5 *
-    faucetMultiplier() *
-    plans[data.membership].faucet
-  );
-
-  addCoins(reward);
-
-  document.getElementById("faucetCountdown").textContent =
-    "You received " + reward +
-    " coins! Next claim in 5 minutes.";
-
-}
-
-
-function updateFaucetTimer() {
-
-  const remaining =
-    300000 - (Date.now() - data.lastFaucet);
-
-  const button = document.getElementById("faucetButton");
-
-  if (data.lastFaucet && remaining > 0) {
-
-    const seconds = Math.ceil(remaining / 1000);
-
-    const minutes = Math.floor(seconds / 60);
-
-    const rest = seconds % 60;
-
-    button.disabled = true;
-
-    document.getElementById("faucetCountdown").textContent =
-      "Next claim in " + minutes + "m " + rest + "s";
-
-  } else {
-
-    button.disabled = false;
-
-    document.getElementById("faucetCountdown").textContent =
-      "Ready to claim!";
-
-  }
-
-}
-
-
-// ==========================================
-// MEMBERSHIP
-// ==========================================
-
-// ==========================================
-// REAL MEMBERSHIP PURCHASE
-// ==========================================
-
-async function subscribe(name) {
-  const productCodes = {
-    Silver: "silver",
-    Gold: "gold",
-    Diamond: "diamond"
-  };
-
-  const productCode = productCodes[name];
-
-  if (!productCode) return;
-
-  await createStarsInvoice(productCode);
-}
-
-// ==========================================
-// TIPS PURCHASE
-// ==========================================
-
-function buyTips(amount,price) {
-
-  alert(
-    "ABA PAYMENT DEMO\n\n" +
-    amount + " Tips = $" +
-    price.toFixed(2) +
-    "\n\nReal payment verification is not connected."
-  );
-
-}
-
-
-// ==========================================
-// REAL TIPS PURCHASE
-// ==========================================
-
-async function buyStars(amount) {
-  const productCodes = {
-    100: "tips_100",
-    150: "tips_150",
-    200: "tips_200"
-  };
-
-  const productCode = productCodes[amount];
-
-  if (!productCode) return;
-
-  await createStarsInvoice(productCode);
-}
-
-// ==========================================
-// TELEGRAM STARS INVOICE
-// ==========================================
-
-async function createStarsInvoice(productCode) {
-  if (paymentBusy) return;
-
-  const tg = window.Telegram?.WebApp;
-
-  if (!tg || !tg.initData || !tg.openInvoice) {
-    alert(
-      "Telegram Stars payments must be opened inside Telegram."
-    );
-    return;
-  }
-
-  if (!authToken) {
-    alert("Your Telegram session is not ready. Please reopen the game.");
-    return;
-  }
-
-  paymentBusy = true;
-
-  try {
-    const result = await backendRequest(
-      "/api/payments/stars/create",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          productCode
-        })
-      }
-    );
-
-    if (!result.success || !result.invoiceUrl) {
-      throw new Error("The backend did not return an invoice URL.");
-    }
-
-    tg.openInvoice(result.invoiceUrl, async function(status) {
-      if (status === "paid") {
-        alert(
-          "Payment successful! Your purchase is being processed."
-        );
-
-        // The Telegram webhook credits the account.
-        // Refresh after it has had time to process the payment.
-        setTimeout(async () => {
-          try {
-            await refreshAccountFromServer();
-
-            alert(
-              "Your account has been updated successfully."
-            );
-          } catch (error) {
-            console.error(error);
-            alert(
-              "Payment received. Please reopen the game shortly to refresh your balance."
-            );
-          }
-        }, 2000);
-
-      } else if (status === "cancelled") {
-        alert("Payment cancelled. No purchase was made.");
-
-      } else if (status === "failed") {
-        alert("Payment failed. Please try again.");
-
-      } else {
-        alert(
-          "Payment status: " + status +
-          ". Please check your account before trying again."
-        );
-      }
-
-      paymentBusy = false;
+    const navButton = [...document.querySelectorAll("nav button")].find(item => {
+      return item.getAttribute("onclick")?.includes("'" + id + "'");
     });
 
-  } catch (error) {
-    paymentBusy = false;
-
-    console.error("Stars payment error:", error);
-
-    alert(
-      "Unable to create Telegram Stars invoice:\n\n" +
-      error.message
-    );
+    if (navButton) navButton.classList.add("active");
   }
+
+  window.scrollTo({top: 0, behavior: "smooth"});
+
+  if (id === "tasks" && authToken) {
+    loadTasks().catch(error => console.error(error));
+    loadMyClaims();
+  }
+
+  if (id === "advertise" && authToken) {
+    loadAdvertiserData();
+    loadSubmissions();
+  }
+
+  if (id === "wallet" && authToken) {
+    loadProfile().catch(error => console.error(error));
+    loadAdvertiserData();
+    loadWalletTransactions();
+    loadServiceOrders();
+  }
+ if (id === "faucet" && authToken) {
+  loadFaucetStatus();
+ }
+ if (id === "smartlinks") {
+  loadSmartLinks();
+ }
 }
-  
-// ==========================================
-// WALLET
-// ==========================================
 
-function requestWithdrawal() {
+// ============================================
+// CONNECTED WITHDRAWAL + DEPOSIT WORKFLOWS
+// ============================================
 
-  const amount = Number(
-    document.getElementById("withdrawAmount").value
-  );
+let depositMethodConfig = [];
 
-  const method =
-    document.getElementById("withdrawMethod").value;
-
-  if (!Number.isFinite(amount) || amount < 2000) {
-
-    alert("Minimum withdrawal is 2,000 coins.");
-
+function showHistory(containerId, rows, kind) {
+  const container = $(containerId);
+  if (!container) return;
+  if (!rows.length) {
+    container.innerHTML = '<div class="empty">No ' + (kind === 'withdrawal' ? 'withdrawal' : 'deposit') + ' requests yet.</div>';
     return;
-
   }
-
-  if (amount > data.coins) {
-
-    alert("Insufficient balance.");
-
-    return;
-
-  }
-
-  const confirmed = confirm(
-    "Submit demo withdrawal of " +
-    amount + " coins using " +
-    method + "?"
-  );
-
-  if (!confirmed) return;
-
-  data.coins -= amount;
-
-  save();
-
-  document.getElementById("withdrawAmount").value = "";
-
-  alert(
-    "Demo withdrawal request recorded locally. " +
-    "No real payment was sent."
-  );
-
+  container.innerHTML = rows.map(item => {
+    const amount = kind === 'withdrawal'
+      ? formatCoins(item.amount_coins ?? item.amountCoins) + ' coins'
+      : formatUSD(item.amountUsd ?? (Number(item.amount_usd_micros || 0) / 1000000));
+    const method = item.method || 'Payment method';
+    const status = String(item.status || 'pending').toUpperCase();
+    const date = item.created_at || item.createdAt;
+    return `<div class="proof-box"><div class="row"><strong>${escapeHTML(amount)}</strong><span class="status">${escapeHTML(status)}</span></div><p class="muted">${escapeHTML(method)}</p>${date ? `<p class="fine">${escapeHTML(new Date(date).toLocaleString())}</p>` : ''}${item.adminNote || item.admin_note ? `<p class="muted">Admin note: ${escapeHTML(item.adminNote || item.admin_note)}</p>` : ''}</div>`;
+  }).join('');
 }
 
-
-// ==========================================
-// REFERRALS
-// ==========================================
-
-function copyReferral() {
-
-  const text =
-    "https://t.me/YOUR_BOT_USERNAME?start=demo";
-
-  if (
-    navigator.clipboard &&
-    navigator.clipboard.writeText
-  ) {
-
-    navigator.clipboard.writeText(text)
-      .then(() => alert("Demo referral link copied."))
-      .catch(() => alert(text));
-
-  } else {
-
-    alert(text);
-
+async function submitWithdrawal() {
+  const button = $('withdrawSubmitBtn');
+  const amountCoins = Number($('withdrawAmount').value);
+  const method = $('withdrawMethod').value;
+  const paymentDetails = $('withdrawDetails').value.trim();
+  if (!Number.isFinite(amountCoins) || amountCoins < 2000 || !Number.isInteger(amountCoins)) {
+    showMessage('withdrawMessage', 'Enter a whole-number amount of at least 2,000 coins.', 'error'); return;
   }
-
-}
-
-
-// ==========================================
-// INITIALIZATION
-// ==========================================
-
-function initialize() {
-
-  // Expire memberships before setting daily Tips.
-  if (
-    data.membership !== "Free" &&
-    data.membershipExpiry > 0 &&
-    Date.now() > data.membershipExpiry
-  ) {
-
-    data.membership = "Free";
-
-    data.membershipExpiry = 0;
-
+  if (paymentDetails.length < 3) {
+    showMessage('withdrawMessage', 'Enter your ABA account details or USDT TON wallet address.', 'error'); return;
   }
-
-  refreshDailyTips();
-
-  const today = new Date().toDateString();
-
-  if (data.lastDaily === today) {
-
-    document.getElementById("dailyButton").disabled = true;
-
-    document.getElementById("dailyStatus").textContent =
-      "Today's daily bonus has already been claimed.";
-
-  }
-
-  render();
-
-  updateFaucetTimer();
-
-  setInterval(updateFaucetTimer,1000);
-
-}
-
-initialize();
-loadAdvertisingConfig();
-  // ==========================================
-// START TELEGRAM BACKEND CONNECTION
-// ==========================================
-
-async function initializeTelegramPayments() {
+  if (!confirm(`Submit a withdrawal request for ${formatCoins(amountCoins)} coins using ${method}?`)) return;
+  button.disabled = true; button.textContent = 'Submitting...';
   try {
-    await loginWithTelegram();
-    await refreshAccountFromServer();
-    await loadStarsCatalog();
-
-    console.log("Telegram backend connected.");
-    console.log("Telegram Stars catalog loaded.");
-
+    const data = await apiRequest('/api/worker/withdraw', {
+      method: 'POST',
+      body: JSON.stringify({ amountCoins, method, paymentDetails })
+    });
+    showMessage('withdrawMessage', data.message || 'Withdrawal request submitted and is pending administrator review.', 'success');
+    $('withdrawAmount').value = ''; $('withdrawDetails').value = '';
+    await Promise.all([loadProfile(), loadWithdrawalHistory()]);
   } catch (error) {
-    console.error("Backend connection error:", error);
-
-    alert(
-      "Unable to connect to your account.\n\n" +
-      error.message
-    );
+    showMessage('withdrawMessage', error.message, 'error');
+  } finally {
+    button.disabled = false; button.textContent = 'Submit Withdrawal Request';
   }
 }
 
-initializeTelegramPayments();
+async function loadWithdrawalHistory() {
+  const container = $('withdrawHistory');
+  if (!container) return;
+  container.innerHTML = '<div class="empty">Loading withdrawal history...</div>';
+  try {
+    const data = await apiRequest('/api/worker/withdrawals');
+    showHistory('withdrawHistory', extractArray(data, ['withdrawals']), 'withdrawal');
+  } catch (error) {
+    container.innerHTML = `<div class="notice error">${escapeHTML(error.message)}</div>`;
+  }
+}
+
+async function loadDepositMethods() {
+  const box = $('depositInstructions');
+  try {
+    const data = await apiRequest('/api/advertiser/deposit-methods');
+    depositMethodConfig = extractArray(data, ['methods']);
+    const select = $('depositMethod');
+    const available = depositMethodConfig.filter(item => item.enabled);
+    select.innerHTML = depositMethodConfig.map(item =>
+      `<option value="${escapeHTML(item.method)}" ${item.enabled ? '' : 'disabled'}>${escapeHTML(item.method)}${item.enabled ? ' · Manual review' : ' · Not configured'}</option>`
+    ).join('');
+    if (available.length) select.value = available[0].method;
+    showDepositInstructions();
+    if (!available.length) showMessage('depositMessage', 'No deposit method is configured yet. The administrator must set ABA_DEPOSIT_INSTRUCTIONS or USDT_TON_DEPOSIT_ADDRESS in Render.', 'error');
+  } catch (error) {
+    box.textContent = error.message;
+    showMessage('depositMessage', 'Could not load deposit methods. Check the backend connection and try again.', 'error');
+  }
+}
+
+function showDepositInstructions() {
+  const selected = depositMethodConfig.find(item => item.method === $('depositMethod')?.value);
+  const box = $('depositInstructions');
+  if (!selected || !selected.enabled) {
+    box.textContent = 'This payment method is not configured yet. Please choose another method or contact support.';
+    return;
+  }
+  box.textContent = (selected.instructions || 'Follow the payment instructions provided by support.') + ' Payment review is manual. Keep your transaction reference.';
+}
+
+async function submitDeposit() {
+  const button = $('depositSubmitBtn');
+  const amountUsd = $('depositAmount').value.trim();
+  const method = $('depositMethod').value;
+  const paymentReference = $('depositReference').value.trim();
+  const paymentDetails = $('depositDetails').value.trim();
+  if (!amountUsd || Number(amountUsd) < 1 || Number(amountUsd) > 10000) {
+    showMessage('depositMessage', 'Enter a deposit amount between $1.00 and $10,000.00.', 'error'); return;
+  }
+  if (paymentReference.length < 4) {
+    showMessage('depositMessage', 'Enter the payment transaction ID or reference (at least 4 characters).', 'error'); return;
+  }
+  if (!confirm(`Submit a ${formatUSD(amountUsd)} ${method} deposit for manual review? Your campaign wallet will be credited only after approval.`)) return;
+  button.disabled = true; button.textContent = 'Submitting...';
+  try {
+    const data = await apiRequest('/api/advertiser/deposits', {
+      method: 'POST',
+      body: JSON.stringify({ amountUsd, method, paymentReference, paymentDetails })
+    });
+    showMessage('depositMessage', data.message || 'Deposit request submitted. Waiting for administrator review.', 'success');
+    $('depositAmount').value = ''; $('depositReference').value = ''; $('depositDetails').value = '';
+    await loadDepositHistory();
+  } catch (error) {
+    showMessage('depositMessage', error.message, 'error');
+  } finally {
+    button.disabled = false; button.textContent = 'Submit Deposit for Review';
+  }
+}
+
+async function loadDepositHistory() {
+  const container = $('depositHistory');
+  if (!container) return;
+  container.innerHTML = '<div class="empty">Loading deposit history...</div>';
+  try {
+    const data = await apiRequest('/api/advertiser/deposits');
+    showHistory('depositHistory', extractArray(data, ['deposits']), 'deposit');
+  } catch (error) {
+    container.innerHTML = `<div class="notice error">${escapeHTML(error.message)}</div>`;
+  }
+}
+
+async function loadWalletTransactions() {
+  await Promise.all([loadWithdrawalHistory(), loadDepositMethods(), loadDepositHistory(), loadServiceOrders()]);
+}
+
+function previewServiceCoins(kind) {
+  const inputId = kind === "phone" ? "phoneAmount" : kind === "game" ? "gameAmount" : "shopAmount";
+  const outputId = kind === "phone" ? "phoneCost" : kind === "game" ? "gameCost" : "shopCost";
+  const usd = Number($(inputId)?.value || 0);
+  $(outputId).textContent = Number.isFinite(usd) && usd > 0 ? formatCoins(Math.round(usd * 10000)) + " coins" : "Enter a valid amount";
+}
+
+async function submitServiceOrder(kind) {
+  const config = {
+    phone: {button:"phoneSubmit", message:"phoneMessage", amount:"phoneAmount", provider:"phoneProvider", recipient:"phoneRecipient", details:"phoneDetails"},
+    game: {button:"gameSubmit", message:"gameMessage", amount:"gameAmount", provider:"gameProvider", recipient:"gameRecipient", details:"gamePackage"},
+    shop: {button:"shopSubmit", message:"shopMessage", amount:"shopAmount", provider:null, recipient:"shopAddress", details:"shopProduct"}
+  }[kind];
+  const button = $(config.button);
+  const amountUsd = Number($(config.amount).value);
+  if (!Number.isFinite(amountUsd) || amountUsd < 0.01 || amountUsd > 1000 || Math.round(amountUsd * 100) !== amountUsd * 100) {
+    showMessage(config.message, "Enter a valid price between $0.01 and $1,000.00.", "error"); return;
+  }
+  let provider = config.provider ? $(config.provider).value : "Shopping";
+  let recipient = $(config.recipient).value.trim();
+  let itemDetails = $(config.details).value.trim();
+  let quantity = 1;
+  if (kind === "phone") {
+    if (!/^[+0-9][0-9\s-]{5,22}$/.test(recipient)) { showMessage(config.message, "Enter a valid phone number.", "error"); return; }
+    itemDetails = itemDetails || "Mobile credit top-up";
+  } else if (kind === "game") {
+    if (recipient.length < 2 || itemDetails.length < 2) { showMessage(config.message, "Enter your Player ID and requested package.", "error"); return; }
+    const serverId = $("gameServer").value.trim();
+    if (serverId) itemDetails += " · Server: " + serverId;
+  } else {
+    const product = $("shopProduct").value.trim();
+    const link = $("shopLink").value.trim();
+    quantity = Number($("shopQuantity").value);
+    if (product.length < 2 || recipient.length < 8 || !Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
+      showMessage(config.message, "Enter the product, a complete delivery address, and quantity from 1 to 99.", "error"); return;
+    }
+    if (link && !/^https?:\/\//i.test(link)) { showMessage(config.message, "Product link must start with http:// or https://.", "error"); return; }
+    itemDetails = product + (link ? " · Link: " + link : "");
+  }
+  const cost = Math.round(amountUsd * 10000);
+  if (!confirm(`Submit this ${kind === "phone" ? "phone top-up" : kind === "game" ? "game top-up" : "shopping"} order for ${formatCoins(cost)} coins ($${amountUsd.toFixed(2)})?`)) return;
+  button.disabled = true; button.textContent = "Submitting...";
+  try {
+    const data = await apiRequest("/api/worker/service-orders", {method:"POST", body:JSON.stringify({orderType:kind === "phone" ? "phone_topup" : kind === "game" ? "game_topup" : "shopping", provider, recipient, itemDetails, quantity, amountUsd})});
+    showMessage(config.message, data.message || "Order submitted. Admin will process it manually.", "success");
+    if (kind === "phone") { $("phoneRecipient").value = ""; $("phoneDetails").value = ""; }
+    if (kind === "game") { $("gameRecipient").value = ""; $("gameServer").value = ""; $("gamePackage").value = ""; }
+    if (kind === "shop") { $("shopProduct").value = ""; $("shopLink").value = ""; $("shopAddress").value = ""; }
+    await Promise.all([loadProfile(), loadServiceOrders()]);
+  } catch (error) { showMessage(config.message, error.message, "error"); }
+  finally { button.disabled = false; button.textContent = kind === "phone" ? "Submit Phone Top Up" : kind === "game" ? "Submit Game Top Up" : "Submit Shopping Order"; }
+}
+
+async function loadServiceOrders() {
+  const box = $("serviceOrderHistory");
+  if (!box) return;
+  box.innerHTML = '<div class="empty">Loading service orders...</div>';
+  try {
+    const data = await apiRequest("/api/worker/service-orders");
+    const rows = extractArray(data, ["orders"]);
+    if (!rows.length) { box.innerHTML = '<div class="empty">No service orders yet.</div>'; return; }
+    const names = {phone_topup:"Phone Top Up",game_topup:"Game Top Up",shopping:"Shopping"};
+    box.innerHTML = rows.map(o => `<div class="proof-box"><div class="row"><strong>${escapeHTML(names[o.order_type] || o.order_type)}</strong><span class="status">${escapeHTML(String(o.status || "pending").toUpperCase())}</span></div><p class="muted">${escapeHTML(o.provider || "")} · ${escapeHTML(o.recipient || "")}</p><p>${escapeHTML(o.item_details || "")}</p><div class="feature"><span>Paid from wallet</span><strong>${formatCoins(o.amount_coins)} coins</strong></div><p class="fine">${o.created_at ? escapeHTML(new Date(o.created_at).toLocaleString()) : ""}</p>${o.admin_note ? `<p class="muted">Admin note: ${escapeHTML(o.admin_note)}</p>` : ""}</div>`).join("");
+  } catch (error) { box.innerHTML = `<div class="notice error">${escapeHTML(error.message)}</div>`; }
+}
+
+function walletTab(id, button) {
+  document.querySelectorAll("#wallet .tabs button").forEach(item => {
+    item.classList.remove("selected");
+  });
+
+  button.classList.add("selected");
+
+  document.querySelectorAll("#wallet .subpage").forEach(page => {
+    page.classList.remove("active");
+  });
+
+  const target = $("wallet" + id.charAt(0).toUpperCase() + id.slice(1));
+  if (target) target.classList.add("active");
+}
+
+function setRole(role, button) {
+  document.querySelectorAll("#profile .tabs button").forEach(item => {
+    item.classList.remove("selected");
+  });
+
+  button.classList.add("selected");
+
+  $("roleDescription").textContent = role === "worker"
+    ? "Worker mode: browse tasks, submit proof and view approved earnings."
+    : "Advertiser mode: create campaigns, fund budgets and review worker submissions.";
+}
+
+async function loadReferralData() {
+  const data = await apiRequest("/api/referrals");
+  const referral = data.referral || {};
+  const linkInput = $("referralLink");
+  if (linkInput) linkInput.value = referral.link || "Referral link unavailable";
+  if ($("referralInvited")) $("referralInvited").textContent = String(referral.totalInvited ?? 0);
+  if ($("referralSuccessful")) $("referralSuccessful").textContent = String(referral.successfulReferrals ?? 0);
+  if ($("referralEarnings")) $("referralEarnings").textContent = formatCoins(referral.earningsCoins ?? 0) + " coins";
+}
+
+async function copyReferralLink() {
+  const field = $("referralLink");
+  const link = field?.value || "";
+  if (!link.startsWith("https://t.me/")) {
+    showMessage("connectionNotice", "Your referral link is not ready yet. Please reopen Invite Friends.", "error");
+    return;
+  }
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(link);
+    } else {
+      field.focus();
+      field.select();
+      if (!document.execCommand("copy")) throw new Error("Copy not supported");
+    }
+    const button = $("copyReferralButton");
+    if (button) button.textContent = "✓ Link Copied";
+    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
+  } catch (error) {
+    field.focus();
+    field.select();
+    showMessage("connectionNotice", "Please copy the selected referral link manually.", "notice");
+  }
+}
+
+// ============================================
+// REFRESH ALL DATA
+// ============================================
+
+async function refreshAll() {
+  const results = await Promise.allSettled([
+    loadProfile(),
+    loadTasks(),
+    loadMyClaims(),
+    loadAdvertiserData(),
+    loadSubmissions(),
+    loadFaucetStatus(),
+    loadWalletTransactions(),
+    loadReferralData()
+  ]);
+
+  results.forEach(result => {
+    if (result.status === "rejected") {
+      console.error(
+        "A marketplace data request failed:",
+        result.reason
+      );
+    }
+  });
+}
+// ============================================
+// START APPLICATION
+// ============================================
+
+campaignFields();
+loadSmartLinks();
+
+authenticateTelegram().then(authenticated => {
+  if (!authenticated) {
+    $("homeTaskCount").textContent = "Login required";
+  }
+});
 
 </script>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="script.js"></script>
 </body>
 </html>
