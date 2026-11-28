@@ -7,6 +7,7 @@
 <meta content="#0b1120" name="theme-color"/>
 <title>Khmer Earn Marketplace</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://libtl.com/sdk.js" data-zone="12341874" data-sdk="show_12341874"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <script async="" defer="" src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoaded&amp;render=explicit"></script>
 <style>
@@ -179,8 +180,7 @@ a{color:var(--blue);overflow-wrap:anywhere}
     </div>
   </div>
 
-  <!-- Monetag SDK: keep this script only once in the entire page. -->
-  <script src="https://libtl.com/sdk.js" data-zone="12341874" data-sdk="show_12341874"></script>
+  <!-- Monetag SDK is loaded once in the document head. -->
 
   <div class="home-sponsored-footer">
     <span>Interested in advertising?</span>
@@ -2912,6 +2912,8 @@ const MONETAG_REWARD_FALLBACK_COINS = 5;
 const MONETAG_REWARD_FALLBACK_DAILY_LIMIT = 20;
 let monetagRewardBusy = false;
 let monetagRewardStatusCache = null;
+let monetagPendingYmid = null;
+let monetagRegistrationPromise = null;
 
 function makeMonetagRewardYmid() {
   return "kem_reward_" + Date.now() + "_" + cryptoRandomSuffix();
@@ -2919,6 +2921,26 @@ function makeMonetagRewardYmid() {
 function cryptoRandomSuffix() {
   try { return Array.from(crypto.getRandomValues(new Uint8Array(8))).map(v => v.toString(16).padStart(2, "0")).join(""); }
   catch { return Math.random().toString(36).slice(2, 14); }
+}
+
+// Register the next unique ad reference before enabling the Watch button.
+// This gives the server an account mapping even when Monetag omits telegram_id.
+async function prepareMonetagRewardSession() {
+  if (!monetagPendingYmid) monetagPendingYmid = makeMonetagRewardYmid();
+  if (!monetagRegistrationPromise) {
+    const ymid = monetagPendingYmid;
+    monetagRegistrationPromise = apiRequest("/api/monetag/register", {
+      method: "POST",
+      body: JSON.stringify({ ymid })
+    }).catch(error => {
+      if (monetagPendingYmid === ymid) monetagPendingYmid = null;
+      throw error;
+    }).finally(() => {
+      monetagRegistrationPromise = null;
+    });
+  }
+  await monetagRegistrationPromise;
+  return monetagPendingYmid;
 }
 
 async function loadMonetagRewardStatus() {
@@ -2933,6 +2955,12 @@ async function loadMonetagRewardStatus() {
   try {
     const data = await apiRequest("/api/monetag/reward-status", { cache: "no-store" });
     monetagRewardStatusCache = data;
+    if (data.canWatch) {
+      await prepareMonetagRewardSession();
+    } else {
+      monetagPendingYmid = null;
+      monetagRegistrationPromise = null;
+    }
     const count = Number(data.claimsToday || 0);
     const limit = Number(data.dailyLimit || MONETAG_REWARD_FALLBACK_DAILY_LIMIT);
     const reward = Number(data.rewardCoins || MONETAG_REWARD_FALLBACK_COINS);
@@ -2987,7 +3015,16 @@ async function watchMonetagReward() {
   if (button) { button.disabled = true; button.textContent = "Loading Monetag ad..."; }
   if ($("monetagRewardStatus")) $("monetagRewardStatus").textContent = "Opening Monetag ad. Your reward will be credited only after server verification.";
   const beforeCount = Number(current.claimsToday || 0);
-  const ymid = makeMonetagRewardYmid();
+  const ymid = monetagPendingYmid;
+  if (!ymid) {
+    monetagRewardBusy = false;
+    if (button) button.disabled = true;
+    if ($("monetagRewardStatus")) $("monetagRewardStatus").textContent = "Preparing a secure ad session. Please try again in a moment.";
+    await loadMonetagRewardStatus();
+    return;
+  }
+  // This reference has already been registered with the backend.
+  monetagPendingYmid = null;
 
   try {
     // IMPORTANT: invoke Monetag synchronously before the first await.
