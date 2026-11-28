@@ -667,9 +667,9 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <p class="muted">Tap to watch a rewarded advertisement. Coins are credited to your Worker Earnings Wallet only after Monetag confirms a valued event through our server.</p>
 <div class="grid">
 <div class="stat">Reward per eligible ad<strong id="monetagRewardAmount">5 coins</strong></div>
-<div class="stat">Rewards today<strong id="monetagClaimsToday">0 / 20</strong></div>
+<div class="stat">Rewards today<strong id="monetagClaimsToday">0 / 40</strong></div>
 <div class="stat">Worker balance<strong id="monetagWorkerBalance">0 coins</strong></div>
-<div class="stat">Daily limit<strong id="monetagDailyLimit">20 ads</strong></div>
+<div class="stat">Daily limit<strong id="monetagDailyLimit">40 ads</strong></div>
 </div>
 <div class="notice" id="monetagRewardStatus" role="status">Checking Monetag reward availability...</div>
 <button class="gold full" id="monetagRewardButton" type="button" onclick="watchMonetagReward()" disabled>▶ Watch Ad · Earn 5 Coins</button>
@@ -2910,7 +2910,7 @@ async function copyReferralLink() {
 // ============================================
 // MONETAG REWARDED ADS — USER-INITIATED; SERVER POSTBACK CREDITS REWARDS
 const MONETAG_REWARD_FALLBACK_COINS = 5;
-const MONETAG_REWARD_FALLBACK_DAILY_LIMIT = 20;
+const MONETAG_REWARD_FALLBACK_DAILY_LIMIT = 40;
 let monetagRewardBusy = false;
 let monetagRewardStatusCache = null;
 
@@ -3119,3 +3119,7 @@ selectGameProvider("Mobile Legends KH", document.querySelector("#gameCatalogGrid
 </script>
 </body>
 </html>
+
+
+
+
