@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 <html lang="en">
@@ -8,6 +7,7 @@
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
 <meta content="#0b1120" name="theme-color"/>
 <title>Khmer Earn Marketplace</title>
+<!-- Monetag reward integration update: register ymid before requesting the rewarded ad. -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://libtl.com/sdk.js" data-zone="12341874" data-sdk="show_12341874"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
@@ -175,9 +175,8 @@ a{color:var(--blue);overflow-wrap:anywhere}
       <span class="home-ad-placeholder-icon">▧</span>
       <strong>Your Advertisement Here</strong>
       <span>Sponsored by Monetag</span>
-      <button class="dark" type="button"
-        onclick="if (typeof window.show_12341874 === 'function') { window.show_12341874(); } else { alert('Advertisement is not ready. Please try again later.'); }">
-        View Advertisement
+      <button class="dark" type="button" onclick="go('watchAds')">
+        Go to Watch Ads
       </button>
     </div>
   </div>
@@ -2992,9 +2991,28 @@ async function watchMonetagReward() {
   const ymid = makeMonetagRewardYmid();
 
   try {
-    // IMPORTANT: invoke Monetag synchronously before the first await.
-    const adPromise = window.show_12341874({ ymid, requestVar: "ads_reward_button" });
-    const result = await adPromise;
+    // Register the unique ad reference with the authenticated backend BEFORE
+    // opening the ad. The postback uses this mapping to identify the account.
+    // This route already exists in the matching server.js.
+    if ($("monetagRewardStatus")) {
+      $("monetagRewardStatus").textContent = "Preparing secure reward verification...";
+    }
+    await apiRequest("/api/monetag/register", {
+      method: "POST",
+      body: JSON.stringify({ ymid })
+    });
+
+    // Monetag Rewarded Interstitial is opened only after the user taps this
+    // button. Do not credit coins from this client-side Promise; the verified
+    // server postback remains the sole source of reward credit.
+    if (typeof window.show_12341874 !== "function") {
+      throw new Error("Monetag SDK did not finish loading. Please refresh and try again.");
+    }
+    const result = await window.show_12341874({
+      ymid,
+      requestVar: "ads_reward_button",
+      timeout: 20
+    });
     if (result && result.reward_event_type === "valued") {
       if ($("monetagRewardStatus")) $("monetagRewardStatus").textContent = "Monetag reported a valued event. Checking server credit...";
     } else {
@@ -3101,6 +3119,3 @@ selectGameProvider("Mobile Legends KH", document.querySelector("#gameCatalogGrid
 </script>
 </body>
 </html>
-
-
-
