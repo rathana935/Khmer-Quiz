@@ -10,6 +10,7 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://libtl.com/sdk.js" data-zone="12341874" data-sdk="show_12341874"></script>
 <script src="https://api.adsun.io/sdk.js"></script>
+<script src="https://api.cleanads.ai/sdk/v1.js"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <script async="" defer="" src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoaded&amp;render=explicit"></script>
 <style>
@@ -689,6 +690,22 @@ a{color:var(--blue);overflow-wrap:anywhere}
   <button class="dark full" type="button" onclick="loadAdsunRewardStatus()">Refresh Adsun Reward Status</button>
   <h3>Recent Adsun Rewards</h3>
   <div id="adsunRewardHistory"><div class="empty">Your verified Adsun rewards will appear here.</div></div>
+</div>
+<div class="card" id="cleanAdsRewardCard">
+  <div class="row"><h3>🎁 CleanAds Reward</h3><span class="pill">5 coins / verified ad</span></div>
+  <p class="muted">Watch an optional CleanAds rewarded advertisement. Coins are added to your Worker Earnings Wallet only after CleanAds sends a valid signed completion callback to our server.</p>
+  <div class="grid">
+    <div class="stat">Reward per eligible ad<strong id="cleanAdsRewardAmount">5 coins</strong></div>
+    <div class="stat">Verified rewards today<strong id="cleanAdsClaimsToday">0 / 40</strong></div>
+    <div class="stat">Worker balance<strong id="cleanAdsWorkerBalance">0 coins</strong></div>
+    <div class="stat">Daily limit<strong id="cleanAdsDailyLimit">40 ads</strong></div>
+  </div>
+  <div class="notice" id="cleanAdsRewardStatus" role="status">Checking CleanAds reward availability...</div>
+  <button class="gold full" id="cleanAdsRewardButton" type="button" onclick="watchCleanAdsReward()" disabled>▶ Watch CleanAds Ad · Earn 5 Coins</button>
+  <p class="fine">CleanAds rewarded ads require at least 15 seconds of viewing. Closing early, no-fill, network errors, or an unverified callback do not earn coins.</p>
+  <button class="dark full" type="button" onclick="loadCleanAdsRewardStatus()">Refresh CleanAds Reward Status</button>
+  <h3>Recent CleanAds Rewards</h3>
+  <div id="cleanAdsRewardHistory"><div class="empty">Your verified CleanAds rewards will appear here.</div></div>
 </div>
 </section>
 <!-- OPTIONAL SMART LINKS: USER-INITIATED, NON-INCENTIVIZED -->
@@ -2282,6 +2299,7 @@ function go(id, button) {
  if (id === "watchAds" && authToken) {
   loadMonetagRewardStatus();
   loadAdsunRewardStatus();
+  loadCleanAdsRewardStatus();
  }
  if (id === "smartLinks") {
   loadSmartLinks();
@@ -3157,6 +3175,124 @@ async function watchAdsunReward() {
   } finally {
     adsunRewardBusy = false;
     await loadAdsunRewardStatus();
+  }
+}
+
+// CLEANADS REWARDED ADS — HMAC CALLBACK ON THE SERVER IS THE ONLY REWARD SOURCE
+const CLEANADS_PLACEMENT_ID = "pl_1y_BqXTG9R-u";
+// Keep true until the CleanAds dashboard records the first test ad request.
+// After that setup step is complete, change this to false for live ads.
+const CLEANADS_TEST_MODE = true;
+const CLEANADS_REWARD_FALLBACK_COINS = 5;
+const CLEANADS_REWARD_FALLBACK_DAILY_LIMIT = 40;
+let cleanAdsRewardBusy = false;
+let cleanAdsRewardStatusCache = null;
+
+function getCleanAdsTelegramUserId() {
+  const id = currentUser?.telegramId || currentUser?.telegram_id || tg?.initDataUnsafe?.user?.id || "";
+  return /^\d{1,20}$/.test(String(id)) ? String(id) : "";
+}
+
+async function loadCleanAdsRewardStatus(since = 0) {
+  const status = $("cleanAdsRewardStatus");
+  const button = $("cleanAdsRewardButton");
+  if (!authToken) {
+    cleanAdsRewardStatusCache = null;
+    if (status) status.textContent = "Open this Mini App through Telegram to check CleanAds rewards.";
+    if (button) button.disabled = true;
+    return null;
+  }
+  try {
+    const query = since > 0 ? `?since=${encodeURIComponent(since)}` : "";
+    const data = await apiRequest("/api/cleanads/reward-status" + query, { cache: "no-store" });
+    cleanAdsRewardStatusCache = data;
+    const reward = Number(data.rewardCoins || CLEANADS_REWARD_FALLBACK_COINS);
+    const count = Number(data.claimsToday || 0);
+    const limit = Number(data.dailyLimit || CLEANADS_REWARD_FALLBACK_DAILY_LIMIT);
+    if ($("cleanAdsRewardAmount")) $("cleanAdsRewardAmount").textContent = `${reward} coins`;
+    if ($("cleanAdsRewardButton")) $("cleanAdsRewardButton").textContent = `▶ Watch CleanAds Ad · Earn ${reward} Coins`;
+    if ($("cleanAdsClaimsToday")) $("cleanAdsClaimsToday").textContent = `${count} / ${limit}`;
+    if ($("cleanAdsDailyLimit")) $("cleanAdsDailyLimit").textContent = `${limit} ads`;
+    if ($("cleanAdsWorkerBalance")) $("cleanAdsWorkerBalance").textContent = formatCoins(data.workerEarnings || 0) + " coins";
+    const sdkReady = Boolean(window.CleanAds && typeof window.CleanAds.init === "function");
+    if (status && !since) {
+      status.textContent = !sdkReady
+        ? "CleanAds SDK is not loaded. Check your connection and refresh."
+        : data.canWatch
+          ? `Ready. Earn ${reward} coins after CleanAds confirms a completed rewarded ad. The ad must be watched for at least 15 seconds.`
+          : `Daily CleanAds reward limit reached (${count}/${limit}). Other Marketplace features remain available.`;
+    }
+    if (button) button.disabled = !sdkReady || !data.canWatch || cleanAdsRewardBusy;
+    const history = $("cleanAdsRewardHistory");
+    if (history) {
+      const rows = Array.isArray(data.recentRewards) ? data.recentRewards : [];
+      history.innerHTML = rows.length
+        ? rows.map(item => `<div class="proof-box"><div class="row"><strong>+${escapeHTML(item.rewardCoins || reward)} coins</strong><span class="status">VERIFIED</span></div><p class="fine">${escapeHTML(new Date(item.createdAt).toLocaleString())}</p></div>`).join("")
+        : '<div class="empty">No verified CleanAds rewards yet.</div>';
+    }
+    return data;
+  } catch (error) {
+    cleanAdsRewardStatusCache = null;
+    if (status) status.textContent = error.message || "Could not load CleanAds reward status.";
+    if (button) button.disabled = true;
+    return null;
+  }
+}
+
+async function watchCleanAdsReward() {
+  if (cleanAdsRewardBusy) return;
+  if (!authToken || !tg?.initData) {
+    showMessage("cleanAdsRewardStatus", "Please open this Mini App inside Telegram first.", "error");
+    return;
+  }
+  if (!window.CleanAds || typeof window.CleanAds.init !== "function") {
+    showMessage("cleanAdsRewardStatus", "CleanAds SDK is not loaded. Please refresh and try again.", "error");
+    return;
+  }
+  const userId = getCleanAdsTelegramUserId();
+  if (!userId) {
+    showMessage("cleanAdsRewardStatus", "Your Telegram user ID is unavailable. Reopen the Mini App and try again.", "error");
+    return;
+  }
+  const before = cleanAdsRewardStatusCache || await loadCleanAdsRewardStatus();
+  if (!before?.canWatch) {
+    showMessage("cleanAdsRewardStatus", "Your CleanAds daily reward limit has been reached or status is unavailable.", "notice");
+    return;
+  }
+
+  cleanAdsRewardBusy = true;
+  const button = $("cleanAdsRewardButton");
+  if (button) { button.disabled = true; button.textContent = "Loading CleanAds ad..."; }
+  if ($("cleanAdsRewardStatus")) $("cleanAdsRewardStatus").textContent = "Opening CleanAds rewarded ad. Watch for at least 15 seconds. Coins are added only after the server verifies CleanAds' signed callback.";
+  const startedAt = Date.now();
+  try {
+    const ad = window.CleanAds.init({
+      placementId: CLEANADS_PLACEMENT_ID,
+      userId,
+      test: CLEANADS_TEST_MODE
+    });
+    await ad.show();
+    if ($("cleanAdsRewardStatus")) $("cleanAdsRewardStatus").textContent = "Ad completed. Waiting for CleanAds' signed server confirmation...";
+
+    let credited = false;
+    for (let attempt = 0; attempt < 16; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const updated = await loadCleanAdsRewardStatus(startedAt);
+      if (updated?.rewarded) { credited = true; break; }
+    }
+    await Promise.allSettled([loadProfile(), loadCleanAdsRewardStatus(), loadWalletTransactions()]);
+    if ($("cleanAdsRewardStatus")) {
+      $("cleanAdsRewardStatus").textContent = credited
+        ? "Verified! Your CleanAds reward was added to your Worker Earnings Wallet."
+        : "The ad finished, but CleanAds' server callback has not confirmed a reward yet. No coins are added until it is verified. Refresh later.";
+    }
+  } catch (error) {
+    console.warn("CleanAds rewarded ad was not completed:", error);
+    const reason = error?.reason || error?.message || "Please try again later.";
+    if ($("cleanAdsRewardStatus")) $("cleanAdsRewardStatus").textContent = `CleanAds ad not completed or unavailable (${reason}). No coins were credited.`;
+  } finally {
+    cleanAdsRewardBusy = false;
+    await loadCleanAdsRewardStatus();
   }
 }
 
