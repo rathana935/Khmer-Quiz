@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -7,7 +8,6 @@
 <meta content="#0b1120" name="theme-color"/>
 <title>Khmer Earn Marketplace</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://libtl.com/sdk.js" data-zone="12341874" data-sdk="show_12341874"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <script async="" defer="" src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoaded&amp;render=explicit"></script>
 <style>
@@ -173,14 +173,14 @@ a{color:var(--blue);overflow-wrap:anywhere}
       <span class="home-ad-placeholder-icon">▧</span>
       <strong>Your Advertisement Here</strong>
       <span>Sponsored by Monetag</span>
-      <button class="dark" type="button"
-        onclick="if (typeof window.show_12341874 === 'function') { window.show_12341874(); } else { alert('Advertisement is not ready. Please try again later.'); }">
-        View Advertisement
+      <button class="dark" type="button" onclick="go('watchAds')">
+        Earn Coins · Watch Ad
       </button>
     </div>
   </div>
 
-  <!-- Monetag SDK is loaded once in the document head. -->
+  <!-- Monetag SDK: keep this script only once in the entire page. -->
+  <script src="https://libtl.com/sdk.js" data-zone="12341874" data-sdk="show_12341874"></script>
 
   <div class="home-sponsored-footer">
     <span>Interested in advertising?</span>
@@ -217,7 +217,7 @@ a{color:var(--blue);overflow-wrap:anywhere}
 </div>
 <div class="card">
 <div class="row"><h3>🎬 Watch Ads &amp; Earn</h3><span class="pill">Optional</span></div>
-<p class="muted">Choose to watch a rewarded ad and earn coins based on your active membership after AdsGram confirms a completed view. You can use the rest of the app without watching ads.</p>
+<p class="muted">Choose to watch an optional Monetag Rewarded Interstitial and earn 5 coins after Monetag confirms an eligible valued ad. You can use the rest of the app without watching ads.</p>
 <button class="gold full" onclick="go('watchAds')">Open Watch Ads &amp; Earn</button>
 </div>
 </section>
@@ -2911,9 +2911,6 @@ async function copyReferralLink() {
 const MONETAG_REWARD_FALLBACK_COINS = 5;
 const MONETAG_REWARD_FALLBACK_DAILY_LIMIT = 20;
 let monetagRewardBusy = false;
-let monetagRewardStatusCache = null;
-let monetagPendingYmid = null;
-let monetagRegistrationPromise = null;
 
 function makeMonetagRewardYmid() {
   return "kem_reward_" + Date.now() + "_" + cryptoRandomSuffix();
@@ -2923,44 +2920,16 @@ function cryptoRandomSuffix() {
   catch { return Math.random().toString(36).slice(2, 14); }
 }
 
-// Register the next unique ad reference before enabling the Watch button.
-// This gives the server an account mapping even when Monetag omits telegram_id.
-async function prepareMonetagRewardSession() {
-  if (!monetagPendingYmid) monetagPendingYmid = makeMonetagRewardYmid();
-  if (!monetagRegistrationPromise) {
-    const ymid = monetagPendingYmid;
-    monetagRegistrationPromise = apiRequest("/api/monetag/register", {
-      method: "POST",
-      body: JSON.stringify({ ymid })
-    }).catch(error => {
-      if (monetagPendingYmid === ymid) monetagPendingYmid = null;
-      throw error;
-    }).finally(() => {
-      monetagRegistrationPromise = null;
-    });
-  }
-  await monetagRegistrationPromise;
-  return monetagPendingYmid;
-}
-
 async function loadMonetagRewardStatus() {
   const status = $("monetagRewardStatus");
   const button = $("monetagRewardButton");
   if (!authToken) {
-    monetagRewardStatusCache = null;
     if (status) status.textContent = "Open this Mini App through Telegram to check your reward status.";
     if (button) button.disabled = true;
     return null;
   }
   try {
     const data = await apiRequest("/api/monetag/reward-status", { cache: "no-store" });
-    monetagRewardStatusCache = data;
-    if (data.canWatch) {
-      await prepareMonetagRewardSession();
-    } else {
-      monetagPendingYmid = null;
-      monetagRegistrationPromise = null;
-    }
     const count = Number(data.claimsToday || 0);
     const limit = Number(data.dailyLimit || MONETAG_REWARD_FALLBACK_DAILY_LIMIT);
     const reward = Number(data.rewardCoins || MONETAG_REWARD_FALLBACK_COINS);
@@ -2979,7 +2948,6 @@ async function loadMonetagRewardStatus() {
     }
     return data;
   } catch (error) {
-    monetagRewardStatusCache = null;
     if (status) status.textContent = error.message || "Could not load Monetag reward status.";
     if (button) button.disabled = true;
     return null;
@@ -2993,50 +2961,31 @@ async function watchMonetagReward() {
     return;
   }
   if (typeof window.show_12341874 !== "function") {
-    showMessage("monetagRewardStatus", "Monetag SDK is not loaded yet. Please wait a moment and try again.", "error");
+    showMessage("monetagRewardStatus", "Monetag is not ready or no ad is available. Please try again later.", "error");
     return;
   }
-
-  // Use the status already loaded for the enabled button. Do not await an API
-  // request before opening the ad: the SDK call must remain in the tap handler.
-  const current = monetagRewardStatusCache;
-  if (!current) {
-    if ($("monetagRewardStatus")) $("monetagRewardStatus").textContent = "Checking reward status. Please try again in a moment.";
-    loadMonetagRewardStatus();
-    return;
-  }
-  if (!current.canWatch) {
-    loadMonetagRewardStatus();
-    return;
-  }
-
+  const current = await loadMonetagRewardStatus();
+  if (!current || !current.canWatch) return;
   monetagRewardBusy = true;
   const button = $("monetagRewardButton");
   if (button) { button.disabled = true; button.textContent = "Loading Monetag ad..."; }
-  if ($("monetagRewardStatus")) $("monetagRewardStatus").textContent = "Opening Monetag ad. Your reward will be credited only after server verification.";
+  if ($("monetagRewardStatus")) $("monetagRewardStatus").textContent = "Ad requested. Waiting for Monetag confirmation; rewards are credited by the server.";
   const beforeCount = Number(current.claimsToday || 0);
-  const ymid = monetagPendingYmid;
-  if (!ymid) {
-    monetagRewardBusy = false;
-    if (button) button.disabled = true;
-    if ($("monetagRewardStatus")) $("monetagRewardStatus").textContent = "Preparing a secure ad session. Please try again in a moment.";
-    await loadMonetagRewardStatus();
-    return;
-  }
-  // This reference has already been registered with the backend.
-  monetagPendingYmid = null;
-
   try {
-    // IMPORTANT: invoke Monetag synchronously before the first await.
-    const adPromise = window.show_12341874({ ymid, requestVar: "ads_reward_button" });
-    const result = await adPromise;
+    const rewardYmid = makeMonetagRewardYmid();
+    // Bind this unique ad reference to the authenticated account before Monetag opens.
+    // The server can then credit the correct user even if Monetag omits telegram_id.
+    await apiRequest("/api/monetag/register", {
+      method: "POST",
+      body: JSON.stringify({ ymid: rewardYmid })
+    });
+    const result = await window.show_12341874({ ymid: rewardYmid, requestVar: "ads_reward_button" });
     if (result && result.reward_event_type === "valued") {
       if ($("monetagRewardStatus")) $("monetagRewardStatus").textContent = "Monetag reported a valued event. Checking server credit...";
     } else {
       if ($("monetagRewardStatus")) $("monetagRewardStatus").textContent = "Ad closed or event was not valued. No reward is issued unless Monetag confirms it.";
     }
-
-    // The backend postback is the only source that can credit coins.
+    // Postback is independent of frontend callback. Poll server status briefly for credit.
     let credited = false;
     for (let attempt = 0; attempt < 10; attempt++) {
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -3046,8 +2995,7 @@ async function watchMonetagReward() {
     await Promise.allSettled([loadProfile(), loadMonetagRewardStatus(), loadWalletTransactions()]);
     if ($("monetagRewardStatus")) $("monetagRewardStatus").textContent = credited ? "Verified! Your Monetag reward was added to your Worker Earnings Wallet." : "Waiting for server confirmation. Refresh status shortly; coins are never credited by the app itself.";
   } catch (error) {
-    console.error("Monetag rewarded ad failed:", error);
-    if ($("monetagRewardStatus")) $("monetagRewardStatus").textContent = error?.message ? `Monetag could not open the ad: ${error.message}. No coins were credited. Please try again later.` : "Monetag ad unavailable. No coins were credited.";
+    if ($("monetagRewardStatus")) $("monetagRewardStatus").textContent = error?.message || "Monetag ad unavailable. No coins were credited.";
   } finally {
     monetagRewardBusy = false;
     await loadMonetagRewardStatus();
@@ -3136,3 +3084,7 @@ selectGameProvider("Mobile Legends KH", document.querySelector("#gameCatalogGrid
 </script>
 </body>
 </html>
+
+
+
+
