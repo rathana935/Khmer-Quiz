@@ -3180,9 +3180,9 @@ async function watchAdsunReward() {
 
 // CLEANADS REWARDED ADS — HMAC CALLBACK ON THE SERVER IS THE ONLY REWARD SOURCE
 const CLEANADS_PLACEMENT_ID = "pl_1y_BqXTG9R-u";
-// Keep true until the CleanAds dashboard records the first test ad request.
-// After that setup step is complete, change this to false for live ads.
-const CLEANADS_TEST_MODE = true;
+// CleanAds setup checklist: first ad request is complete. Live mode enabled.
+// Rewards are still credited only after the signed server callback is verified.
+const CLEANADS_TEST_MODE = false;
 const CLEANADS_REWARD_FALLBACK_COINS = 5;
 const CLEANADS_REWARD_FALLBACK_DAILY_LIMIT = 40;
 let cleanAdsRewardBusy = false;
