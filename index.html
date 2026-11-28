@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
@@ -10,6 +9,7 @@
 <!-- Monetag reward integration update: register ymid before requesting the rewarded ad. -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://libtl.com/sdk.js" data-zone="12341874" data-sdk="show_12341874"></script>
+<script src="https://api.adsun.io/sdk.js"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <script async="" defer="" src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoaded&amp;render=explicit"></script>
 <style>
@@ -677,6 +677,22 @@ a{color:var(--blue);overflow-wrap:anywhere}
 <button class="dark full" type="button" onclick="loadMonetagRewardStatus()">Refresh Reward Status</button>
 <h3>Recent Monetag Rewards</h3>
 <div id="monetagRewardHistory"><div class="empty">Your verified Monetag rewards will appear here.</div></div>
+</div>
+<div class="card" id="adsunRewardCard">
+  <div class="row"><h3>🎁 Adsun Reward</h3><span class="pill">5 coins / verified ad</span></div>
+  <p class="muted">Watch an Adsun rewarded advertisement. Your 5 coins are added to your Worker Earnings Wallet only after Adsun confirms the completed view through our server.</p>
+  <div class="grid">
+    <div class="stat">Reward per eligible ad<strong id="adsunRewardAmount">5 coins</strong></div>
+    <div class="stat">Verified rewards today<strong id="adsunClaimsToday">0</strong></div>
+    <div class="stat">Worker balance<strong id="adsunWorkerBalance">0 coins</strong></div>
+    <div class="stat">Ad block<strong>50371</strong></div>
+  </div>
+  <div class="notice" id="adsunRewardStatus" role="status">Checking Adsun reward availability...</div>
+  <button class="gold full" id="adsunRewardButton" type="button" onclick="watchAdsunReward()" disabled>▶ Watch Adsun Ad · Earn 5 Coins</button>
+  <p class="fine">Only Adsun's server-verified Reward URL can credit coins. Opening, skipping, or closing an ad does not earn coins. If no ad is available, try again later.</p>
+  <button class="dark full" type="button" onclick="loadAdsunRewardStatus()">Refresh Adsun Reward Status</button>
+  <h3>Recent Adsun Rewards</h3>
+  <div id="adsunRewardHistory"><div class="empty">Your verified Adsun rewards will appear here.</div></div>
 </div>
 </section>
 <!-- OPTIONAL SMART LINKS: USER-INITIATED, NON-INCENTIVIZED -->
@@ -2269,6 +2285,7 @@ function go(id, button) {
  }
  if (id === "watchAds" && authToken) {
   loadMonetagRewardStatus();
+  loadAdsunRewardStatus();
  }
  if (id === "smartLinks") {
   loadSmartLinks();
@@ -3037,6 +3054,116 @@ async function watchMonetagReward() {
   }
 }
 
+// ADSUN REWARDED ADS — SERVER-VERIFIED CALLBACK ONLY
+const ADSUN_BLOCK_ID = "50371";
+const ADSUN_REWARD_FALLBACK_COINS = 5;
+let adsunRewardBusy = false;
+let adsunRewardController = null;
+let adsunRewardStatusCache = null;
+
+function getAdsunRewardController() {
+  if (!window.Adsun || typeof window.Adsun.init !== "function") return null;
+  if (!adsunRewardController) {
+    adsunRewardController = window.Adsun.init({ blockId: ADSUN_BLOCK_ID });
+    if (adsunRewardController && typeof adsunRewardController.addEventListener === "function") {
+      adsunRewardController.addEventListener("onReward", () => {
+        // This event indicates Adsun verified the view; wallet credit is still
+        // read from our backend Reward URL record, never from this browser event.
+        loadAdsunRewardStatus();
+      });
+    }
+  }
+  return adsunRewardController;
+}
+
+async function loadAdsunRewardStatus(since = 0) {
+  const status = $("adsunRewardStatus");
+  const button = $("adsunRewardButton");
+  if (!authToken) {
+    adsunRewardStatusCache = null;
+    if (status) status.textContent = "Open this Mini App through Telegram to check Adsun rewards.";
+    if (button) button.disabled = true;
+    return null;
+  }
+  try {
+    const query = since > 0 ? `?since=${encodeURIComponent(since)}` : "";
+    const data = await apiRequest("/api/adsun/reward-status" + query, { cache: "no-store" });
+    adsunRewardStatusCache = data;
+    const reward = Number(data.rewardCoins || ADSUN_REWARD_FALLBACK_COINS);
+    if ($("adsunRewardAmount")) $("adsunRewardAmount").textContent = `${reward} coins`;
+    if ($("adsunRewardButton")) $("adsunRewardButton").textContent = `▶ Watch Adsun Ad · Earn ${reward} Coins`;
+    if ($("adsunClaimsToday")) $("adsunClaimsToday").textContent = String(Number(data.claimsToday || 0));
+    if ($("adsunWorkerBalance")) $("adsunWorkerBalance").textContent = formatCoins(data.workerEarnings || 0) + " coins";
+    const sdkReady = Boolean(getAdsunRewardController());
+    if (status && !since) {
+      status.textContent = sdkReady
+        ? `Ready. Earn ${reward} coins after Adsun confirms a completed rewarded ad.`
+        : "Loading Adsun SDK. Please wait a moment, then refresh this status.";
+    }
+    if (button) button.disabled = !sdkReady || adsunRewardBusy;
+    const history = $("adsunRewardHistory");
+    if (history) {
+      const rows = Array.isArray(data.recentRewards) ? data.recentRewards : [];
+      history.innerHTML = rows.length
+        ? rows.map(item => `<div class="proof-box"><div class="row"><strong>+${escapeHTML(item.rewardCoins || reward)} coins</strong><span class="status">VERIFIED</span></div><p class="fine">${escapeHTML(new Date(item.createdAt).toLocaleString())}</p></div>`).join("")
+        : '<div class="empty">No verified Adsun rewards yet.</div>';
+    }
+    return data;
+  } catch (error) {
+    adsunRewardStatusCache = null;
+    if (status) status.textContent = error.message || "Could not load Adsun reward status.";
+    if (button) button.disabled = true;
+    return null;
+  }
+}
+
+async function watchAdsunReward() {
+  if (adsunRewardBusy) return;
+  if (!tg || !tg.initData || !authToken) {
+    showMessage("adsunRewardStatus", "Please open this Mini App from Telegram first.", "error");
+    return;
+  }
+  const controller = getAdsunRewardController();
+  if (!controller || typeof controller.show !== "function") {
+    showMessage("adsunRewardStatus", "Adsun SDK is not loaded yet. Please wait and refresh the status.", "error");
+    return;
+  }
+
+  adsunRewardBusy = true;
+  const button = $("adsunRewardButton");
+  if (button) { button.disabled = true; button.textContent = "Loading Adsun ad..."; }
+  const startedAt = Date.now();
+  if ($("adsunRewardStatus")) $("adsunRewardStatus").textContent = "Opening Adsun rewarded ad. Please watch until it finishes; reward verification is handled securely by the server.";
+
+  try {
+    // Do not award coins from the SDK Promise. Adsun must call our Reward URL.
+    const result = await controller.show();
+    if (!result || result.done !== true) {
+      throw new Error(result?.description || "The ad was not completed. No coins were credited.");
+    }
+    if ($("adsunRewardStatus")) $("adsunRewardStatus").textContent = "Ad completed. Waiting for Adsun's server confirmation...";
+
+    let credited = false;
+    for (let attempt = 0; attempt < 12; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const updated = await loadAdsunRewardStatus(startedAt);
+      if (updated?.rewarded) { credited = true; break; }
+    }
+    await Promise.allSettled([loadProfile(), loadAdsunRewardStatus(), loadWalletTransactions()]);
+    if ($("adsunRewardStatus")) {
+      $("adsunRewardStatus").textContent = credited
+        ? "Verified! Your 5 Adsun coins were added to your Worker Earnings Wallet."
+        : "Ad finished, but the server has not confirmed the reward yet. Please refresh later. No coins are added until Adsun confirms it.";
+    }
+  } catch (error) {
+    console.warn("Adsun rewarded ad was not completed:", error);
+    if ($("adsunRewardStatus")) $("adsunRewardStatus").textContent = `Adsun ad not completed or unavailable: ${error?.message || "Please try again later."} No coins were credited.`;
+  } finally {
+    adsunRewardBusy = false;
+    await loadAdsunRewardStatus();
+  }
+}
+
 // ADSGRAM NON-REWARDED INTERSTITIAL ADS
 // Kept separate; task submission no longer triggers an automatic ad.
 // ============================================
@@ -3119,7 +3246,3 @@ selectGameProvider("Mobile Legends KH", document.querySelector("#gameCatalogGrid
 </script>
 </body>
 </html>
-
-
-
-
